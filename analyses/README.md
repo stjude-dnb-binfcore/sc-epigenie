@@ -73,7 +73,7 @@ To characterize the cell landscape of the bone marrow at single cell resolution.
   
   > might be useful, not sure - TO READ
 
-- [Altay and Vingron, 2024](chrome-extension://efaidnbmnnnibpcajpcglclefindmkaj/https://watermark.silverchair.com/lqae135.pdf?token=AQECAHi208BE49Ooan9kkhW_Ercy7Dm3ZL_9Cf3qfKAc485ysgAAA3wwggN4BgkqhkiG9w0BBwagggNpMIIDZQIBADCCA14GCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQMjaaQtescfi2cuDGiAgEQgIIDL1CAmVusiBrFze0MkiaKLKJ7q3va98wPL7fhRsp5r5MzXFo77zo0BGGBfT5rCadvWvB5De9e6Oze-cvDCUrDzLtymrPgBJ2o14FK2MeQX_gAhY4yD5rDQkPFB9Iaqie5wvQ3GVdk14Pcm9VWOEO-Wfz6GAilZmN-whTliirMHpki4wcMlposJwRkHRtSOW6QGrIYDAJqCaIjU3CgPN3tT9_MGFJXT7T-MPuRP5MA5gHiNDDNWMqctU8PFKz944Du8ddv4sG4m8G91gqEh3L6tcJabwJp2w1fQcHTlzVFMsfqJzFLV3xdhIVUheFqI3KDVx9xyAeHwKI_wYhNDZ1BTz45gutDeJW5w86Acy7j1cPJx186OM34AjDQURYFCceZg8NaaeSHOXGbJyrzAITNUzIkuWJBG9ctvIU3ZHp2okQUyGe95Rk1NvEw8_fEfgatM-KJUTT7P2TsGVJGlsshbtAFMR2Fcdo_Lec7SinJ_HsAWizpM2j5LU-Hq-cScq69FG4LSuiR-ZICNJCZ7-VtPS9Ld6025cGasQZNGvPyTvnt9AIEFnKE2mWxggvMHVghrV9n_GK53qBMovYR4YEU7jBCy4MtDQFxo0nk1aa_e6EomchI0PUM4cS3Nih90DcIoakWstGWPd66KAgyxRd5JmjK9d0qspzCShSLtsUbgfjzl1i8WWCyW6hOPBHn1KCIW_4vw5_j7TxsKTeMTEeqtq_ljp3QcYPpKrULL3-0Aerod3cRhZwGpkTNxl0SftCfnsynDLnttWUwRtoOOdmR_Vsb0YVonZG4uRAd3bxKoz9YHdZBKo9cJ5dHWB2Eq2lffpA3VuCmcWG0JYFzwukVz1_LbR1G1NZhpnk7mMbiWS2zN4MSAhVxZGjsQLxQ3L8bcjZDyAVmjdjM9LOovl_EzvppmkEz47T48iyBUVUXrbIPAj4uEKPzP99OsUwb7J1BkbH2bz2bsWGmVBh_waY0_zj9oQjpK30oU2TpWzs34WiIKSYNLonPLbZYvvHEzb693AX0jsUTom8PIsNwyIw5_5559d7_qBiGy51GyNS3Gq3VbuhIpMJ6ExG3MEDCspRg) scATAcat: cell-type annotation for scATAC-seq data.
+- [Altay and Vingron, 2024](https://academic.oup.com/nargab/article/6/4/lqae135/7815643) scATAcat: cell-type annotation for scATAC-seq data.
   
   > [scATAcat is available as a python package](https://github.com/aybugealtay/scATAcat)
   
@@ -97,18 +97,15 @@ Each module is self-contained and can be executed independently or as part of a 
    
 2. `upstream-analysis` module (description="Pipeline for estimating QC metrics and filtering low quality cells.", required=True)
 
-  - `Peak/Cell matrix`. This is analogous to the gene expression count matrix used to analyze single-cell RNA-seq. However, instead of genes, each row of the matrix represents a region of the genome (a peak), that is predicted to represent a region of open chromatin. Each value in the matrix represents the number of Tn5 integration sites for each single barcode (i.e. a cell) that map within each peak. You can find more detail on the [10X Website](https://support.10xgenomics.com/single-cell-atac/software/pipelines/latest/output/matrices).
-  - `Fragment file`. This represents a full list of all unique fragments across all single cells. It is a substantially larger file, is slower to work with, and is stored on-disk (instead of in memory). However, the advantage of retaining this file is that it contains all fragments associated with each single cell, as opposed to only fragments that map to peaks. More information about the fragment file can be found on the [10x Genomics website](https://support.10xgenomics.com/single-cell-atac/software/pipelines/latest/output/fragments) or on the [sinto website](https://timoast.github.io/sinto/basic_usage.html#create-scatac-seq-fragments-file).
-  - `Computing QC Metrics`
-  - `Normalization and linear dimensional reduction`
-  - `Non-linear dimension reduction and clustering`
-  - `Create a gene activity matrix`
-  
+   - `Peak/Cell matrix`. This is analogous to the gene expression count matrix used to analyze single-cell RNA-seq. However, instead of genes, each row of the matrix represents a region of the genome (a peak), that is predicted to represent a region of open chromatin. Each value in the matrix represents the number of Tn5 integration sites for each single barcode (i.e. a cell) that map within each peak. You can find more detail on the [10X Website](https://support.10xgenomics.com/single-cell-atac/software/pipelines/latest/output/matrices).
+   - `Fragment file`. This represents a full list of all unique fragments across all single cells. It is a substantially larger file, is slower to work with, and is stored on-disk (instead of in memory). However, the advantage of retaining this file is that it contains all fragments associated with each single cell, as opposed to only fragments that map to peaks. More information about the fragment file can be found on the [10x Genomics website](https://support.10xgenomics.com/single-cell-atac/software/pipelines/latest/output/fragments) or on the [sinto website](https://timoast.github.io/sinto/basic_usage.html#create-scatac-seq-fragments-file).
+   - `Computing QC Metrics`
+   - `Normalization and linear dimensional reduction`
+   - `Non-linear dimension reduction and clustering`
+   - `Create a gene activity matrix`
+   - `03_run_scDblFinder.Rmd`. To identify doublets from secondary motor cortex single-nucleus ATAC-seq datasets, we use single-cell RNA-seq doublets detection algorithm Scrublet
+
      > 01A_scATAC-Seq_data_Create_Matrice_Assay_Object_v3.R; 01B_scATAC-Seq_data_Combined_obj_Filter.new_v2.R
-  
-
-  - `03_run_scDblFinder.Rmd`. To identify doublets from secondary motor cortex single-nucleus ATAC-seq datasets, we use single-cell RNA-seq doublets detection algorithm Scrublet
-
   
 3. `integrative-analysis` module (description="Pipeline for Integrative analysis.", required=True)
 
@@ -117,25 +114,24 @@ Each module is self-contained and can be executed independently or as part of a 
 
 4. `cell-types-annotation` module (description="Pipeline for annotating cell types.", required=True)
   
-  - Marker-based annotation
-  - Reference-based label-transfer, either scATAC or bulkATAC seq data (see scATAcat method in the **References**)
-  - Integration with scRNA-seq: Integrate single-cell ATAC-seq with single-cell RNA-seq data to annotate cell types and identify transcriptional regulators linked to chromatin accessibility changes.
+   - Marker-based annotation
+   - Reference-based label-transfer, either scATAC or bulkATAC seq data (see scATAcat method in the **References**)
+   - Integration with scRNA-seq: Integrate single-cell ATAC-seq with single-cell RNA-seq data to annotate cell types and identify transcriptional regulators linked to chromatin accessibility changes.
+    
     > How to do Cell type annotation:
        a) **Projection of AML samples onto healthy BM UMAP**
        b) Bridge integration to label cells
        c) Cell type-specific peaks for cell type annotation
 
 
-5. `peak-calling` module (description="Pipeline for calling peaks.", required=False)
+5. `peak-calling` module (description="Pipeline for calling peaks and Motif Enrichment Analysis.", required=False)
 
-Motif Enrichment Analysis
-  - Transcription Factor Binding Motifs: Use tools like chromVAR, Homer, or MEME to search for enriched motifs in open chromatin regions and predict active transcription factors or regulatory proteins in different cell clusters or conditions.
-  - Comparing Motifs: Compare motif enrichment across cell populations to identify differentially active transcription factors and co-factors that might drive cell-specific or condition-specific gene regulation.
-  - Building trajectories with Monocle 3
-  - Transcription factor motif analysis; Call peaks with MACS2
+   - Transcription Factor Binding Motifs: Use tools like chromVAR, Homer, or MEME to search for enriched motifs in open chromatin regions and predict active transcription factors or regulatory proteins in different cell clusters or conditions.
+   - Comparing Motifs: Compare motif enrichment across cell populations to identify differentially active transcription factors and co-factors that might drive cell-specific or condition-specific gene regulation.
+   - Building trajectories with Monocle 3
+   - Transcription factor motif analysis; Call peaks with MACS2
 
-  > Transcription factor footprinting analysis/06_scATAC-Seq_data_Peak_calling.R
- 
+    > Transcription factor footprinting analysis/06_scATAC-Seq_data_Peak_calling.R
  
 5. `differential-accessibility-analysis` module (description="Pipeline for differentially expressed genes.", required=False)
    
