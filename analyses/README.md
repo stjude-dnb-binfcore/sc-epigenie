@@ -19,8 +19,8 @@ This repository contains a collection of analysis modules designed to process an
 To characterize the cell landscape of the bone marrow at single cell resolution
 
  > Questions to address:
-   - Chromatin aaccessibility in the brain of X condition.
-  - Chromatin aaccessibility in the brain of X condition per cell type.
+ >  - Chromatin aaccessibility in the brain of X condition.
+ >  - Chromatin aaccessibility in the brain of X condition per cell type.
 
 
 
@@ -84,6 +84,7 @@ To characterize the cell landscape of the bone marrow at single cell resolution
 ---------------------------------------------------------------------------------------
 
 **Analysis modules**
+
 Each module is self-contained and can be executed independently or as part of a larger analysis pipeline. Below is a summary of each analysis module, including whether they are required or optional. Furthermore, the analysis modules should be run in the following recommended order:
 
 1. `cellranger-analysis` module (description="Pipeline for running and summarizing Cell Ranger count for single or multiple libraries.", required=True)
@@ -103,25 +104,16 @@ Each module is self-contained and can be executed independently or as part of a 
   - `Non-linear dimension reduction and clustering`
   - `Create a gene activity matrix`
   
-  > 01A_scATAC-Seq_data_Create_Matrice_Assay_Object_v3.R
+     > 01A_scATAC-Seq_data_Create_Matrice_Assay_Object_v3.R; 01B_scATAC-Seq_data_Combined_obj_Filter.new_v2.R
   
-  > 01B_scATAC-Seq_data_Combined_obj_Filter.new_v2.R
-
 
   - `03_run_scDblFinder.Rmd`. To identify doublets from secondary motor cortex single-nucleus ATAC-seq datasets, we use single-cell RNA-seq doublets detection algorithm Scrublet
 
   
 3. `integrative-analysis` module (description="Pipeline for Integrative analysis.", required=True)
 
-  > 02_scATAC-Seq_data_Integration-across-Modalities
-  
-  > 03_scATAC-Seq_data_Integration-across-Modalities_RNA_UMAP.R
-  
-  > 05A_scATAC-Seq_data_Integration-across-Modalities.Subset.Samples.R
-  
-  > 07_scATAC-Seq_data_Integration-across-Samples.Harmony.R
-  
-  > 08_scATAC-Seq_data_Integration-across-Samples.Anchors.R
+   > 02_scATAC-Seq_data_Integration-across-Modalities; 03_scATAC-Seq_data_Integration-across-Modalities_RNA_UMAP.R; 05A_scATAC-Seq_data_Integration-across-Modalities.Subset.Samples.R; 07_scATAC-Seq_data_Integration-across-Samples.Harmony.R; 08_scATAC-Seq_data_Integration-across-Samples.Anchors.R
+ 
 
 4. `cell-types-annotation` module (description="Pipeline for annotating cell types.", required=True)
   
@@ -139,20 +131,19 @@ Each module is self-contained and can be executed independently or as part of a 
 Motif Enrichment Analysis
   - Transcription Factor Binding Motifs: Use tools like chromVAR, Homer, or MEME to search for enriched motifs in open chromatin regions and predict active transcription factors or regulatory proteins in different cell clusters or conditions.
   - Comparing Motifs: Compare motif enrichment across cell populations to identify differentially active transcription factors and co-factors that might drive cell-specific or condition-specific gene regulation.
-
-Transcription factor motif analysis; Call peaks with MACS2
+  - Building trajectories with Monocle 3
+  - Transcription factor motif analysis; Call peaks with MACS2
 
   > Transcription factor footprinting analysis/06_scATAC-Seq_data_Peak_calling.R
-  
-  > Building trajectories with Monocle 3
-
+ 
+ 
 5. `differential-accessibility-analysis` module (description="Pipeline for differentially expressed genes.", required=False)
    
    - Identify differential chromatin accessibility between conditions (e.g., disease vs. healthy, treatment vs. control) using tools like edgeR, DESeq2, or MAST (for single-cell RNA-seq).
    - Find differentially accessible peaks (DAPs) to discover regions of the genome whose accessibility changes in response to biological conditions or cell states.
    - [Find differentially accessible peaks between cell types](https://stuartlab.org/signac/articles/pbmc_vignette.html)
 
-> 09_scATAC-Seq_data_DE_Analysis_Combined.R
+   > 09_scATAC-Seq_data_DE_Analysis_Combined.R
 
 
 6. `plotting-genomic-regions-analysis` module. We can plot the frequency of Tn5 integration across regions of the genome for cells grouped by cluster, cell type, or any other metadata stored in the object for any genomic region using the CoveragePlot() function.
