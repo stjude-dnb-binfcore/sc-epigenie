@@ -1,0 +1,393 @@
+---
+title: "Data exploratory analysis"
+author: "Antonia Chroni for SJCRH DNB_BINF_Core"
+papersize: a4
+fontsize: 11pt
+links-as-notes: true
+output:
+  html_document:
+    toc: TRUE
+    toc_float: TRUE
+    df_print: paged
+    code_folding: hide
+    toc_depth: 2
+    highlight: tango
+    number_sections: TRUE
+  pdf_document:
+    toc: TRUE
+    highlight: tango
+    number_sections: TRUE
+    latex_engine: lualatex
+    keep_tex: FALSE
+    fig_caption: yes
+    fig_crop: no
+    fig_height: 2
+    fig_width: 3
+    toc_depth: 2
+always_allow_html: TRUE
+urlcolor: blue
+linkcolor: black
+citecolor: blue
+geometry: margin=1in
+header-includes: 
+  - \usepackage{titling}
+  - \usepackage{fancyhdr}
+  - \usepackage{graphicx}
+  - \usepackage{float}
+params:
+  root_dir: './'
+  metadata_dir: './'
+  PROJECT_NAME: './'
+  PI_NAME: './'
+  TASK_ID: './'
+  PROJECT_LEAD_NAME: './'
+  DEPARTMENT: './'
+  LEAD_ANALYSTS: './'
+  GROUP_LEAD: './'
+  CONTACT_EMAIL: './'
+  PIPELINE: './'
+  START_DATE: './'
+  COMPLETION_DATE: './'
+---
+
+```{r logo-file, echo=FALSE}
+attach(params)
+# Insert logo on the top of the html report 
+logo_file <- file.path(root_dir, "figures", "img", "DNB-BINF-Core-logo.png")
+htmltools::img(src = knitr::image_uri(logo_file), alt = "logo", style = "position:absolute; top:0; left:0; padding:0px; height:120px;")
+detach(params)
+```
+
+\addtolength{\headheight}{2.0cm} 
+\fancypagestyle{plain}{} 
+\thispagestyle{fancy}
+\fancyhead[L]{\includegraphics[height=120px]{`r logo_file`}}
+\renewcommand{\headrulewidth}{0pt}
+
+<style type="text/css">
+:root {--DNB_BINF_Core_color: #00427B;}
+
+h1.title {margin-top: 130px;
+          margin-bottom: 25px;
+          font-size: 36px;}
+
+.nobullet li {list-style-type: none;}
+
+.reporthead {font-size: 20px;}
+
+body { /* Normal */
+  font-size: 16px;
+  font-style: Arial, Helvetica, sans-serif;}
+
+h1 {color: var(--DNB_BINF_Core_color);
+    font-size: 28px;
+    margin-top: 50px;}
+
+h2 {color: var(--DNB_BINF_Core_color);
+    font-size: 20px;}
+
+.list-group-item.active, .list-group-item.active:focus, .list-group-item.active:hover {
+  background-color: var(--DNB_BINF_Core_color);}
+</style>
+
+<a href="https://wiki.stjude.org/display/CAB">
+
+</a>
+
+\pagebreak
+
+<div class="reporthead"><br/>
+**PI: `r params$PI_NAME`**  
+**Project: `r params$PROJECT_NAME`**  
+Task: `r params$TASK_ID`  
+Project Lead(s): `r params$PROJECT_LEAD_NAME`  
+Department: `r params$DEPARTMENT`  
+
+<br />  
+
+DNB Bioinformatics Core Analysis Team: 
+<br />  
+
+>**Lead Analyst(s): `r params$LEAD_ANALYSTS`**  
+>Group Lead: `r params$GROUP_LEAD`  
+<br />
+>**Contact E-mail:** `r params$CONTACT_EMAIL`  
+>**DNB Bioinformatics Core Pipeline:** `r params$PIPELINE`  
+
+Date started: `r params$START_DATE`  
+Date completed:  `r params$COMPLETION_DATE`  
+Report generated: `r format(Sys.time(), '%H:%M:%S %Z %m/%d/%Y')` \
+
+Reviewed by: _____________________   Date: ____________ \
+</div>
+\pagebreak
+  
+
+# Information about this notebook
+This is an exploratory analysis of the data in the project. We are investigating number of samples overall per condition and variables as defined in the `params`.
+
+We are looking for cohorts that fit the following criteria.
+
+  - Control vs condition (min. 3+3 samples)
+  - Number of cells/sample - size of datasets might determined packages/pipelines to be used
+  - Single cell/Single-nucleus ATAC
+  - Integration of scRNA-seq and scATAC-seq data from the same biological system (multiple modalities)
+  - Pipeline for same samples but not same cells with scRNA-seq and scATAC-seq
+  - Annotate scATAC-seq cells via label transfer by using scRNA data: cell type annotation
+  - Available bulk ATAC-seq data for the same samples (matched) - this could be used for cell type annotation
+
+# Set up
+
+```{r load-library, include=FALSE, echo=TRUE}
+suppressPackageStartupMessages({
+  library(tidyverse)
+  library(knitr)
+  library(readxl)
+})
+```
+
+# Directories and paths to file Inputs/Outputs
+
+```{r set-dir-and-file-names, include=FALSE, echo=TRUE}
+attach(params)
+analysis_dir <- file.path(root_dir, "analyses", "data-exploratory-analysis") 
+
+# input files
+data_file <- file.path(metadata_dir, "TestData_10x_2024_12_16.xlsx")
+#metadata_file <- file.path(metadata_dir, "project_metadata.tsv") # metadata input file
+palette_file <- file.path(root_dir, "figures", "palettes", "binary_color_palette.tsv")
+
+# File path to `input` directory
+input_dir <- file.path(analysis_dir, "input") 
+if (!dir.exists(input_dir)) {
+  dir.create(input_dir)}
+
+# File path to `plots` directory
+plots_dir <- file.path(analysis_dir, "plots") 
+if (!dir.exists(plots_dir)) {
+  dir.create(plots_dir)}
+
+# File path to `results` directory
+results_dir <- file.path(analysis_dir, "results") 
+if (!dir.exists(results_dir)) {
+  dir.create(results_dir)}
+
+figures_plots_dir <- file.path(plots_dir, "figures") 
+if (!dir.exists(figures_plots_dir)) {
+  dir.create(figures_plots_dir)}
+
+#source(paste0(analysis_dir, "/util/function-create-barplot.R"))
+source(paste0(root_dir, "/figures/scripts/theme_plot.R"))
+```
+
+```{r echo=FALSE, warning=FALSE}
+opts_chunk$set(fig.align='center',
+               external=TRUE,
+               echo=FALSE,
+               warning=FALSE,
+               fig.pos='H')
+a4width <- 8.3
+a4height <- 11.7
+```
+
+# Read raw data file
+
+```{r read-raw-data, include=FALSE, echo=TRUE}
+# Read metadata
+raw_data_df <- read_excel(data_file) %>%
+  
+  # save data under a more descriptive file name
+  # all edits will be made on this one and not on the RAW data
+  # RAW data were edited manually by Antonia Chroni to add typo of experiment and type of kit for multiomic 10x
+  write_tsv(file.path(input_dir, "cohorts_10x_rna_atac_testing_phase_not_processed.tsv"))
+```
+
+
+# Read processed data file
+
+```{r read-processed-data, include=FALSE, echo=TRUE}
+#df <- readr::read_tsv(v12_file, guess_max = 100000, show_col_types = FALSE) %>%
+df_processed <- raw_data_df %>%
+  
+  # Add metadata
+  add_column(seq_unit = "nucleus",
+             condition = "unknown") %>%
+  tidyr::separate(Kit, c("seq_technology", "assay_drop"), sep = ' ', remove = FALSE) %>% 
+  tidyr::separate(assay_drop, c("assay", "drop"), sep = ' ', remove = FALSE) %>% 
+  select(!c(assay_drop, drop)) %>%
+  mutate(seq_unit = case_when(grepl("More Retina", experiment) ~ "cell",
+                              grepl("Stressed Retina", experiment) ~ "cell",
+                              TRUE ~ seq_unit),
+         Sample = case_when(grepl("6wk Cerebellum", Sample) ~ "6 week cerebellum",
+                            grepl("P0 Cerebellum,", Sample) ~ "P0 cerebellum",
+                            
+                            TRUE ~ Sample),
+         
+         # Add condition col
+         condition = case_when(grepl("P0 cerebellum|6 week cerebellum|E14.5|P0 Retina|E14.5 Retina|Adult Retina", Sample) ~ "age",
+                               grepl("Wt1|Wt2|SEKO_21|SEKO_25", Sample) ~ "knock-out",
+                               grepl("ATOH HI|ATOH Low", Sample) ~ "treatment",
+                               TRUE ~ condition)) %>%
+  
+  write_tsv(file.path(results_dir, "cohorts_10x_rna_atac_testing_phase.tsv"))
+```
+
+## Color palette for plotting
+
+```{r palette, echo=TRUE}
+# Read color palette
+#palette_df <- readr::read_tsv(palette_file, guess_max = 100000, show_col_types = FALSE) %>%
+#  mutate(color_names = case_when(grepl("binary_1", color_names) ~ "Het",
+#                                     grepl("binary_2", color_names) ~ "WT"))
+       
+# Define and order palette
+#palette <- palette_df$hex_codes
+#names(palette) <- palette_df$color_names
+```
+
+# Cohort with 10x for matched samples with RNA and ATAC
+
+```{r cohort-10x, include=FALSE, echo=TRUE}
+df <- df_processed %>%
+  filter(multiome_10x == "no")
+```
+
+## Type of sequencing assay and unit
+
+We should investigate if there are samples from two different sequencing technologies and unit.
+
+```{r cohort-10x-assay-unit-sc, include=FALSE, echo=TRUE}
+# Was nucleus or whole cell used for the sequencing?
+seq_unit_samples <- unique(df$seq_unit)
+
+# What type of assay was used?
+assay_samples <- unique(df$assay)
+```
+
+Single cell sequencing was done by using `r seq_unit_samples` and there are `r assay_samples` sequencing technologies in the database. Cohort is formed and processed accordingly. 
+
+## Number of samples per experiment
+
+```{r, fig.align = "left", results = "asis", message = FALSE, warning = FALSE, echo = FALSE}
+tables1 <- df %>% count(experiment)
+cat("  \n<div style=\"font-size:80%\">  \n")
+caption_value = "Summary of samples per experiment"
+
+print(knitr::kable(tables1, align = "lcccc", caption = caption_value))
+cat("  \n</div>  \n")
+cat("  \n\\pagebreak  \n")
+```
+
+\pagebreak
+
+## Number of samples per experiment, seq_unit, assay, and condition
+
+```{r, fig.align = "left", results = "asis", message = FALSE, warning = FALSE, echo = FALSE}
+tables1 <- df %>% count(experiment, seq_unit, assay, condition)
+cat("  \n<div style=\"font-size:80%\">  \n")
+caption_value = "Summary of samples per experiment, seq_unit, assay, and condition"
+
+print(knitr::kable(tables1, align = "lcccc", caption = caption_value))
+cat("  \n</div>  \n")
+cat("  \n\\pagebreak  \n")
+```
+
+## Number of samples per experiment, seq_unit, assay, condition, and sample
+
+```{r, fig.align = "left", results = "asis", message = FALSE, warning = FALSE, echo = FALSE}
+tables1 <- df %>% count(experiment, seq_unit, assay, condition, Sample)
+cat("  \n<div style=\"font-size:80%\">  \n")
+caption_value = "Summary of samples per experiment, seq_unit, assay, condition, and Sample"
+
+print(knitr::kable(tables1, align = "lcccc", caption = caption_value))
+cat("  \n</div>  \n")
+cat("  \n\\pagebreak  \n")
+```
+
+
+# Cohort with 10x multiomics for RNA and ATAC
+
+```{r cohort-10x-multiomic, include=FALSE, echo=TRUE}
+df <- df_processed %>%
+  filter(multiome_10x == "yes")
+```
+
+## Type of sequencing assay and seq_unit
+
+We should investigate if there are samples from two different sequencing technologies and unit.
+
+```{r cohort-10x-multiomic-assay-unit-sc, include=FALSE, echo=TRUE}
+# Was nucleus or whole cell used for the sequencing?
+seq_unit_samples <- unique(df$seq_unit)
+
+# What type of assay was used?
+assay_samples <- unique(df$assay)
+```
+
+Single cell sequencing was done by using `r seq_unit_samples` and there are `r assay_samples` sequencing technologies in the database. Cohort is formed and processed accordingly. 
+
+## Number of samples per experiment
+
+```{r, fig.align = "left", results = "asis", message = FALSE, warning = FALSE, echo = FALSE}
+tables1 <- df %>% count(experiment)
+cat("  \n<div style=\"font-size:80%\">  \n")
+caption_value = "Summary of samples per experiment"
+
+print(knitr::kable(tables1, align = "lcccc", caption = caption_value))
+cat("  \n</div>  \n")
+cat("  \n\\pagebreak  \n")
+```
+
+\pagebreak
+
+## Number of samples per experiment, seq_unit, assay, and condition
+
+```{r, fig.align = "left", results = "asis", message = FALSE, warning = FALSE, echo = FALSE}
+tables1 <- df %>% count(experiment, seq_unit, assay, condition)
+cat("  \n<div style=\"font-size:80%\">  \n")
+caption_value = "Summary of samples per experiment, seq_unit, assay, and condition"
+
+print(knitr::kable(tables1, align = "lcccc", caption = caption_value))
+cat("  \n</div>  \n")
+cat("  \n\\pagebreak  \n")
+```
+
+## Number of samples per experiment, seq_unit, assay, condition, and sample
+
+```{r, fig.align = "left", results = "asis", message = FALSE, warning = FALSE, echo = FALSE}
+tables1 <- df %>% count(experiment, seq_unit, assay, condition, Sample)
+cat("  \n<div style=\"font-size:80%\">  \n")
+caption_value = "Summary of samples per experiment, seq_unit, assay, condition, and Sample"
+
+print(knitr::kable(tables1, align = "lcccc", caption = caption_value))
+cat("  \n</div>  \n")
+cat("  \n\\pagebreak  \n")
+```
+
+# Notes 
+
+I have identified the following datasets that almost fit the criteria for the testing phase:
+
+  - **10x Matched RNA and ATAC test dataset**: `Victoria Knockout` experiment with 1 replicate/knock-out group (4 samples for 10x RNA + 4 samples 10x ATAC). Replicates could be potentially grouped together and have 2 replicates for WT and 2 replicates for knock-out.
+  
+  - **10x Multiomics RNA and ATAC test dataset**: `Multiome Retina` experiment with 1 replicate/age group (3 samples for 10x RNA (Multiome) + 3 samples for 10x ATAC (multiome).
+
+# Questions
+
+1. Are samples in the `seq_unit` column correctly assigned?
+2. Are samples in the `condition` column correctly assigned?
+3. What is the column to use for `sample_id`? Is the `DYE` column? That will help me to summarize and confirm samples with paired assays per experiment.
+
+
+```{r echo=FALSE}
+detach(params)
+```
+
+\pagebreak
+
+# Session Info
+
+```{r echo=FALSE}
+sessionInfo()
+```
+
