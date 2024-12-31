@@ -16,7 +16,7 @@ This repository contains a collection of analysis modules designed to process an
 
 **Aim**
 
-To characterize the cell landscape of the bone marrow at single cell resolution. Questions to address:
+To characterize the cell landscape of the tissue at single cell resolution. Questions to address:
   - Chromatin accessibility in the brain of X condition.
   - Chromatin accessibility in the brain of X condition per cell type.
 
@@ -119,7 +119,7 @@ Each module is self-contained and can be executed independently or as part of a 
    - Integration with scRNA-seq: Integrate single-cell ATAC-seq with single-cell RNA-seq data to annotate cell types and identify transcriptional regulators linked to chromatin accessibility changes.
     
     > How to do Cell type annotation:
-       a) **Projection of AML samples onto healthy BM UMAP**
+       a) **Projection of malignant samples onto healthy tissue UMAP**
        b) Bridge integration to label cells
        c) Cell type-specific peaks for cell type annotation
 
