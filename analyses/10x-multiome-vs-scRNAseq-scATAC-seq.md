@@ -1,4 +1,4 @@
-# [10x Genomics Multiome vs. matched scRNA-seq and scATAC-seq](https://www.scdiscoveries.com/blog/10x-genomics-multiome-vs-scrna-seq-and-scatac-seq/)
+# 10x Genomics Multiome vs. matched scRNA-seq and scATAC-seq
 
 
 The processing of 10x scATAC-seq with matched scRNA-seq versus the 10x multiomic pipeline (which combines both scRNA-seq and scATAC-seq in a single experiment) differs in how the data is generated, processed, and integrated. Both pipelines aim to analyze transcriptomic and epigenomic data at the single-cell level, but they have different workflows and considerations due to the way the data is handled.
@@ -146,9 +146,29 @@ Seurat v4 (multi-modal integration) or MOFA are designed to handle multiomic dat
 
 **Aim**
 
-To characterize the cell landscape of the bone marrow at single cell resolution. Questions to address:
-  - Chromatin accessibility in the brain of X condition.
-  - Chromatin accessibility in the brain of X condition per cell type.
+For more information, please see [10x Genomics Multiome vs. matched scRNA-seq and scATAC-seq](https://www.scdiscoveries.com/blog/10x-genomics-multiome-vs-scrna-seq-and-scatac-seq/).
+
+### Deep characterization of cell populations
+1. The combined data serves for cross-validation: To identify cell types in a tissue by grouping together nuclei with similar gene expression and chromatin accessibility profiles. 
+
+2. To high-resolution mapping of cell fates in developmental biology and stem cell research. In addition, it is possible to identify transcription factors and regulatory mechanisms responsible for priming cells, as explained in more detail in another section.
+
+3. Unearth novel cell types that are undistinguished by gene expression or chromatin accessibility alone, yet show a unique combination of gene expression and chromatin accessibility profile deviant from other cell types. 
+
+4. How do chromatin accessibility and gene expression change over time? The technology is often applied to generating high-resolution roadmaps of cell fates in samples including: Developing tissues (e.g., Ma et al., 2020; Frazel et al. 2023); Stem cell-based model systems such as organoids (Lee et al., 2023); Immune cell lineages (Chopp et al., 2023); and Transition processes in cancer (Han et al., 2022).
+
+### Map regulatory networks in single cells
+
+5. What regulatory elements are active? To enhance a sample’s single-cell transcription profile with an additional layer of information about each cell’s regulatory elements.
+
+6. Where are transcription factors binding? To identify known and novel sequence patterns occurring within peak regions. These can be binding motifs, short sequences of DNA to which transcription factors bind to regulate gene expression.
+
+7. Which regulatory elements drive gene expression, how?
+
+8. What are the unique gene networks in each cell type?
+
+9. How do conditions influence regulatory elements and downstream pathways?
+
 
 
 **Methods**
@@ -157,11 +177,7 @@ To characterize the cell landscape of the bone marrow at single cell resolution.
 
 **References**
 
-- [Jessa et al., 2022](https://www.nature.com/articles/s41588-022-01205-w). Human/mouse pediatric H3K27M gliomas; scATAC joined with sc/sNRNA along with pipeline; scMultiome data. 
-   > [Available code](https://github.com/fungenomics/HGG-oncohistones?tab=readme-ov-file)
-  
-   > [Normal human fetal brain scRNA-seq reference dataset](https://github.com/fungenomics/HGG-oncohistones#human-fetal-brain-scrnaseq-data)
-
+- [10x Genomics Multiome vs. matched scRNA-seq and scATAC-seq](https://www.scdiscoveries.com/blog/10x-genomics-multiome-vs-scrna-seq-and-scatac-seq/)
 
 
 ---------------------------------------------------------------------------------------
