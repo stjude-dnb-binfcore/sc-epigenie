@@ -1,19 +1,19 @@
-# 10x Genomics Multiome vs. matched scRNA-seq and scATAC-seq
+# 10x Genomics Multiome vs. 10x matched scRNA-seq and scATAC-seq
 
 
 The processing of 10x scATAC-seq with matched scRNA-seq versus the 10x multiomic pipeline (which combines both scRNA-seq and scATAC-seq in a single experiment) differs in how the data is generated, processed, and integrated. Both pipelines aim to analyze transcriptomic and epigenomic data at the single-cell level, but they have different workflows and considerations due to the way the data is handled.
 
-# Key Differences Between 10x scATAC + scRNA-seq with Matching vs. 10x Multiomic Pipeline
+# Key Differences
 
 ## 1. Experimental Setup
 
-### 10x scATAC + matched scRNA-seq
+### 10x matched scRNA-seq and scATAC-seq
 
 - In this setup, two separate experiments (or assays) are performed: one for scATAC-seq and one for scRNA-seq.
 - These are matched data because each cell in the scRNA-seq experiment is identified in the scATAC-seq experiment, usually by using the same cell barcode. This allows linking the RNA data to the chromatin accessibility data for the same cell.
 - Cells are processed in two distinct channels and the matching of barcodes (and cells) allows the integration of the data afterward.
 
-### 10x Multiomic Pipeline
+### 10x Genomics Multiome
 
 - The multiomic approach uses a single experiment where both scRNA-seq and scATAC-seq are captured from the same set of cells in a single run. It uses a combined protocol with unique barcodes for both RNA and ATAC-seq, enabling simultaneous profiling of both transcriptomic and epigenomic features.
 - A more integrated experimental design, where both the RNA and ATAC data are collected at the same time, meaning that both types of data share the exact same cell-level barcodes.
@@ -22,7 +22,7 @@ The processing of 10x scATAC-seq with matched scRNA-seq versus the 10x multiomic
 ## 2. Data Processing Workflow
 The pipelines for scATAC-seq with matched scRNA-seq and 10x multiomic data follow different paths in terms of data processing, integration, and analysis.
 
-### scATAC-seq with Matched scRNA-seq Pipeline
+### 10x matched scRNA-seq and scATAC-seq
 This pipeline involves separate processing for each modality (RNA and ATAC), followed by the integration of the results. The steps are:
 
 1. Preprocessing of scRNA-seq:
@@ -50,7 +50,7 @@ This pipeline involves separate processing for each modality (RNA and ATAC), fol
 - Identify cell-type clusters based on both transcriptomic and epigenomic features.
 - Analyze the relationship between gene expression and chromatin accessibility. For example, look for cis-regulatory elements that correlate with gene expression changes.
 
-### 10x Multiomic Pipeline
+### 10x Genomics Multiome
 In the multiomic pipeline, both RNA and ATAC data are collected simultaneously, so the workflow is more integrated. The steps are:
 
 1. Preprocessing:
@@ -88,7 +88,7 @@ In the multiomic pipeline, both RNA and ATAC data are collected simultaneously, 
 
 
 ## Advantages & Disadvantages
-### scATAC-seq with Matched scRNA-seq:
+### 10x matched scRNA-seq and scATAC-seq
 - Advantages:
    - Flexible and customizable: You can separately fine-tune RNA and ATAC processing pipelines.
    - Allows you to use existing pipelines for scRNA-seq and scATAC-seq separately, which may be advantageous if you need specialized tools for each modality.
@@ -96,7 +96,7 @@ In the multiomic pipeline, both RNA and ATAC data are collected simultaneously, 
    - Requires a post-processing integration step, which can be more challenging and may introduce potential mismatches or biases.
    - Separate experiments can sometimes lead to technical inconsistencies.
 
-### 10x Multiomic Pipeline:
+### 10x Genomics Multiome
 - Advantages:
    - More streamlined: Data are processed together in a single experiment, so the integration of RNA and ATAC data is inherently simpler.
    - Simultaneous profiling: You capture both the transcriptome and the epigenome in a single experiment, reducing potential mismatches or batch effects.
@@ -110,13 +110,13 @@ Additionally, nuclei isolation is mandatory for 10x Multiome because it is a req
 
 A workaround is to combine a standalone whole-cell scRNA-seq experiment with a standalone (single-nuclei) ATAC-seq experiment by dividing the sample for two separate analyses.
 
-## 10x Multiome versus standalone scATAC-seq
+## 10x Genomics Multiome versus standalone scATAC-seq
 Compared to standalone scATAC-seq, 10x Multiome is currently outperformed in terms of sensitivity and library complexity. In a systematic benchmark study on peripheral blood mononuclear cells (De Rop et al., 2023), 10x Multiome produced half the unique fragment peaks as the most advanced 10x Single Cell ATAC protocol.
 
 The study reports that 10x Multiome results in additional costs while it is less sensitive and efficient in sequencing that standalone scATAC-seq. This has to be taken into account in designs for which scATAC-seq is the primary focus of a study. For these designs, 10x Genomics Single Cell ATAC may be the preferred option.
 
 
-# 10x Multiome: A Guide to research questions, pipeline design, and analyses modules
+# 10x Genomics Multiome: A Guide to research questions, pipeline design, and analyses modules
 
 ## Aim
 
@@ -184,7 +184,7 @@ Sequencing read alignments of snATAC-seq and snMultiome-seq: To process sequence
 
 ### 3. `integrative-analysis` module (description="Pipeline for Integrative analysis.", required=True)
 
-#### 10x scATAC-seq with matched scRNA-seq
+#### 10x matched scRNA-seq and scATAC-seq
 - Requires post-processing integration since the RNA and ATAC data come from separate experiments, even if matched at the cell level.
 - The integration is usually performed after the individual data processing, and tools like Seurat’s CCA or Harmony can be used to align the RNA and ATAC datasets.
 - Integration is not as straightforward as in the multiomic pipeline, since the two datasets are processed independently before integration.
@@ -194,7 +194,7 @@ Tools for Integration:
 - Harmony: Another integration tool that is commonly used for aligning datasets after normalization.
 
 
-#### 10x Multiomic Pipeline
+#### 10x Genomics Multiome
 - Inherently integrated since both RNA and ATAC data are generated from the same cells in a single experiment.
 - Integration is more seamless because both data types share the same barcodes, allowing for more straightforward downstream analysis (such as joint clustering and multiomic visualization).
 - The cell-level correspondence between RNA and ATAC data is ensured from the start.
@@ -215,7 +215,7 @@ Cell type annotation of snATAC-seq and snMultiome-seq data
 
 ## Summary
 
-| Analyses modules | matched scRNA-seq and scATAC-seq  | 10x Genomics Multiome |
+| Analyses modules | 10x matched scRNA-seq and scATAC-seq  | 10x Genomics Multiome |
 |:-----------:|:----------:|:--------:|
 | cellranger-analysis | separate for each modality - different pipeline | CellRanger-arc count to align and demultiplex modalities |
 | upstream-analysis | separate processing and filtering for each modality - different pipeline - identify doublets | separate processing and filtering for each modality - identify doublets |
