@@ -188,7 +188,8 @@ For more information, please see [10x Genomics Multiome vs. matched scRNA-seq an
 
 #### Sequencing read alignments of snATAC-seq and snMultiome-seq
 
-From [](https://www.nature.com/articles/s41586-023-06682-5#Sec10):
+From [Terekhanova et al., 2023](https://www.nature.com/articles/s41586-023-06682-5#Sec10). See also [PanCan_snATAC_publication GitHub repo](https://github.com/ding-lab/PanCan_snATAC_publication).
+
 
 To process sequenced snATAC-seq and snMutiome-seq data, we used the CellRanger-atac count (v.2.0, 10x Genomics) and CellRanger-arc count (v.2.0, 10x Genomics) pipelines, respectively. These pipelines filter and map snATAC-seq reads and identify transposase cut sites, and the CellRanger-arc pipeline also performs filtering and alignment of snRNA-seq reads. The GRCh38 human reference was used for the read mapping (refdata-cellranger-arc-GRCh38-2020-A-2.0.0). Owing to low snRNA-seq quality, the snATAC-seq part of some snMultiome-seq samples was separately run with the modified version of CellRanger-atac v.2.0, which had ATAC cell barcodes replaced with snMultiome-seq barcodes. In particular, the snMultiome-seq barcode file cellranger-arc-2.0.0/lib/python/atac/barcodes/737K-arc-v1.txt was copied into CellRanger-atac directory cellranger-atac-2.0.0/lib/python/barcodes/ and renamed to 737K-cratac-v1.txt. The CellRanger report from each sample was carefully evaluated and we excluded samples with few errors, except the ‘Number of cells is too high’ error, while retaining samples with no errors or with just warnings. Examples of errors for which we removed samples are as follows: ‘ATAC high-quality fragments in cells is low’, ‘ATAC TSS enrichment is low’ and ‘ATAC fragments in peaks is low’.
 
@@ -219,13 +220,18 @@ We next computed the weighted nearest neighbour (WNN) graph with the FindMultiMo
 
 **References**
 
-- [10x Genomics Multiome vs. matched scRNA-seq and scATAC-seq](https://www.scdiscoveries.com/blog/10x-genomics-multiome-vs-scrna-seq-and-scatac-seq/)
-
+- [10x Genomics Multiome vs. matched scRNA-seq and scATAC-seq](https://www.scdiscoveries.com/blog/10x-genomics-multiome-vs-scrna-seq-and-scatac-seq/).
+- [Terekhanova et al., 2023](https://www.nature.com/articles/s41586-023-06682-5#Sec10).
 
 ---------------------------------------------------------------------------------------
 
 **Analysis modules**
 
+1. `cellranger-analysis` module (description="Pipeline for running and summarizing Cell Ranger count for single or multiple libraries.", required=True)
+2. `upstream-analysis` module (description="Pipeline for estimating QC metrics and filtering low quality cells.", required=True)
+3. `integrative-analysis` module (description="Pipeline for Integrative analysis.", required=True)
+4. `cell-types-annotation` module (description="Pipeline for annotating cell types.", required=True)
+5. `peak-calling` module (description="Pipeline for calling peaks and Motif Enrichment Analysis.", required=False)
 
 
 
