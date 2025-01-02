@@ -144,9 +144,7 @@ The study reports that 10x Multiome results in additional costs while it is less
 
 # 10x Multiome: A Guide to research questions, pipeline design, and analyses modules
 
-## **Aim**
-
-For more information, please see [10x Genomics Multiome vs. matched scRNA-seq and scATAC-seq](https://www.scdiscoveries.com/blog/10x-genomics-multiome-vs-scrna-seq-and-scatac-seq/).
+## Aim
 
 ### Deep characterization of cell populations
 1. The combined data serves for cross-validation: To identify cell types in a tissue by grouping together nuclei with similar gene expression and chromatin accessibility profiles. 
@@ -170,7 +168,7 @@ For more information, please see [10x Genomics Multiome vs. matched scRNA-seq an
 9. How do conditions influence regulatory elements and downstream pathways?
 
 
-## **Methods**
+## Methods
 
 [Signac package](https://stuartlab.org/signac/)
 
@@ -218,7 +216,7 @@ Sequencing read alignments of snATAC-seq and snMultiome-seq: To process sequence
 ### 5. `peak-calling` module (description="Pipeline for calling peaks and Motif Enrichment Analysis.", required=False)
 
 
-### what else...?### 
+### what else...?
 
 
 
@@ -226,8 +224,12 @@ Sequencing read alignments of snATAC-seq and snMultiome-seq: To process sequence
 
 - [10x Genomics Multiome vs. matched scRNA-seq and scATAC-seq](https://www.scdiscoveries.com/blog/10x-genomics-multiome-vs-scrna-seq-and-scatac-seq/).
 - [Terekhanova et al., 2023](https://www.nature.com/articles/s41586-023-06682-5#Sec10) have sequenced, processed, and analyzed snATAC-seq and snMutiome-seq data. See also [PanCan_snATAC_publication GitHub repo](https://github.com/ding-lab/PanCan_snATAC_publication).
-
-
+- Developing tissues (e.g., [Ma et al., 2020](https://www.sciencedirect.com/science/article/pii/S0092867420312538?via%3Dihub#sec4); Frazel et al. 2023)
+- Stem cell-based model systems such as organoids by [Lee et al., 2023](https://www.nature.com/articles/s12276-023-01076-z).
+- Immune cell lineages by [Chopp et al., 2023](https://www.science.org/doi/10.1126/sciimmunol.adi9066#sec-4).
+- Transition processes in cancer by [Han et al., 2022](https://www.sciencedirect.com/science/article/pii/S1535610822005025?via%3Dihub). Code available at the [Single-cell-multi-omics repo](https://github.com/lifei176/Single-cell-multi-omics).
+- [Bi et al., 2022](https://www.nature.com/articles/s41467-022-30924-1)
+- Some code that might be useful: [Human-primed-to-naive-transition-analysis](https://github.com/zftu/Human-primed-to-naive-transition-analysis/tree/main)
 
 ## Contact
 
