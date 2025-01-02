@@ -191,8 +191,8 @@ The study reports that 10x Multiome results in additional costs while it is less
 - Integration is not as straightforward as in the multiomic pipeline, since the two datasets are processed independently before integration.
 
   > Tools for Integration:
-    - Seurat: Seurat can integrate the two datasets via CCA (Canonical Correlation Analysis) or more recent multi-modal integration techniques (for version 4+).
-    - Harmony: Another integration tool that is commonly used for aligning datasets after normalization.
+    > - Seurat: Seurat can integrate the two datasets via CCA (Canonical Correlation Analysis) or more recent multi-modal integration techniques (for version 4+).
+    > - Harmony: Another integration tool that is commonly used for aligning datasets after normalization.
 
 
 #### 10x Genomics Multiome
@@ -201,8 +201,8 @@ The study reports that 10x Multiome results in additional costs while it is less
 - The cell-level correspondence between RNA and ATAC data is ensured from the start.
 
   > Tools for Integration:
-    - Cell Ranger ATAC and Cell Ranger (for RNA) are typically used for preprocessing, but for integration: Seurat v4 (multi-modal integration) or MOFA are designed to handle multiomic data by leveraging the same barcodes.
-    - Signac: A tool that works seamlessly with Seurat for integrating scRNA-seq and scATAC-seq data in the multiomic pipeline.
+    > - Cell Ranger ATAC and Cell Ranger (for RNA) are typically used for preprocessing, but for integration: Seurat v4 (multi-modal integration) or MOFA are designed to handle multiomic data by leveraging the same barcodes.
+    > - Signac: A tool that works seamlessly with Seurat for integrating scRNA-seq and scATAC-seq data in the multiomic pipeline.
 
 
 ### 4. `cell-types-annotation` module (description="Pipeline for annotating cell types.", required=True)
@@ -219,7 +219,7 @@ Cell type annotation of snATAC-seq and snMultiome-seq data
 |:-----------:|:----------:|:--------:|
 | cellranger-analysis | separate for each modality - different pipeline | CellRanger-arc count to align and demultiplex modalities |
 | upstream-analysis | separate processing and filtering for each modality - different pipeline - identify doublets | separate processing and filtering for each modality - identify doublets |
-| integrative-analysis | Seurat, Harmony | Signac |
+| integrative-analysis | Seurat, Harmony, liger for scRNA-seq/Seurat, Harmony for scATAC-seq | Signac |
 | cell-types-annotation | e.g., Integrate with scRNA-seq and label transfer | ... |
 | peak-calling | yes | ... |
 | differential-accessibility-analysis | yes | ... |
