@@ -132,6 +132,15 @@ Seurat v4 (multi-modal integration) or MOFA are designed to handle multiomic dat
 
 
 
+## Mandatory nuclei isolation
+Additionally, nuclei isolation is mandatory for 10x Multiome because it is a requisite for scATAC-seq’s tagmentation step. This contrasts with scRNA-seq, which can be performed on nuclei and whole cells. You can get an idea of how important the whole-cell transcriptome would be for your experiment in our informative blog on single-nucleus RNA sequencing.
+
+A workaround is to combine a standalone whole-cell scRNA-seq experiment with a standalone (single-nuclei) ATAC-seq experiment by dividing the sample for two separate analyses.
+
+## 10x Multiome versus standalone scATAC-seq
+Compared to standalone scATAC-seq, 10x Multiome is currently outperformed in terms of sensitivity and library complexity. In a systematic benchmark study on peripheral blood mononuclear cells (De Rop et al., 2023), 10x Multiome produced half the unique fragment peaks as the most advanced 10x Single Cell ATAC protocol.
+
+The study reports that 10x Multiome results in additional costs while it is less sensitive and efficient in sequencing that standalone scATAC-seq. This has to be taken into account in designs for which scATAC-seq is the primary focus of a study. For these designs, 10x Genomics Single Cell ATAC may be the preferred option.
 
 
 
@@ -171,9 +180,42 @@ For more information, please see [10x Genomics Multiome vs. matched scRNA-seq an
 
 
 
+
+
+
+
 **Methods**
 
+#### Sequencing read alignments of snATAC-seq and snMultiome-seq
 
+From [](https://www.nature.com/articles/s41586-023-06682-5#Sec10):
+
+To process sequenced snATAC-seq and snMutiome-seq data, we used the CellRanger-atac count (v.2.0, 10x Genomics) and CellRanger-arc count (v.2.0, 10x Genomics) pipelines, respectively. These pipelines filter and map snATAC-seq reads and identify transposase cut sites, and the CellRanger-arc pipeline also performs filtering and alignment of snRNA-seq reads. The GRCh38 human reference was used for the read mapping (refdata-cellranger-arc-GRCh38-2020-A-2.0.0). Owing to low snRNA-seq quality, the snATAC-seq part of some snMultiome-seq samples was separately run with the modified version of CellRanger-atac v.2.0, which had ATAC cell barcodes replaced with snMultiome-seq barcodes. In particular, the snMultiome-seq barcode file cellranger-arc-2.0.0/lib/python/atac/barcodes/737K-arc-v1.txt was copied into CellRanger-atac directory cellranger-atac-2.0.0/lib/python/barcodes/ and renamed to 737K-cratac-v1.txt. The CellRanger report from each sample was carefully evaluated and we excluded samples with few errors, except the ‘Number of cells is too high’ error, while retaining samples with no errors or with just warnings. Examples of errors for which we removed samples are as follows: ‘ATAC high-quality fragments in cells is low’, ‘ATAC TSS enrichment is low’ and ‘ATAC fragments in peaks is low’.
+
+
+#### Peak calling for snATAC-seq data
+To call peaks on snATAC-seq data (from regular snATAC-seq and from snMultiome-seq), we used the MACS2 tool (v.2.2.7.1)72 through the CallPeaks function of the Signac package (v.1.3.0, https://github.com/timoast/signac). We further removed peaks from the Y chromosome, as well as those overlapping genomic regions containing ‘N’. All peaks were resized to 501 bp centred at the peak summit defined by MACS2. We next performed the iterative removal procedure described previously6 to get the set of non-overlapping peaks. In brief, we start with retaining the most significant peak by MACS2 peak score (−log10[q]), removing all peaks that have direct overlap with it. We repeat this procedure for the remaining peaks, until we have the set of non-overlapping peaks. The resulting sample peak set was used to calculate peak-count matrix using FeatureMatrix from the Signac package, which was also used for downstream analysis.
+
+#### Quality control of snATAC-seq data
+Quality-control filtering of the snATAC-seq datasets was performed using functions from the Signac package. Filters that were applied for the cell calling include: 1,000 < number of fragments in peaks < 20,000; percentage of reads in peaks > 15; ENCODE blacklist regions percentage < 0.05 (https://www.encodeproject.org/annotations/ENCSR636HFF/); nucleosome banding pattern score < 5; and enrichment-score for Tn5-integration events at transcriptional start sites > 2. Open chromatin regions were annotated with the R package ChIPseeker (v.1.26.2)73 using transcript database TxDb.Hsapiens.UCSC.hg38.knownGene. The promoter region was specified (−1000,100) relative to the TSS.
+
+#### Normalization, feature selection, dimensionality reduction and clustering of snATAC-seq data
+The filtered peak-count matrix was normalized using term frequency-inverse document frequency (TF-IDF) normalization implemented in the Signac package. This procedure normalizes across cells, accounting for differences in coverage across them and across peaks, giving higher values to the rarer peaks. All peaks were used as features for dimensional reduction. We used the RunSVD Signac function to perform singular value decomposition on the normalized TF-IDF matrix, a method that is also known as latent semantic indexing (LSI) dimension reduction. The resulting 2:30 LSI components were used for nonlinear dimensionality reduction using the RunUMAP function from the Seurat package. The nuclei were clustered using a graph-based clustering approach implemented in Seurat. First, we used the Seurat function FindNeighbors to construct a shared nearest neighbour graph using the 2:30 LSI components. We next used the FindClusters function to iteratively group nuclei together while optimizing modularity using the Louvain algorithm.
+
+#### Quality control, normalization, feature selection, dimensionality reduction and clustering of snMutiome-seq data
+For snMultiome-seq data containing profiles of both snRNA- and snATAC-seq data, we first performed separate processing and filtering of cells using the same steps as were described for the processing of separate sc/snRNA-seq and snATAC-seq assays. To obtain the final list of barcodes, we retained the cells that passed the quality control filters in both the snRNA- and snATAC-seq assays. In the result, we obtained filtered gene- and peak-count matrices for the same set of cells. We then performed TF-IDF normalization of the peak-count matrix, followed by LSI dimensionality reduction using the RunTFIDF and RunSVD Signac functions. For normalization and dimensionality reduction of the gene-count matrix, we used the SCTransform and RunPCA functions of Seurat with the same parameters as used for regular sc/snRNA-seq data processing.
+
+We next computed the weighted nearest neighbour (WNN) graph with the FindMultiModalNeighbors function using both data modalities. We used 1:30 PCA components from snRNA-seq and 2:30 LSI components from snATAC-seq for this analysis. We performed nonlinear dimensionality reduction of the resulting WNN graph using the RunUMAP function of Seurat. Finally, we obtained clusters with the FindClusters function using the WNN graph, setting the argument algorithm = 3 (SLM).
+
+
+#### Identification of doublets in snATAC-seq and snMultiome-seq samples
+
+#### Merging of snATAC-seq data across samples (cohort-level objects)
+
+
+#### Merging of snATAC-seq data across cancers (pan-cancer-level objects)
+
+#### Cell type annotation of snATAC-seq and snMultiome-seq data
 
 **References**
 
