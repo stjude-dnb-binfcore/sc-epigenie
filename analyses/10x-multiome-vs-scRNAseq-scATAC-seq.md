@@ -5,24 +5,24 @@ The processing of 10x scATAC-seq with matched scRNA-seq versus the 10x multiomic
 
 # Key Differences Between 10x scATAC + scRNA-seq with Matching vs. 10x Multiomic Pipeline
 
-## 1. Experimental Setup:
+## 1. Experimental Setup
 
-### 10x scATAC + matched scRNA-seq:
+### 10x scATAC + matched scRNA-seq
 
 - In this setup, two separate experiments (or assays) are performed: one for scATAC-seq and one for scRNA-seq.
 - These are matched data because each cell in the scRNA-seq experiment is identified in the scATAC-seq experiment, usually by using the same cell barcode. This allows linking the RNA data to the chromatin accessibility data for the same cell.
 - Cells are processed in two distinct channels and the matching of barcodes (and cells) allows the integration of the data afterward.
 
-### 10x Multiomic Pipeline:
+### 10x Multiomic Pipeline
 
 - The multiomic approach uses a single experiment where both scRNA-seq and scATAC-seq are captured from the same set of cells in a single run. It uses a combined protocol with unique barcodes for both RNA and ATAC-seq, enabling simultaneous profiling of both transcriptomic and epigenomic features.
 - A more integrated experimental design, where both the RNA and ATAC data are collected at the same time, meaning that both types of data share the exact same cell-level barcodes.
 
 
-## 2. Data Processing Workflow:
+## 2. Data Processing Workflow
 The pipelines for scATAC-seq with matched scRNA-seq and 10x multiomic data follow different paths in terms of data processing, integration, and analysis.
 
-### scATAC-seq with Matched scRNA-seq Pipeline:
+### scATAC-seq with Matched scRNA-seq Pipeline
 This pipeline involves separate processing for each modality (RNA and ATAC), followed by the integration of the results. The steps are:
 
 1. Preprocessing of scRNA-seq:
@@ -50,7 +50,7 @@ This pipeline involves separate processing for each modality (RNA and ATAC), fol
 - Identify cell-type clusters based on both transcriptomic and epigenomic features.
 - Analyze the relationship between gene expression and chromatin accessibility. For example, look for cis-regulatory elements that correlate with gene expression changes.
 
-### 10x Multiomic Pipeline:
+### 10x Multiomic Pipeline
 In the multiomic pipeline, both RNA and ATAC data are collected simultaneously, so the workflow is more integrated. The steps are:
 
 1. Preprocessing:
@@ -87,31 +87,6 @@ In the multiomic pipeline, both RNA and ATAC data are collected simultaneously, 
 - However, the major advantage is that the data are already matched at the cell level, so the analysis of joint gene expression and chromatin accessibility is more streamlined and integrated.
 
 
-## Integration of Data
-### 10x scATAC-seq with matched scRNA-seq:
-- Requires post-processing integration since the RNA and ATAC data come from separate experiments, even if matched at the cell level.
-- The integration is usually performed after the individual data processing, and tools like Seurat’s CCA or Harmony can be used to align the RNA and ATAC datasets.
-- Integration is not as straightforward as in the multiomic pipeline, since the two datasets are processed independently before integration.
-
-### 10x Multiomic Pipeline:
-- Inherently integrated since both RNA and ATAC data are generated from the same cells in a single experiment.
-- Integration is more seamless because both data types share the same barcodes, allowing for more straightforward downstream analysis (such as joint clustering and multiomic visualization).
-- The cell-level correspondence between RNA and ATAC data is ensured from the start.
-
-
-## Tools for Integration
-### scATAC + matched scRNA-seq:
-
-- Seurat: Seurat can integrate the two datasets via CCA (Canonical Correlation Analysis) or more recent multi-modal integration techniques (for version 4+).
-- Harmony: Another integration tool that is commonly used for aligning datasets after normalization.
-
-### 10x Multiomic Pipeline:
-
-- Cell Ranger ATAC and Cell Ranger (for RNA) are typically used for preprocessing, but for integration:
-Seurat v4 (multi-modal integration) or MOFA are designed to handle multiomic data by leveraging the same barcodes.
-- Signac: A tool that works seamlessly with Seurat for integrating scRNA-seq and scATAC-seq data in the multiomic pipeline.
-
-
 ## Advantages & Disadvantages
 ### scATAC-seq with Matched scRNA-seq:
 - Advantages:
@@ -128,8 +103,7 @@ Seurat v4 (multi-modal integration) or MOFA are designed to handle multiomic dat
 - Disadvantages:
     - Less flexibility: You must use the tools and workflows that are compatible with the 10x multiomic platform (e.g., Cell Ranger and Seurat).
     - Requires a large amount of sequencing depth and high-quality data to capture both.
-
-
+    
 
 ## Mandatory nuclei isolation
 Additionally, nuclei isolation is mandatory for 10x Multiome because it is a requisite for scATAC-seq’s tagmentation step. This contrasts with scRNA-seq, which can be performed on nuclei and whole cells. You can get an idea of how important the whole-cell transcriptome would be for your experiment in our informative blog on single-nucleus RNA sequencing.
@@ -181,7 +155,7 @@ The study reports that 10x Multiome results in additional costs while it is less
 [Joint RNA and ATAC analysis: SNARE-seq](https://stuartlab.org/signac/articles/snareseq)
 
 
-## **Analysis modules**
+## Analysis modules
 
 ### 1. `cellranger-analysis` module (description="Pipeline for running and summarizing Cell Ranger count for single or multiple libraries.", required=True)
 
@@ -209,9 +183,31 @@ Sequencing read alignments of snATAC-seq and snMultiome-seq: To process sequence
 - Merging of snATAC-seq data across cancers (pan-cancer-level objects)
 
 ### 3. `integrative-analysis` module (description="Pipeline for Integrative analysis.", required=True)
+
+#### 10x scATAC-seq with matched scRNA-seq
+- Requires post-processing integration since the RNA and ATAC data come from separate experiments, even if matched at the cell level.
+- The integration is usually performed after the individual data processing, and tools like Seurat’s CCA or Harmony can be used to align the RNA and ATAC datasets.
+- Integration is not as straightforward as in the multiomic pipeline, since the two datasets are processed independently before integration.
+
+Tools for Integration:
+- Seurat: Seurat can integrate the two datasets via CCA (Canonical Correlation Analysis) or more recent multi-modal integration techniques (for version 4+).
+- Harmony: Another integration tool that is commonly used for aligning datasets after normalization.
+
+
+#### 10x Multiomic Pipeline
+- Inherently integrated since both RNA and ATAC data are generated from the same cells in a single experiment.
+- Integration is more seamless because both data types share the same barcodes, allowing for more straightforward downstream analysis (such as joint clustering and multiomic visualization).
+- The cell-level correspondence between RNA and ATAC data is ensured from the start.
+
+Tools for Integration:
+- Cell Ranger ATAC and Cell Ranger (for RNA) are typically used for preprocessing, but for integration:
+Seurat v4 (multi-modal integration) or MOFA are designed to handle multiomic data by leveraging the same barcodes.
+- Signac: A tool that works seamlessly with Seurat for integrating scRNA-seq and scATAC-seq data in the multiomic pipeline.
+
+
 ### 4. `cell-types-annotation` module (description="Pipeline for annotating cell types.", required=True)
 
-#### Cell type annotation of snATAC-seq and snMultiome-seq data
+Cell type annotation of snATAC-seq and snMultiome-seq data
 
 ### 5. `peak-calling` module (description="Pipeline for calling peaks and Motif Enrichment Analysis.", required=False)
 
@@ -222,7 +218,7 @@ Sequencing read alignments of snATAC-seq and snMultiome-seq: To process sequence
 | Analyses modules | matched scRNA-seq and scATAC-seq  | 10x Genomics Multiome |
 |:-----------:|:----------:|:--------:|
 | cellranger-analysis | separate for each modality - different pipeline | CellRanger-arc count to align and demultiplex modalities |
-| upstream-analysis | separate processing and filtering for each modality - different pipeline -identify doublets | separate processing and filtering for each modality -identify doublets |
+| upstream-analysis | separate processing and filtering for each modality - different pipeline - identify doublets | separate processing and filtering for each modality - identify doublets |
 | integrative-analysis | Seurat, Harmony | Signac |
 | cell-types-annotation | e.g., Integrate with scRNA-seq and label transfer | ... |
 | peak-calling | yes | ... |
