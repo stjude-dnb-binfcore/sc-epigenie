@@ -159,7 +159,8 @@ The study reports that 10x Multiome results in additional costs while it is less
 
 ### 1. `cellranger-analysis` module (description="Pipeline for running and summarizing Cell Ranger count for single or multiple libraries.", required=True)
 
-Sequencing read alignments of snATAC-seq and snMultiome-seq: To process sequenced snATAC-seq and snMutiome-seq data, we used the CellRanger-atac count (v.2.0, 10x Genomics) and CellRanger-arc count (v.2.0, 10x Genomics) pipelines, respectively. 
+- CellRanger-arc count
+  > Sequencing read alignments of snATAC-seq and snMultiome-seq: To process sequenced snATAC-seq and snMutiome-seq data, we used the CellRanger-atac count (v.2.0, 10x Genomics) and CellRanger-arc count (v.2.0, 10x Genomics) pipelines, respectively. 
 
 ### 2. `upstream-analysis` module (description="Pipeline for estimating QC metrics and filtering low quality cells.", required=True)
 
@@ -189,9 +190,9 @@ Sequencing read alignments of snATAC-seq and snMultiome-seq: To process sequence
 - The integration is usually performed after the individual data processing, and tools like Seurat’s CCA or Harmony can be used to align the RNA and ATAC datasets.
 - Integration is not as straightforward as in the multiomic pipeline, since the two datasets are processed independently before integration.
 
-Tools for Integration:
-- Seurat: Seurat can integrate the two datasets via CCA (Canonical Correlation Analysis) or more recent multi-modal integration techniques (for version 4+).
-- Harmony: Another integration tool that is commonly used for aligning datasets after normalization.
+  > Tools for Integration:
+    - Seurat: Seurat can integrate the two datasets via CCA (Canonical Correlation Analysis) or more recent multi-modal integration techniques (for version 4+).
+    - Harmony: Another integration tool that is commonly used for aligning datasets after normalization.
 
 
 #### 10x Genomics Multiome
@@ -199,10 +200,9 @@ Tools for Integration:
 - Integration is more seamless because both data types share the same barcodes, allowing for more straightforward downstream analysis (such as joint clustering and multiomic visualization).
 - The cell-level correspondence between RNA and ATAC data is ensured from the start.
 
-Tools for Integration:
-- Cell Ranger ATAC and Cell Ranger (for RNA) are typically used for preprocessing, but for integration:
-Seurat v4 (multi-modal integration) or MOFA are designed to handle multiomic data by leveraging the same barcodes.
-- Signac: A tool that works seamlessly with Seurat for integrating scRNA-seq and scATAC-seq data in the multiomic pipeline.
+  > Tools for Integration:
+    - Cell Ranger ATAC and Cell Ranger (for RNA) are typically used for preprocessing, but for integration: Seurat v4 (multi-modal integration) or MOFA are designed to handle multiomic data by leveraging the same barcodes.
+    - Signac: A tool that works seamlessly with Seurat for integrating scRNA-seq and scATAC-seq data in the multiomic pipeline.
 
 
 ### 4. `cell-types-annotation` module (description="Pipeline for annotating cell types.", required=True)
