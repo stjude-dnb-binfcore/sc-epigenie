@@ -216,12 +216,11 @@ Sequencing read alignments of snATAC-seq and snMultiome-seq: To process sequence
 ### 5. `peak-calling` module (description="Pipeline for calling peaks and Motif Enrichment Analysis.", required=False)
 
 
-### .........
 
-
+## Summary
 
 | Analyses modules | matched scRNA-seq and scATAC-seq  | 10x Genomics Multiome |
-:----------|:----------|:----------|:----------|
+|:-----------:|:----------:|:--------:|
 | cellranger-analysis | separate for each modality - different pipeline | CellRanger-arc count to align and demultiplex modalities |
 | upstream-analysis | separate processing and filtering for each modality - different pipeline -identify doublets | separate processing and filtering for each modality -identify doublets |
 | integrative-analysis | Seurat, Harmony | Signac |
