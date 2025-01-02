@@ -3,7 +3,7 @@
 
 The processing of 10x scATAC-seq with matched scRNA-seq versus the 10x multiomic pipeline (which combines both scRNA-seq and scATAC-seq in a single experiment) differs in how the data is generated, processed, and integrated. Both pipelines aim to analyze transcriptomic and epigenomic data at the single-cell level, but they have different workflows and considerations due to the way the data is handled.
 
-# Key Differences Between 10x scATAC + scRNA-seq with Matching vs. 10x Multiomic Pipeline:
+# Key Differences Between 10x scATAC + scRNA-seq with Matching vs. 10x Multiomic Pipeline
 
 ## 1. Experimental Setup:
 
@@ -64,7 +64,7 @@ In the multiomic pipeline, both RNA and ATAC data are collected simultaneously, 
 - RNA-seq: Align RNA reads to the transcriptome using Cell Ranger.
 - ATAC-seq: Align ATAC reads to the genome using Cell Ranger ATAC.
 
-3.Feature Generation:
+3. Feature Generation:
 
 - For RNA, generate the gene expression matrix based on UMIs.
 - For ATAC, generate the chromatin accessibility matrix based on peaks or fragments.
@@ -77,7 +77,7 @@ In the multiomic pipeline, both RNA and ATAC data are collected simultaneously, 
 
 5. Integration:
 
-- Multiomic integration is performed using methods like Seurat v3/Seurat v4 (multi-modal integration), which allows both RNA and ATAC data to be jointly analyzed and integrated based on shared cell barcodes.
+- Multiomic integration is performed using methods like Seurat (multi-modal integration), which allows both RNA and ATAC data to be jointly analyzed and integrated based on shared cell barcodes.
 - Dimensionality reduction (e.g., PCA, UMAP, t-SNE) can be done on the multi-modal data.
 - The analysis also integrates information from both RNA and ATAC-seq to reveal coordinated changes in gene expression and chromatin accessibility.
 
@@ -87,7 +87,7 @@ In the multiomic pipeline, both RNA and ATAC data are collected simultaneously, 
 - However, the major advantage is that the data are already matched at the cell level, so the analysis of joint gene expression and chromatin accessibility is more streamlined and integrated.
 
 
-## Integration of Data:
+## Integration of Data
 ### 10x scATAC-seq with matched scRNA-seq:
 - Requires post-processing integration since the RNA and ATAC data come from separate experiments, even if matched at the cell level.
 - The integration is usually performed after the individual data processing, and tools like Seurat’s CCA or Harmony can be used to align the RNA and ATAC datasets.
@@ -98,8 +98,8 @@ In the multiomic pipeline, both RNA and ATAC data are collected simultaneously, 
 - Integration is more seamless because both data types share the same barcodes, allowing for more straightforward downstream analysis (such as joint clustering and multiomic visualization).
 - The cell-level correspondence between RNA and ATAC data is ensured from the start.
 
-## Tools for Integration:
 
+## Tools for Integration
 ### scATAC + matched scRNA-seq:
 
 - Seurat: Seurat can integrate the two datasets via CCA (Canonical Correlation Analysis) or more recent multi-modal integration techniques (for version 4+).
@@ -112,8 +112,7 @@ Seurat v4 (multi-modal integration) or MOFA are designed to handle multiomic dat
 - Signac: A tool that works seamlessly with Seurat for integrating scRNA-seq and scATAC-seq data in the multiomic pipeline.
 
 
-## Advantages & Disadvantages:
-
+## Advantages & Disadvantages
 ### scATAC-seq with Matched scRNA-seq:
 - Advantages:
    - Flexible and customizable: You can separately fine-tune RNA and ATAC processing pipelines.
@@ -150,10 +149,9 @@ The study reports that 10x Multiome results in additional costs while it is less
 
 
 ---------------------------------------------------------------------------------------
-**How 10x Multiome Works: A Guide**
+# How 10x Multiome Works: A Guide
 
-
-**Aim**
+## **Aim**
 
 For more information, please see [10x Genomics Multiome vs. matched scRNA-seq and scATAC-seq](https://www.scdiscoveries.com/blog/10x-genomics-multiome-vs-scrna-seq-and-scatac-seq/).
 
@@ -179,20 +177,26 @@ For more information, please see [10x Genomics Multiome vs. matched scRNA-seq an
 9. How do conditions influence regulatory elements and downstream pathways?
 
 
+## **Methods**
+
+[Signac package](https://stuartlab.org/signac/)
+
+[Signac and Seurat vignette](https://satijalab.org/seurat/articles/seurat5_atacseq_integration_vignette)
+
+[Joint RNA and ATAC analysis: 10x multiomic](https://stuartlab.org/signac/articles/pbmc_multiomic)
+
+[Analyzing adult mouse brain scATAC-seq](https://stuartlab.org/signac/articles/mouse_brain_vignette)
+
+[Joint RNA and ATAC analysis: SNARE-seq](https://stuartlab.org/signac/articles/snareseq)
 
 
+## **Analysis modules**
 
+1. `cellranger-analysis` module (description="Pipeline for running and summarizing Cell Ranger count for single or multiple libraries.", required=True)
 
+Sequencing read alignments of snATAC-seq and snMultiome-seq: To process sequenced snATAC-seq and snMutiome-seq data, we used the CellRanger-atac count (v.2.0, 10x Genomics) and CellRanger-arc count (v.2.0, 10x Genomics) pipelines, respectively. 
 
-**Methods**
-
-#### Sequencing read alignments of snATAC-seq and snMultiome-seq
-
-From [Terekhanova et al., 2023](https://www.nature.com/articles/s41586-023-06682-5#Sec10). See also [PanCan_snATAC_publication GitHub repo](https://github.com/ding-lab/PanCan_snATAC_publication).
-
-
-To process sequenced snATAC-seq and snMutiome-seq data, we used the CellRanger-atac count (v.2.0, 10x Genomics) and CellRanger-arc count (v.2.0, 10x Genomics) pipelines, respectively. These pipelines filter and map snATAC-seq reads and identify transposase cut sites, and the CellRanger-arc pipeline also performs filtering and alignment of snRNA-seq reads. The GRCh38 human reference was used for the read mapping (refdata-cellranger-arc-GRCh38-2020-A-2.0.0). Owing to low snRNA-seq quality, the snATAC-seq part of some snMultiome-seq samples was separately run with the modified version of CellRanger-atac v.2.0, which had ATAC cell barcodes replaced with snMultiome-seq barcodes. In particular, the snMultiome-seq barcode file cellranger-arc-2.0.0/lib/python/atac/barcodes/737K-arc-v1.txt was copied into CellRanger-atac directory cellranger-atac-2.0.0/lib/python/barcodes/ and renamed to 737K-cratac-v1.txt. The CellRanger report from each sample was carefully evaluated and we excluded samples with few errors, except the ‘Number of cells is too high’ error, while retaining samples with no errors or with just warnings. Examples of errors for which we removed samples are as follows: ‘ATAC high-quality fragments in cells is low’, ‘ATAC TSS enrichment is low’ and ‘ATAC fragments in peaks is low’.
-
+2. `upstream-analysis` module (description="Pipeline for estimating QC metrics and filtering low quality cells.", required=True)
 
 #### Peak calling for snATAC-seq data
 To call peaks on snATAC-seq data (from regular snATAC-seq and from snMultiome-seq), we used the MACS2 tool (v.2.2.7.1)72 through the CallPeaks function of the Signac package (v.1.3.0, https://github.com/timoast/signac). We further removed peaks from the Y chromosome, as well as those overlapping genomic regions containing ‘N’. All peaks were resized to 501 bp centred at the peak summit defined by MACS2. We next performed the iterative removal procedure described previously6 to get the set of non-overlapping peaks. In brief, we start with retaining the most significant peak by MACS2 peak score (−log10[q]), removing all peaks that have direct overlap with it. We repeat this procedure for the remaining peaks, until we have the set of non-overlapping peaks. The resulting sample peak set was used to calculate peak-count matrix using FeatureMatrix from the Signac package, which was also used for downstream analysis.
@@ -203,35 +207,31 @@ Quality-control filtering of the snATAC-seq datasets was performed using functio
 #### Normalization, feature selection, dimensionality reduction and clustering of snATAC-seq data
 The filtered peak-count matrix was normalized using term frequency-inverse document frequency (TF-IDF) normalization implemented in the Signac package. This procedure normalizes across cells, accounting for differences in coverage across them and across peaks, giving higher values to the rarer peaks. All peaks were used as features for dimensional reduction. We used the RunSVD Signac function to perform singular value decomposition on the normalized TF-IDF matrix, a method that is also known as latent semantic indexing (LSI) dimension reduction. The resulting 2:30 LSI components were used for nonlinear dimensionality reduction using the RunUMAP function from the Seurat package. The nuclei were clustered using a graph-based clustering approach implemented in Seurat. First, we used the Seurat function FindNeighbors to construct a shared nearest neighbour graph using the 2:30 LSI components. We next used the FindClusters function to iteratively group nuclei together while optimizing modularity using the Louvain algorithm.
 
+
 #### Quality control, normalization, feature selection, dimensionality reduction and clustering of snMutiome-seq data
 For snMultiome-seq data containing profiles of both snRNA- and snATAC-seq data, we first performed separate processing and filtering of cells using the same steps as were described for the processing of separate sc/snRNA-seq and snATAC-seq assays. To obtain the final list of barcodes, we retained the cells that passed the quality control filters in both the snRNA- and snATAC-seq assays. In the result, we obtained filtered gene- and peak-count matrices for the same set of cells. We then performed TF-IDF normalization of the peak-count matrix, followed by LSI dimensionality reduction using the RunTFIDF and RunSVD Signac functions. For normalization and dimensionality reduction of the gene-count matrix, we used the SCTransform and RunPCA functions of Seurat with the same parameters as used for regular sc/snRNA-seq data processing.
 
 We next computed the weighted nearest neighbour (WNN) graph with the FindMultiModalNeighbors function using both data modalities. We used 1:30 PCA components from snRNA-seq and 2:30 LSI components from snATAC-seq for this analysis. We performed nonlinear dimensionality reduction of the resulting WNN graph using the RunUMAP function of Seurat. Finally, we obtained clusters with the FindClusters function using the WNN graph, setting the argument algorithm = 3 (SLM).
 
-
 #### Identification of doublets in snATAC-seq and snMultiome-seq samples
 
 #### Merging of snATAC-seq data across samples (cohort-level objects)
 
-
 #### Merging of snATAC-seq data across cancers (pan-cancer-level objects)
+
+3. `integrative-analysis` module (description="Pipeline for Integrative analysis.", required=True)
+4. `cell-types-annotation` module (description="Pipeline for annotating cell types.", required=True)
+
 
 #### Cell type annotation of snATAC-seq and snMultiome-seq data
 
-**References**
+5. `peak-calling` module (description="Pipeline for calling peaks and Motif Enrichment Analysis.", required=False)
+
+
+## **References**
 
 - [10x Genomics Multiome vs. matched scRNA-seq and scATAC-seq](https://www.scdiscoveries.com/blog/10x-genomics-multiome-vs-scrna-seq-and-scatac-seq/).
-- [Terekhanova et al., 2023](https://www.nature.com/articles/s41586-023-06682-5#Sec10).
-
----------------------------------------------------------------------------------------
-
-**Analysis modules**
-
-1. `cellranger-analysis` module (description="Pipeline for running and summarizing Cell Ranger count for single or multiple libraries.", required=True)
-2. `upstream-analysis` module (description="Pipeline for estimating QC metrics and filtering low quality cells.", required=True)
-3. `integrative-analysis` module (description="Pipeline for Integrative analysis.", required=True)
-4. `cell-types-annotation` module (description="Pipeline for annotating cell types.", required=True)
-5. `peak-calling` module (description="Pipeline for calling peaks and Motif Enrichment Analysis.", required=False)
+- [Terekhanova et al., 2023](https://www.nature.com/articles/s41586-023-06682-5#Sec10) have sequenced, processed, and analyzed snATAC-seq and snMutiome-seq data. See also [PanCan_snATAC_publication GitHub repo](https://github.com/ding-lab/PanCan_snATAC_publication).
 
 
 
