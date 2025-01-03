@@ -211,13 +211,17 @@ df_processed <- raw_data_df %>%
   
   # Add metadata
   add_column(seq_unit = "nucleus",
-             condition = "unknown") %>%
+             condition = "unknown",
+             species = "mouse") %>%
   tidyr::separate(Kit, c("seq_technology", "assay_drop"), sep = ' ', remove = FALSE) %>% 
   tidyr::separate(assay_drop, c("assay", "drop"), sep = ' ', remove = FALSE) %>% 
   select(!c(assay_drop, drop)) %>%
   mutate(seq_unit = case_when(grepl("More Retina", experiment) ~ "cell",
                               grepl("Stressed Retina", experiment) ~ "cell",
                               TRUE ~ seq_unit),
+         seq_technology = case_when(grepl("RNA", assay) ~ "10Xv3",
+                              grepl("ATAC", assay) ~ "10Xv2",
+                              TRUE ~ seq_technology),
          Sample = case_when(grepl("6wk Cerebellum", Sample) ~ "6 week cerebellum",
                             grepl("P0 Cerebellum,", Sample) ~ "P0 cerebellum",
                             
@@ -245,7 +249,7 @@ df_processed <- raw_data_df %>%
 #names(palette) <- palette_df$color_names
 ```
 
-# Cohort with 10x for matched samples with RNA and ATAC
+# 10x matched scRNA-seq and scATAC-seq cohort
 
 ```{r cohort-10x, include=FALSE, echo=TRUE}
 df <- df_processed %>%
@@ -262,9 +266,12 @@ seq_unit_samples <- unique(df$seq_unit)
 
 # What type of assay was used?
 assay_samples <- unique(df$assay)
+
+# What type of seq_technology was used?
+seq_technology_samples <- unique(df$seq_technology)
 ```
 
-Single cell sequencing was done by using `r seq_unit_samples` and there are `r assay_samples` sequencing technologies in the database. Cohort is formed and processed accordingly. 
+Single cell sequencing was done by using `r seq_unit_samples` and there are `r assay_samples` and `r seq_technology_samples` sequencing technologies in the database. Cohort is formed and processed accordingly. 
 
 ## Number of samples per experiment
 
@@ -295,9 +302,9 @@ cat("  \n\\pagebreak  \n")
 ## Number of samples per experiment, seq_unit, assay, condition, and sample
 
 ```{r, fig.align = "left", results = "asis", message = FALSE, warning = FALSE, echo = FALSE}
-tables1 <- df %>% count(experiment, seq_unit, assay, condition, Sample)
+tables1 <- df %>% count(experiment, seq_unit, assay, seq_technology, condition, Sample)
 cat("  \n<div style=\"font-size:80%\">  \n")
-caption_value = "Summary of samples per experiment, seq_unit, assay, condition, and Sample"
+caption_value = "Summary of samples per experiment, seq_unit, assay, seq_technology, condition, and Sample"
 
 print(knitr::kable(tables1, align = "lcccc", caption = caption_value))
 cat("  \n</div>  \n")
@@ -305,7 +312,7 @@ cat("  \n\\pagebreak  \n")
 ```
 
 
-# Cohort with 10x multiomics for RNA and ATAC
+# 10x Genomics Multiome cohort
 
 ```{r cohort-10x-multiomic, include=FALSE, echo=TRUE}
 df <- df_processed %>%
@@ -322,9 +329,12 @@ seq_unit_samples <- unique(df$seq_unit)
 
 # What type of assay was used?
 assay_samples <- unique(df$assay)
+
+# What type of seq_technology was used?
+seq_technology_samples <- unique(df$seq_technology)
 ```
 
-Single cell sequencing was done by using `r seq_unit_samples` and there are `r assay_samples` sequencing technologies in the database. Cohort is formed and processed accordingly. 
+Single cell sequencing was done by using `r seq_unit_samples` and there are `r assay_samples` and `r seq_technology_samples` sequencing technologies in the database. Cohort is formed and processed accordingly. 
 
 ## Number of samples per experiment
 
@@ -352,12 +362,12 @@ cat("  \n</div>  \n")
 cat("  \n\\pagebreak  \n")
 ```
 
-## Number of samples per experiment, seq_unit, assay, condition, and sample
+## Number of samples per experiment, seq_unit, assay, seq_technology, condition, and sample
 
 ```{r, fig.align = "left", results = "asis", message = FALSE, warning = FALSE, echo = FALSE}
-tables1 <- df %>% count(experiment, seq_unit, assay, condition, Sample)
+tables1 <- df %>% count(experiment, seq_unit, assay, seq_technology, condition, Sample)
 cat("  \n<div style=\"font-size:80%\">  \n")
-caption_value = "Summary of samples per experiment, seq_unit, assay, condition, and Sample"
+caption_value = "Summary of samples per experiment, seq_unit, assay, seq_technology, condition, and Sample"
 
 print(knitr::kable(tables1, align = "lcccc", caption = caption_value))
 cat("  \n</div>  \n")
@@ -368,9 +378,9 @@ cat("  \n\\pagebreak  \n")
 
 I have identified the following datasets that almost fit the criteria for the testing phase:
 
-  - **10x Matched RNA and ATAC test dataset**: `Victoria Knockout` experiment with 1 replicate/knock-out group (4 samples for 10x RNA + 4 samples 10x ATAC). Replicates could be potentially grouped together and have 2 replicates for WT and 2 replicates for knock-out.
+  - **10x matched scRNA-seq and scATAC-seq**: `Victoria Knockout` experiment with 1 replicate/knock-out group (4 samples for 10x RNA + 4 samples 10x ATAC). Replicates could be potentially grouped together and have 2 replicates for WT and 2 replicates for knock-out.
   
-  - **10x Multiomics RNA and ATAC test dataset**: `Multiome Retina` experiment with 1 replicate/age group (3 samples for 10x RNA (Multiome) + 3 samples for 10x ATAC (multiome).
+  - **10x Genomics Multiome**: `Multiome Retina` experiment with 1 replicate/age group (3 samples for 10x RNA (Multiome) + 3 samples for 10x ATAC (multiome).
 
 # Questions
 
