@@ -154,8 +154,6 @@ analysis_dir <- file.path(root_dir, "analyses", "data-exploratory-analysis")
 
 # input files
 data_file <- file.path(metadata_dir, "TestData_10x_2024_12_16.xlsx")
-#metadata_file <- file.path(metadata_dir, "project_metadata.tsv") # metadata input file
-palette_file <- file.path(root_dir, "figures", "palettes", "binary_color_palette.tsv")
 
 # File path to `input` directory
 input_dir <- file.path(analysis_dir, "input") 
