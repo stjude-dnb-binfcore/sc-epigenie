@@ -2636,115 +2636,6 @@ ul.task-list{list-style: none;}
 
 
 
-<style type="text/css">
-code {
-white-space: pre;
-}
-.sourceCode {
-overflow: visible;
-}
-</style>
-<style type="text/css" data-origin="pandoc">
-pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { line-height: 1.25; }
-pre > code.sourceCode > span:empty { height: 1.2em; }
-.sourceCode { overflow: visible; }
-code.sourceCode > span { color: inherit; text-decoration: inherit; }
-div.sourceCode { margin: 1em 0; }
-pre.sourceCode { margin: 0; }
-@media screen {
-div.sourceCode { overflow: auto; }
-}
-@media print {
-pre > code.sourceCode { white-space: pre-wrap; }
-pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
-}
-pre.numberSource code
-{ counter-reset: source-line 0; }
-pre.numberSource code > span
-{ position: relative; left: -4em; counter-increment: source-line; }
-pre.numberSource code > span > a:first-child::before
-{ content: counter(source-line);
-position: relative; left: -1em; text-align: right; vertical-align: baseline;
-border: none; display: inline-block;
--webkit-touch-callout: none; -webkit-user-select: none;
--khtml-user-select: none; -moz-user-select: none;
--ms-user-select: none; user-select: none;
-padding: 0 4px; width: 4em;
-color: #aaaaaa;
-}
-pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
-div.sourceCode
-{ background-color: #f8f8f8; }
-@media screen {
-pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
-}
-code span.al { color: #ef2929; } 
-code span.an { color: #8f5902; font-weight: bold; font-style: italic; } 
-code span.at { color: #204a87; } 
-code span.bn { color: #0000cf; } 
-code span.cf { color: #204a87; font-weight: bold; } 
-code span.ch { color: #4e9a06; } 
-code span.cn { color: #8f5902; } 
-code span.co { color: #8f5902; font-style: italic; } 
-code span.cv { color: #8f5902; font-weight: bold; font-style: italic; } 
-code span.do { color: #8f5902; font-weight: bold; font-style: italic; } 
-code span.dt { color: #204a87; } 
-code span.dv { color: #0000cf; } 
-code span.er { color: #a40000; font-weight: bold; } 
-code span.ex { } 
-code span.fl { color: #0000cf; } 
-code span.fu { color: #204a87; font-weight: bold; } 
-code span.im { } 
-code span.in { color: #8f5902; font-weight: bold; font-style: italic; } 
-code span.kw { color: #204a87; font-weight: bold; } 
-code span.op { color: #ce5c00; font-weight: bold; } 
-code span.ot { color: #8f5902; } 
-code span.pp { color: #8f5902; font-style: italic; } 
-code span.sc { color: #ce5c00; font-weight: bold; } 
-code span.ss { color: #4e9a06; } 
-code span.st { color: #4e9a06; } 
-code span.va { color: #000000; } 
-code span.vs { color: #4e9a06; } 
-code span.wa { color: #8f5902; font-weight: bold; font-style: italic; } 
-.sourceCode .row {
-width: 100%;
-}
-.sourceCode {
-overflow-x: auto;
-}
-.code-folding-btn {
-margin-right: -30px;
-}
-</style>
-<script>
-// apply pandoc div.sourceCode style to pre.sourceCode instead
-(function() {
-  var sheets = document.styleSheets;
-  for (var i = 0; i < sheets.length; i++) {
-    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
-    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
-    var j = 0;
-    while (j < rules.length) {
-      var rule = rules[j];
-      // check if there is a div.sourceCode rule
-      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
-        j++;
-        continue;
-      }
-      var style = rule.style.cssText;
-      // check if color or background-color is set
-      if (rule.style.color === '' && rule.style.backgroundColor === '') {
-        j++;
-        continue;
-      }
-      // replace div.sourceCode by a pre.sourceCode rule
-      sheets[i].deleteRule(j);
-      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
-    }
-  }
-})();
-</script>
 
 
 
@@ -2965,7 +2856,7 @@ sc-/sn-ATAC-Seq Analysis in 10X Genomics data</p>
 </blockquote>
 <p>Date started: Dec-16-2024<br />
 Date completed: ONGOING<br />
-Report generated: 12:35:51 CST 01/03/2025<br />
+Report generated: 12:53:44 CST 01/03/2025<br />
 </p>
 <p>Reviewed by: _____________________ Date: ____________<br />
 </p>
@@ -3006,18 +2897,6 @@ to file Inputs/Outputs</h1>
 <div id="read-processed-data-file" class="section level1" number="5">
 <h1><span class="header-section-number">5</span> Read processed data
 file</h1>
-<div id="color-palette-for-plotting" class="section level2" number="5.1">
-<h2><span class="header-section-number">5.1</span> Color palette for
-plotting</h2>
-<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="co"># Read color palette</span></span>
-<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a><span class="co">#palette_df &lt;- readr::read_tsv(palette_file, guess_max = 100000, show_col_types = FALSE) %&gt;%</span></span>
-<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a><span class="co">#  mutate(color_names = case_when(grepl(&quot;binary_1&quot;, color_names) ~ &quot;Het&quot;,</span></span>
-<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a><span class="co">#                                     grepl(&quot;binary_2&quot;, color_names) ~ &quot;WT&quot;))</span></span>
-<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a>       </span>
-<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a><span class="co"># Define and order palette</span></span>
-<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a><span class="co">#palette &lt;- palette_df$hex_codes</span></span>
-<span id="cb2-8"><a href="#cb2-8" tabindex="-1"></a><span class="co">#names(palette) &lt;- palette_df$color_names</span></span></code></pre></div>
-</div>
 </div>
 <div id="x-matched-scrna-seq-and-scatac-seq-cohort" class="section level1" number="6">
 <h1><span class="header-section-number">6</span> 10x matched scRNA-seq
