@@ -172,11 +172,6 @@ results_dir <- file.path(analysis_dir, "results")
 if (!dir.exists(results_dir)) {
   dir.create(results_dir)}
 
-figures_plots_dir <- file.path(plots_dir, "figures") 
-if (!dir.exists(figures_plots_dir)) {
-  dir.create(figures_plots_dir)}
-
-#source(paste0(analysis_dir, "/util/function-create-barplot.R"))
 source(paste0(root_dir, "/figures/scripts/theme_plot.R"))
 ```
 
@@ -234,19 +229,6 @@ df_processed <- raw_data_df %>%
                                TRUE ~ condition)) %>%
   
   write_tsv(file.path(results_dir, "cohorts_10x_rna_atac_testing_phase.tsv"))
-```
-
-## Color palette for plotting
-
-```{r palette, echo=TRUE}
-# Read color palette
-#palette_df <- readr::read_tsv(palette_file, guess_max = 100000, show_col_types = FALSE) %>%
-#  mutate(color_names = case_when(grepl("binary_1", color_names) ~ "Het",
-#                                     grepl("binary_2", color_names) ~ "WT"))
-       
-# Define and order palette
-#palette <- palette_df$hex_codes
-#names(palette) <- palette_df$color_names
 ```
 
 # 10x matched scRNA-seq and scATAC-seq cohort
