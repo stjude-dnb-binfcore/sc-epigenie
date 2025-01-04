@@ -154,6 +154,7 @@ analysis_dir <- file.path(root_dir, "analyses", "data-exploratory-analysis")
 
 # input files
 data_file <- file.path(metadata_dir, "TestData_10x_2024_12_16.xlsx")
+jackie_data_file <- file.path(metadata_dir, "cohorts_10x_rna_atac_testing_phase_JN.xlsx")
 
 # File path to `input` directory
 input_dir <- file.path(analysis_dir, "input") 
@@ -169,8 +170,6 @@ if (!dir.exists(plots_dir)) {
 results_dir <- file.path(analysis_dir, "results") 
 if (!dir.exists(results_dir)) {
   dir.create(results_dir)}
-
-source(paste0(root_dir, "/figures/scripts/theme_plot.R"))
 ```
 
 ```{r echo=FALSE, warning=FALSE}
@@ -212,12 +211,8 @@ df_processed <- raw_data_df %>%
   mutate(seq_unit = case_when(grepl("More Retina", experiment) ~ "cell",
                               grepl("Stressed Retina", experiment) ~ "cell",
                               TRUE ~ seq_unit),
-         seq_technology = case_when(grepl("RNA", assay) ~ "10Xv3",
-                              grepl("ATAC", assay) ~ "10Xv2",
-                              TRUE ~ seq_technology),
          Sample = case_when(grepl("6wk Cerebellum", Sample) ~ "6 week cerebellum",
                             grepl("P0 Cerebellum,", Sample) ~ "P0 cerebellum",
-                            
                             TRUE ~ Sample),
          
          # Add condition col
@@ -226,8 +221,30 @@ df_processed <- raw_data_df %>%
                                grepl("ATOH HI|ATOH Low", Sample) ~ "treatment",
                                TRUE ~ condition)) %>%
   
-  write_tsv(file.path(results_dir, "cohorts_10x_rna_atac_testing_phase.tsv"))
+  write_tsv(file.path(results_dir, "cohorts_10x_rna_atac_testing_phase_2024-12-17.tsv"))
 ```
+
+# Read Jackie data file (2025-01-03) and update table
+
+```{r read-jackie-data, include=FALSE, echo=TRUE}
+df_processed_select <- df_processed %>%
+  select(!c(SRM_id, SRM_Sample_id, seq_unit, condition))
+
+# Read data
+df_processed <- read_excel(jackie_data_file) %>%
+  select(DYE, SRM_id, SRM_Sample_id, seq_unit, condition) %>%
+  right_join(df_processed_select, by = join_by(DYE)) %>%
+  mutate(seq_technology = case_when(grepl("RNA", assay) ~ "10Xv3",
+                                    grepl("ATAC", assay) ~ "10Xv2"),
+         seq_technology = case_when(grepl("yes", multiome_10x) ~ "10X",
+                                    TRUE ~ seq_technology)) %>%
+  select(experiment, everything()) %>%
+  
+  # save data 
+  write_tsv(file.path(results_dir, glue::glue("cohorts_10x_rna_atac_testing_phase_{Sys.Date()}.tsv")))
+```
+
+
 
 # 10x matched scRNA-seq and scATAC-seq cohort
 
@@ -362,11 +379,6 @@ I have identified the following datasets that almost fit the criteria for the te
   
   - **10x Genomics Multiome**: `Multiome Retina` experiment with 1 replicate/age group (3 samples for 10x RNA (Multiome) + 3 samples for 10x ATAC (multiome).
 
-# Questions
-
-1. Are samples in the `seq_unit` column correctly assigned?
-2. Are samples in the `condition` column correctly assigned?
-3. What is the column to use for `sample_id`? Is the `DYE` column? That will help me to summarize and confirm samples with paired assays per experiment.
 
 
 ```{r echo=FALSE}
