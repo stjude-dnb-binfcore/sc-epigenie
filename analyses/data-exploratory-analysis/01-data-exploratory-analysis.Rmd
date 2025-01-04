@@ -240,6 +240,10 @@ df_processed <- read_excel(jackie_data_file) %>%
                                     TRUE ~ seq_technology)) %>%
   select(experiment, everything()) %>%
   
+  # Add tissue/location information
+  mutate(tissue = case_when(grepl("Retina", experiment) ~ "Retina",
+                            grepl("Cerebellum", experiment) ~ "Cerebellum",
+                            grepl("Victoria Knockout", experiment) ~ "Retina")) %>%
   # save data 
   write_tsv(file.path(results_dir, glue::glue("cohorts_10x_rna_atac_testing_phase_{Sys.Date()}.tsv")))
 ```
@@ -296,12 +300,12 @@ cat("  \n</div>  \n")
 cat("  \n\\pagebreak  \n")
 ```
 
-## Number of samples per experiment, seq_unit, assay, condition, and sample
+## Number of samples per experiment, tissue, seq_unit, assay, condition, and sample
 
 ```{r, fig.align = "left", results = "asis", message = FALSE, warning = FALSE, echo = FALSE}
-tables1 <- df %>% count(experiment, seq_unit, assay, seq_technology, condition, Sample)
+tables1 <- df %>% count(experiment, tissue, seq_unit, assay, seq_technology, condition, Sample)
 cat("  \n<div style=\"font-size:80%\">  \n")
-caption_value = "Summary of samples per experiment, seq_unit, assay, seq_technology, condition, and Sample"
+caption_value = "Summary of samples per experiment, tissue, seq_unit, assay, seq_technology, condition, and Sample"
 
 print(knitr::kable(tables1, align = "lcccc", caption = caption_value))
 cat("  \n</div>  \n")
@@ -359,12 +363,12 @@ cat("  \n</div>  \n")
 cat("  \n\\pagebreak  \n")
 ```
 
-## Number of samples per experiment, seq_unit, assay, seq_technology, condition, and sample
+## Number of samples per experiment, tissue, seq_unit, assay, seq_technology, condition, and sample
 
 ```{r, fig.align = "left", results = "asis", message = FALSE, warning = FALSE, echo = FALSE}
-tables1 <- df %>% count(experiment, seq_unit, assay, seq_technology, condition, Sample)
+tables1 <- df %>% count(experiment, tissue, seq_unit, assay, seq_technology, condition, Sample)
 cat("  \n<div style=\"font-size:80%\">  \n")
-caption_value = "Summary of samples per experiment, seq_unit, assay, seq_technology, condition, and Sample"
+caption_value = "Summary of samples per experiment, tissue, seq_unit, assay, seq_technology, condition, and Sample"
 
 print(knitr::kable(tables1, align = "lcccc", caption = caption_value))
 cat("  \n</div>  \n")

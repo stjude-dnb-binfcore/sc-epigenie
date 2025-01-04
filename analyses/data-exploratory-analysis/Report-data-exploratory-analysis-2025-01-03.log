@@ -1,4 +1,4 @@
-This is LuaHBTeX, Version 1.18.0 (TeX Live 2024)  (format=lualatex 2024.3.26)  3 JAN 2025 18:27
+This is LuaHBTeX, Version 1.18.0 (TeX Live 2024)  (format=lualatex 2024.3.26)  3 JAN 2025 18:44
  restricted system commands enabled.
 **/research_jude/rgs01_jude/dept/DNB/core_operations/Bioinformatics/achroni/Git
 Hub/sc-atac-seq/analyses/data-exploratory-analysis/plots/Report-data-explorator
@@ -1122,8 +1122,77 @@ Underfull \hbox (badness 10000) in paragraph at lines 139--141
 
  []
 
-[2] [3] [4] [5] [6] [7] [8] [9] [10] (./Report-data-exploratory-analysis-2025-0
-1-03.aux)
+[2] [3] [4]
+Overfull \hbox (4.2366pt too wide) in paragraph at lines 283--284
+ []\TU/lmr/m/n/10.95 seq_unit 
+ []
+
+
+Overfull \hbox (4.2366pt too wide) in paragraph at lines 303--304
+ []\TU/lmr/m/n/10.95 seq_unit 
+ []
+
+
+Overfull \hbox (3.3415pt too wide) in paragraph at lines 325--325
+ []|\TU/lmr/m/n/10.95 ATAC| 
+ []
+
+
+Overfull \hbox (3.3415pt too wide) in paragraph at lines 327--327
+ []|\TU/lmr/m/n/10.95 ATAC| 
+ []
+
+
+Overfull \hbox (3.3415pt too wide) in paragraph at lines 329--329
+ []|\TU/lmr/m/n/10.95 ATAC| 
+ []
+
+
+Overfull \hbox (3.3415pt too wide) in paragraph at lines 331--331
+ []|\TU/lmr/m/n/10.95 ATAC| 
+ []
+
+
+Overfull \hbox (3.3415pt too wide) in paragraph at lines 333--333
+ []|\TU/lmr/m/n/10.95 ATAC| 
+ []
+
+
+Overfull \hbox (3.3415pt too wide) in paragraph at lines 334--334
+ []|\TU/lmr/m/n/10.95 ATAC| 
+ []
+
+
+Overfull \hbox (3.3415pt too wide) in paragraph at lines 335--335
+ []|\TU/lmr/m/n/10.95 ATAC| 
+ []
+
+
+Overfull \hbox (3.3415pt too wide) in paragraph at lines 342--342
+ []|\TU/lmr/m/n/10.95 ATAC| 
+ []
+
+
+Overfull \hbox (3.3415pt too wide) in paragraph at lines 350--350
+ []|\TU/lmr/m/n/10.95 ATAC| 
+ []
+
+
+Overfull \hbox (3.3415pt too wide) in paragraph at lines 352--352
+ []|\TU/lmr/m/n/10.95 ATAC| 
+ []
+
+
+Overfull \hbox (3.3415pt too wide) in paragraph at lines 354--354
+ []|\TU/lmr/m/n/10.95 ATAC| 
+ []
+
+
+Overfull \hbox (3.3415pt too wide) in paragraph at lines 355--355
+ []|\TU/lmr/m/n/10.95 ATAC| 
+ []
+
+[5] [6] [7] [8] [9] [10] (./Report-data-exploratory-analysis-2025-01-03.aux)
  ***********
 LaTeX2e <2023-11-01> patch level 1
 L3 programming layer <2024-03-14>
@@ -1137,10 +1206,10 @@ Here is how much of LuaTeX's memory you used:
    7 hlist, 2 vlist, 2 rule, 1 local_par, 5 glue, 4 kern, 1 penalty, 3 glyph, 11
  attribute, 65 glue_spec, 11 attribute_list, 1 write, 1 user_defined, 1 pdf_acti
 on nodes
-   avail lists: 1:2,2:2124,3:938,4:95,5:398,6:368,7:5228,8:32,9:2390,10:3,11:250
+   avail lists: 1:2,2:2406,3:938,4:95,5:398,6:420,7:6105,8:32,9:2732,10:3,11:256
  42771 multiletter control sequences out of 65536+600000
  77 fonts using 24423903 bytes
- 90i,15n,121p,1626b,399s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 90i,15n,121p,1712b,399s stack positions out of 10000i,1000n,20000p,200000b,200000s
 </research/rgs01/applications/hpcf/authorized_apps/rhel8_apps/texlive/install/20
 24/texmf-dist/fonts/opentype/public/lm/lmroman9-regular.otf></research/rgs01/app
 lications/hpcf/authorized_apps/rhel8_apps/texlive/install/2024/texmf-dist/fonts/
@@ -1158,7 +1227,7 @@ exlive/install/2024/texmf-dist/fonts/opentype/public/lm/lmroman12-regular.otf></
 research/rgs01/applications/hpcf/authorized_apps/rhel8_apps/texlive/install/2024
 /texmf-dist/fonts/opentype/public/lm/lmroman17-regular.otf>
 Output written on Report-data-exploratory-analysis-2025-01-03.pdf (10 pages, 24
-4683 bytes).
+5099 bytes).
 
 PDF statistics: 221 PDF objects out of 1000 (max. 8388607)
  178 compressed objects within 2 object streams
