@@ -1,4 +1,4 @@
-experiment	DYE	SRM #	SRM Sample #	Kit	multiome_10x	Sample
+experiment	DYE	SRM_id	SRM_Sample_id	Kit	multiome_10x	Sample
 Cerebellum	DYE0314	277093	NA	10x RNA	no	ATOH Low
 Cerebellum	DYE0315	277093	NA	10x RNA	no	ATOH HI
 Cerebellum	DYE0316	277094	NA	10x ATAC	no	ATOH Low

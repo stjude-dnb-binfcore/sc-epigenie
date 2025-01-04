@@ -1,4 +1,4 @@
-This is LuaHBTeX, Version 1.18.0 (TeX Live 2024)  (format=lualatex 2024.3.26)  3 JAN 2025 13:19
+This is LuaHBTeX, Version 1.18.0 (TeX Live 2024)  (format=lualatex 2024.3.26)  3 JAN 2025 18:27
  restricted system commands enabled.
 **/research_jude/rgs01_jude/dept/DNB/core_operations/Bioinformatics/achroni/Git
 Hub/sc-atac-seq/analyses/data-exploratory-analysis/plots/Report-data-explorator
@@ -1131,15 +1131,15 @@ L3 programming layer <2024-03-14>
 )
 
 Here is how much of LuaTeX's memory you used:
- 21090 strings out of 476435
+ 21085 strings out of 476435
  125086,1977958 words of node,token memory allocated
  632 words of node memory still in use:
    7 hlist, 2 vlist, 2 rule, 1 local_par, 5 glue, 4 kern, 1 penalty, 3 glyph, 11
  attribute, 65 glue_spec, 11 attribute_list, 1 write, 1 user_defined, 1 pdf_acti
 on nodes
-   avail lists: 1:2,2:2124,3:938,4:95,5:393,6:368,7:5346,8:32,9:2388,10:3,11:242
- 42773 multiletter control sequences out of 65536+600000
- 77 fonts using 24423803 bytes
+   avail lists: 1:2,2:2124,3:938,4:95,5:398,6:368,7:5228,8:32,9:2390,10:3,11:250
+ 42771 multiletter control sequences out of 65536+600000
+ 77 fonts using 24423903 bytes
  90i,15n,121p,1626b,399s stack positions out of 10000i,1000n,20000p,200000b,200000s
 </research/rgs01/applications/hpcf/authorized_apps/rhel8_apps/texlive/install/20
 24/texmf-dist/fonts/opentype/public/lm/lmroman9-regular.otf></research/rgs01/app
@@ -1158,10 +1158,10 @@ exlive/install/2024/texmf-dist/fonts/opentype/public/lm/lmroman12-regular.otf></
 research/rgs01/applications/hpcf/authorized_apps/rhel8_apps/texlive/install/2024
 /texmf-dist/fonts/opentype/public/lm/lmroman17-regular.otf>
 Output written on Report-data-exploratory-analysis-2025-01-03.pdf (10 pages, 24
-4992 bytes).
+4683 bytes).
 
-PDF statistics: 224 PDF objects out of 1000 (max. 8388607)
- 181 compressed objects within 2 object streams
- 40 named destinations out of 1000 (max. 131072)
+PDF statistics: 221 PDF objects out of 1000 (max. 8388607)
+ 178 compressed objects within 2 object streams
+ 37 named destinations out of 1000 (max. 131072)
  145 words of extra memory for PDF output out of 10000 (max. 100000000)
 
