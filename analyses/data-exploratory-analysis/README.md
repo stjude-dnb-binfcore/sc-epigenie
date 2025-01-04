@@ -35,6 +35,8 @@ The structure of this folder is as follows:
 |   ├── Report-data-exploratory-analysis-<Sys.Date()>.html
 |   └── Report-data-exploratory-analysis-<Sys.Date()>.pdf
 ├── README.md
+├── Report-data-exploratory-analysis-<Sys.Date()>.log
+├── results
 ├── run-data-exploratory-analysis.R
 └── run-data-exploratory-analysis.sh
 ```
