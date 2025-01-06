@@ -25,22 +25,16 @@ The pipelines for scATAC-seq with matched scRNA-seq and 10x multiomic data follo
 ### 10x matched scRNA-seq and scATAC-seq
 This pipeline involves separate processing for each modality (RNA and ATAC), followed by the integration of the results. The steps are:
 
-1. Preprocessing of scRNA-seq:
-
-As described in [sc-rna-seq-snap/analyses/README.md](https://github.com/stjude-dnb-binfcore/sc-rna-seq-snap/tree/main/analyses).
+1. Preprocessing of scRNA-seq. As described in [sc-rna-seq-snap/analyses/README.md](https://github.com/stjude-dnb-binfcore/sc-rna-seq-snap/tree/main/analyses).
 
 
-2. Preprocessing of scATAC-seq:
-
-As described in [./analyses/README.md](https://github.com/stjude-dnb-binfcore/sc-atac-seq/tree/main/analyses).
+2. Preprocessing of scATAC-seq. As described in [./analyses/README.md](https://github.com/stjude-dnb-binfcore/sc-atac-seq/tree/main/analyses).
 
 
-3. Integration:
+3. Integration. As described in [./analyses/README.md](https://github.com/stjude-dnb-binfcore/sc-atac-seq/tree/main/analyses).
 
-- This is typically done using cell barcodes to match RNA and ATAC data at the single-cell level.
-- Use integration methods such as Seurat’s canonical correlation analysis (CCA) or Harmony to link RNA and ATAC data and align the datasets in a common space.
-
-See also [./analyses/README.md](https://github.com/stjude-dnb-binfcore/sc-atac-seq/tree/main/analyses).
+   > - This is typically done using cell barcodes to match RNA and ATAC data at the single-cell level.
+   > - Use integration methods such as Seurat’s canonical correlation analysis (CCA) or Harmony to link RNA and ATAC data and align the datasets in a common space.
 
 
 
