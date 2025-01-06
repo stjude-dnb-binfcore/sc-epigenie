@@ -217,6 +217,8 @@ Cell type annotation of snATAC-seq and snMultiome-seq data.
 - Immune cell lineages by [Chopp et al., 2023](https://www.science.org/doi/10.1126/sciimmunol.adi9066#sec-4).
 - Transition processes in cancer by [Han et al., 2022](https://www.sciencedirect.com/science/article/pii/S1535610822005025?via%3Dihub). Code available at the [Single-cell-multi-omics repo](https://github.com/lifei176/Single-cell-multi-omics).
 - [Bi et al., 2022](https://www.nature.com/articles/s41467-022-30924-1). Code available at the [Human-primed-to-naive-transition-analysis repo ](https://github.com/zftu/Human-primed-to-naive-transition-analysis/tree/main)
+- [Analysis of Single-Cell Multiome ATAC + Gene Expression - Dr. Wayne Doyle](https://www.youtube.com/watch?v=y1mFdkDVc-c&ab_channel=ActiveMotif)
+
 
 
 ## Contact
