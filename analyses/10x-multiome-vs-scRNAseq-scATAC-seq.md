@@ -27,11 +27,9 @@ This pipeline involves separate processing for each modality (RNA and ATAC), fol
 
 1. Preprocessing of scRNA-seq. As described in [sc-rna-seq-snap/analyses/README.md](https://github.com/stjude-dnb-binfcore/sc-rna-seq-snap/tree/main/analyses).
 
+2. Preprocessing of scATAC-seq. As described in [sc-atac-seq/analyses/README.md](https://github.com/stjude-dnb-binfcore/sc-atac-seq/tree/main/analyses).
 
-2. Preprocessing of scATAC-seq. As described in [./analyses/README.md](https://github.com/stjude-dnb-binfcore/sc-atac-seq/tree/main/analyses).
-
-
-3. Integration. As described in [./analyses/README.md](https://github.com/stjude-dnb-binfcore/sc-atac-seq/tree/main/analyses).
+3. Integration. As described in [sc-atac-seq/analyses/README.md](https://github.com/stjude-dnb-binfcore/sc-atac-seq/tree/main/analyses).
 
    > - This is typically done using cell barcodes to match RNA and ATAC data at the single-cell level.
    > - Use integration methods such as Seurat’s canonical correlation analysis (CCA) or Harmony to link RNA and ATAC data and align the datasets in a common space.
@@ -147,6 +145,11 @@ The study reports that 10x Genomics Multiome results in additional costs while i
 
 ### 1. `cellranger-analysis` module (description="Pipeline for running and summarizing Cell Ranger count for single or multiple libraries.", required=True)
 
+#### 10x matched scRNA-seq and scATAC-seq
+
+As described in [sc-rna-seq-snap/analyses/README.md](https://github.com/stjude-dnb-binfcore/sc-rna-seq-snap/tree/main/analyses) and [sc-atac-seq/analyses/README.md](https://github.com/stjude-dnb-binfcore/sc-atac-seq/tree/main/analyses).
+
+#### 10x Genomics Multiome
 - CellRanger-arc count
   > Sequencing read alignments of snATAC-seq and snMultiome-seq: To process sequenced snATAC-seq and snMutiome-seq data, we used the CellRanger-atac count (v.2.0, 10x Genomics) and CellRanger-arc count (v.2.0, 10x Genomics) pipelines, respectively. 
 
@@ -154,14 +157,7 @@ The study reports that 10x Genomics Multiome results in additional costs while i
 
 #### 10x matched scRNA-seq and scATAC-seq
 
-- Peak calling for snATAC-seq data
-  > To call peaks on snATAC-seq data (from regular snATAC-seq and from snMultiome-seq), we used the MACS2 tool (v.2.2.7.1)72 through the CallPeaks function of the Signac package (v.1.3.0, https://github.com/timoast/signac). We further removed peaks from the Y chromosome, as well as those overlapping genomic regions containing ‘N’. All peaks were resized to 501 bp centred at the peak summit defined by MACS2. We next performed the iterative removal procedure described previously6 to get the set of non-overlapping peaks. In brief, we start with retaining the most significant peak by MACS2 peak score (−log10[q]), removing all peaks that have direct overlap with it. We repeat this procedure for the remaining peaks, until we have the set of non-overlapping peaks. The resulting sample peak set was used to calculate peak-count matrix using FeatureMatrix from the Signac package, which was also used for downstream analysis.
-
-- Quality control of snATAC-seq data
-  > Quality-control filtering of the snATAC-seq datasets was performed using functions from the Signac package. Filters that were applied for the cell calling include: 1,000 < number of fragments in peaks < 20,000; percentage of reads in peaks > 15; ENCODE blacklist regions percentage < 0.05 (https://www.encodeproject.org/annotations/ENCSR636HFF/); nucleosome banding pattern score < 5; and enrichment-score for Tn5-integration events at transcriptional start sites > 2. Open chromatin regions were annotated with the R package ChIPseeker (v.1.26.2)73 using transcript database TxDb.Hsapiens.UCSC.hg38.knownGene. The promoter region was specified (−1000,100) relative to the TSS.
-
-- Normalization, feature selection, dimensionality reduction and clustering of snATAC-seq data
-  > The filtered peak-count matrix was normalized using term frequency-inverse document frequency (TF-IDF) normalization implemented in the Signac package. This procedure normalizes across cells, accounting for differences in coverage across them and across peaks, giving higher values to the rarer peaks. All peaks were used as features for dimensional reduction. We used the RunSVD Signac function to perform singular value decomposition on the normalized TF-IDF matrix, a method that is also known as latent semantic indexing (LSI) dimension reduction. The resulting 2:30 LSI components were used for nonlinear dimensionality reduction using the RunUMAP function from the Seurat package. The nuclei were clustered using a graph-based clustering approach implemented in Seurat. First, we used the Seurat function FindNeighbors to construct a shared nearest neighbour graph using the 2:30 LSI components. We next used the FindClusters function to iteratively group nuclei together while optimizing modularity using the Louvain algorithm.
+As described in [sc-rna-seq-snap/analyses/README.md](https://github.com/stjude-dnb-binfcore/sc-rna-seq-snap/tree/main/analyses) and [sc-atac-seq/analyses/README.md](https://github.com/stjude-dnb-binfcore/sc-atac-seq/tree/main/analyses).
 
 #### 10x Genomics Multiome
 - Quality control, normalization, feature selection, dimensionality reduction and clustering of snMutiome-seq data
@@ -176,14 +172,8 @@ The study reports that 10x Genomics Multiome results in additional costs while i
 ### 3. `integrative-analysis` module (description="Pipeline for Integrative analysis.", required=True)
 
 #### 10x matched scRNA-seq and scATAC-seq
-- Requires post-processing integration since the RNA and ATAC data come from separate experiments, even if matched at the cell level.
-- The integration is usually performed after the individual data processing, and tools like Seurat’s CCA or Harmony can be used to align the RNA and ATAC datasets.
-- Integration is not as straightforward as in the multiomic pipeline, since the two datasets are processed independently before integration.
 
-  > Tools for Integration:
-    > - Seurat: Seurat can integrate the two datasets via CCA (Canonical Correlation Analysis) or more recent multi-modal integration techniques (for version 4+).
-    > - Harmony: Another integration tool that is commonly used for aligning datasets after normalization.
-
+As described in [sc-rna-seq-snap/analyses/README.md](https://github.com/stjude-dnb-binfcore/sc-rna-seq-snap/tree/main/analyses) and [sc-atac-seq/analyses/README.md](https://github.com/stjude-dnb-binfcore/sc-atac-seq/tree/main/analyses).
 
 #### 10x Genomics Multiome
 - Inherently integrated since both RNA and ATAC data are generated from the same cells in a single experiment.
@@ -197,7 +187,7 @@ The study reports that 10x Genomics Multiome results in additional costs while i
 
 ### 4. `cell-types-annotation` module (description="Pipeline for annotating cell types.", required=True)
 
-Cell type annotation of snATAC-seq and snMultiome-seq data
+Cell type annotation of snATAC-seq and snMultiome-seq data.
 
 ### 5. `peak-calling` module (description="Pipeline for calling peaks and Motif Enrichment Analysis.", required=False)
 

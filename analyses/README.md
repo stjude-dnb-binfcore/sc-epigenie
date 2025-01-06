@@ -98,18 +98,35 @@ Each module is self-contained and can be executed independently or as part of a 
 2. `upstream-analysis` module (description="Pipeline for estimating QC metrics and filtering low quality cells.", required=True)
 
    - `Peak/Cell matrix`. This is analogous to the gene expression count matrix used to analyze single-cell RNA-seq. However, instead of genes, each row of the matrix represents a region of the genome (a peak), that is predicted to represent a region of open chromatin. Each value in the matrix represents the number of Tn5 integration sites for each single barcode (i.e. a cell) that map within each peak. You can find more detail on the [10X Website](https://support.10xgenomics.com/single-cell-atac/software/pipelines/latest/output/matrices).
+   
+   > Peak calling for snATAC-seq data. To call peaks on snATAC-seq data (from regular snATAC-seq and from snMultiome-seq), we used the MACS2 tool (v.2.2.7.1)72 through the CallPeaks function of the Signac package (v.1.3.0, https://github.com/timoast/signac). We further removed peaks from the Y chromosome, as well as those overlapping genomic regions containing ‘N’. All peaks were resized to 501 bp centred at the peak summit defined by MACS2. We next performed the iterative removal procedure described previously6 to get the set of non-overlapping peaks. In brief, we start with retaining the most significant peak by MACS2 peak score (−log10[q]), removing all peaks that have direct overlap with it. We repeat this procedure for the remaining peaks, until we have the set of non-overlapping peaks. The resulting sample peak set was used to calculate peak-count matrix using FeatureMatrix from the Signac package, which was also used for downstream analysis.
+   
    - `Fragment file`. This represents a full list of all unique fragments across all single cells. It is a substantially larger file, is slower to work with, and is stored on-disk (instead of in memory). However, the advantage of retaining this file is that it contains all fragments associated with each single cell, as opposed to only fragments that map to peaks. More information about the fragment file can be found on the [10x Genomics website](https://support.10xgenomics.com/single-cell-atac/software/pipelines/latest/output/fragments) or on the [sinto website](https://timoast.github.io/sinto/basic_usage.html#create-scatac-seq-fragments-file).
    - `Computing QC Metrics`
+   
+   > Quality control of snATAC-seq data. Quality-control filtering of the snATAC-seq datasets was performed using functions from the Signac package. Filters that were applied for the cell calling include: 1,000 < number of fragments in peaks < 20,000; percentage of reads in peaks > 15; ENCODE blacklist regions percentage < 0.05 (https://www.encodeproject.org/annotations/ENCSR636HFF/); nucleosome banding pattern score < 5; and enrichment-score for Tn5-integration events at transcriptional start sites > 2. Open chromatin regions were annotated with the R package ChIPseeker (v.1.26.2)73 using transcript database TxDb.Hsapiens.UCSC.hg38.knownGene. The promoter region was specified (−1000,100) relative to the TSS.
+   
    - `Normalization and linear dimensional reduction`
    - `Non-linear dimension reduction and clustering`
    - `Create a gene activity matrix`
+
+ > Normalization, feature selection, dimensionality reduction and clustering of snATAC-seq data. The filtered peak-count matrix was normalized using term frequency-inverse document frequency (TF-IDF) normalization implemented in the Signac package. This procedure normalizes across cells, accounting for differences in coverage across them and across peaks, giving higher values to the rarer peaks. All peaks were used as features for dimensional reduction. We used the RunSVD Signac function to perform singular value decomposition on the normalized TF-IDF matrix, a method that is also known as latent semantic indexing (LSI) dimension reduction. The resulting 2:30 LSI components were used for nonlinear dimensionality reduction using the RunUMAP function from the Seurat package. The nuclei were clustered using a graph-based clustering approach implemented in Seurat. First, we used the Seurat function FindNeighbors to construct a shared nearest neighbour graph using the 2:30 LSI components. We next used the FindClusters function to iteratively group nuclei together while optimizing modularity using the Louvain algorithm.
+
    - `03_run_scDblFinder.Rmd`. To identify doublets from secondary motor cortex single-nucleus ATAC-seq datasets, we use single-cell RNA-seq doublets detection algorithm Scrublet
 
      > 01A_scATAC-Seq_data_Create_Matrice_Assay_Object_v3.R; 01B_scATAC-Seq_data_Combined_obj_Filter.new_v2.R
-  
-3. `integrative-analysis` module (description="Pipeline for Integrative analysis.", required=True)
 
-   > 02_scATAC-Seq_data_Integration-across-Modalities; 03_scATAC-Seq_data_Integration-across-Modalities_RNA_UMAP.R; 05A_scATAC-Seq_data_Integration-across-Modalities.Subset.Samples.R; 07_scATAC-Seq_data_Integration-across-Samples.Harmony.R; 08_scATAC-Seq_data_Integration-across-Samples.Anchors.R
+
+ 
+3. `integrative-analysis` module (description="Pipeline for Integrative analysis.", required=True)
+- Requires post-processing integration since the RNA and ATAC data come from separate experiments, even if matched at the cell level.
+- The integration is usually performed after the individual data processing, and tools like Seurat’s CCA or Harmony can be used to align the RNA and ATAC datasets.
+- Integration is not as straightforward as in the multiomic pipeline, since the two datasets are processed independently before integration.
+
+  > Tools for Integration:
+    > - Seurat: Seurat can integrate the two datasets via CCA (Canonical Correlation Analysis) or more recent multi-modal integration techniques (for version 4+).
+    > - Harmony: Another integration tool that is commonly used for aligning datasets after normalization.
+    > - 02_scATAC-Seq_data_Integration-across-Modalities; 03_scATAC-Seq_data_Integration-across-Modalities_RNA_UMAP.R; 05A_scATAC-Seq_data_Integration-across-Modalities.Subset.Samples.R; 07_scATAC-Seq_data_Integration-across-Samples.Harmony.R; 08_scATAC-Seq_data_Integration-across-Samples.Anchors.R
  
 
 4. `cell-types-annotation` module (description="Pipeline for annotating cell types.", required=True)
