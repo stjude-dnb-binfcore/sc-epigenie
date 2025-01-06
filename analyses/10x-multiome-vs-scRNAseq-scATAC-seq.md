@@ -41,38 +41,38 @@ This pipeline involves separate processing for each modality (RNA and ATAC), fol
 ### 10x Genomics Multiome
 In the multiomic pipeline, both RNA and ATAC data are collected simultaneously, so the workflow is more integrated. The steps are:
 
-1. Preprocessing:
+1. Preprocessing
 
-- Cells are processed in the same experiment, where both RNA and ATAC data are captured together with unique barcodes for both modalities.
-- The demultiplexing step assigns both the RNA and ATAC data to the same cell barcode.
-- Perform QC on both the RNA and ATAC data. Filtering cells based on both gene counts (for RNA) and peak counts (for ATAC).
+   > - Cells are processed in the same experiment, where both RNA and ATAC data are captured together with unique barcodes for both modalities.
+   > - The demultiplexing step assigns both the RNA and ATAC data to the same cell barcode.
+   > - Perform QC on both the RNA and ATAC data. Filtering cells based on both gene counts (for RNA) and peak counts (for ATAC).
 
-2. Alignment:
+2. Alignment
 
-- RNA-seq: Align RNA reads to the transcriptome using Cell Ranger.
-- ATAC-seq: Align ATAC reads to the genome using Cell Ranger ATAC.
+   > - RNA-seq: Align RNA reads to the transcriptome using Cell Ranger.
+   > - ATAC-seq: Align ATAC reads to the genome using Cell Ranger ATAC.
 
-3. Feature Generation:
+3. Feature Generation
 
-- For RNA, generate the gene expression matrix based on UMIs.
-- For ATAC, generate the chromatin accessibility matrix based on peaks or fragments.
+   > - For RNA, generate the gene expression matrix based on UMIs.
+   > - For ATAC, generate the chromatin accessibility matrix based on peaks or fragments.
 
-4. Normalization and Correction:
+4. Normalization and Correction
 
-- Normalize both RNA and ATAC data.
-- RNA normalization: Normalize the UMI count data, often using library size factors or other methods like log-normalization.
-- ATAC normalization: Normalize the ATAC data for sequencing depth, peak distribution, and cell-specific biases.
+   > - Normalize both RNA and ATAC data.
+   > - RNA normalization: Normalize the UMI count data, often using library size factors or other methods like log-normalization.
+   > - ATAC normalization: Normalize the ATAC data for sequencing depth, peak distribution, and cell-specific biases.
 
-5. Integration:
+5. Integration
 
-- Multiomic integration is performed using methods like Seurat (multi-modal integration), which allows both RNA and ATAC data to be jointly analyzed and integrated based on shared cell barcodes.
-- Dimensionality reduction (e.g., PCA, UMAP, t-SNE) can be done on the multi-modal data.
-- The analysis also integrates information from both RNA and ATAC-seq to reveal coordinated changes in gene expression and chromatin accessibility.
+   > - Multiomic integration is performed using methods like Seurat (multi-modal integration), which allows both RNA and ATAC data to be jointly analyzed and integrated based on shared cell barcodes.
+   > - Dimensionality reduction (e.g., PCA, UMAP, t-SNE) can be done on the multi-modal data.
+   > - The analysis also integrates information from both RNA and ATAC-seq to reveal coordinated changes in gene expression and chromatin accessibility.
 
-6. Analysis:
+6. Analysis
 
-- Like the scATAC + scRNA-seq pipeline, clustering can be done based on both transcriptomic and epigenomic features.
-- However, the major advantage is that the data are already matched at the cell level, so the analysis of joint gene expression and chromatin accessibility is more streamlined and integrated.
+   > - Like the scATAC + scRNA-seq pipeline, clustering can be done based on both transcriptomic and epigenomic features.
+   > - However, the major advantage is that the data are already matched at the cell level, so the analysis of joint gene expression and chromatin accessibility is more streamlined and integrated.
 
 
 ## Advantages & Disadvantages
