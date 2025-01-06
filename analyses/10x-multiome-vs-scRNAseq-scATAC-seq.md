@@ -27,28 +27,22 @@ This pipeline involves separate processing for each modality (RNA and ATAC), fol
 
 1. Preprocessing of scRNA-seq:
 
-- Demultiplex and assign RNA reads to cells based on the cell barcodes.
-- Perform quality control (QC) on the RNA data (e.g., filtering low-quality cells based on the number of genes detected, number of UMIs, mitochondrial gene expression).
-- Normalize RNA counts (e.g., TPM, CPM, or using tools like Seurat).
+As described in [sc-rna-seq-snap/analyses/README.md](https://github.com/stjude-dnb-binfcore/sc-rna-seq-snap/tree/main/analyses).
+
 
 2. Preprocessing of scATAC-seq:
 
-- Align ATAC-seq reads to the reference genome (e.g., Bowtie2 or BWA).
-- Identify peaks (regions of open chromatin) using tools like MACS2 or HOMER.
-- Count fragments in these peaks for each cell.
-- Normalize ATAC-seq data for sequencing depth and other biases.
+As described in [./analyses/README.md](https://github.com/stjude-dnb-binfcore/sc-atac-seq/tree/main/analyses).
+
 
 3. Integration:
 
-- After preprocessing, integrate the scRNA-seq and scATAC-seq data.
 - This is typically done using cell barcodes to match RNA and ATAC data at the single-cell level.
 - Use integration methods such as Seurat’s canonical correlation analysis (CCA) or Harmony to link RNA and ATAC data and align the datasets in a common space.
 
-4. Analysis:
+See also [./analyses/README.md](https://github.com/stjude-dnb-binfcore/sc-atac-seq/tree/main/analyses).
 
-- Dimensionality reduction (PCA, UMAP) is performed separately for the RNA and ATAC data, and then integrated.
-- Identify cell-type clusters based on both transcriptomic and epigenomic features.
-- Analyze the relationship between gene expression and chromatin accessibility. For example, look for cis-regulatory elements that correlate with gene expression changes.
+
 
 ### 10x Genomics Multiome
 In the multiomic pipeline, both RNA and ATAC data are collected simultaneously, so the workflow is more integrated. The steps are:
@@ -111,9 +105,9 @@ Additionally, nuclei isolation is mandatory for 10x Multiome because it is a req
 A workaround is to combine a standalone whole-cell scRNA-seq experiment with a standalone (single-nuclei) ATAC-seq experiment by dividing the sample for two separate analyses.
 
 ## 10x Genomics Multiome versus standalone scATAC-seq
-Compared to standalone scATAC-seq, 10x Multiome is currently outperformed in terms of sensitivity and library complexity. In a systematic benchmark study on peripheral blood mononuclear cells (De Rop et al., 2023), 10x Multiome produced half the unique fragment peaks as the most advanced 10x Single Cell ATAC protocol.
+Compared to standalone scATAC-seq, 10x Genomics Multiome is currently outperformed in terms of sensitivity and library complexity. In a systematic benchmark study on peripheral blood mononuclear cells (De Rop et al., 2023), 10x Genomics Multiome produced half the unique fragment peaks as the most advanced 10x Single Cell ATAC protocol.
 
-The study reports that 10x Multiome results in additional costs while it is less sensitive and efficient in sequencing that standalone scATAC-seq. This has to be taken into account in designs for which scATAC-seq is the primary focus of a study. For these designs, 10x Genomics Single Cell ATAC may be the preferred option.
+The study reports that 10x Genomics Multiome results in additional costs while it is less sensitive and efficient in sequencing that standalone scATAC-seq. This has to be taken into account in designs for which scATAC-seq is the primary focus of a study. For these designs, 10x Genomics Single Cell ATAC may be the preferred option.
 
 
 # 10x Genomics Multiome: A Guide to research questions, pipeline design, and analyses modules
