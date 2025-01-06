@@ -80,6 +80,8 @@ To characterize the cell landscape of the tissue at single cell resolution. Ques
   > scATAcat is a tool for annotation of cell-types in scATAC-seq data based on characterized bulk ATAC-seq data.
 
 
+- [MPG Primer: Understand Single Cell ATAC-Seq Data Analysis (2024)](https://www.youtube.com/watch?v=sUq4yTIJqvk&ab_channel=BroadInstitute)
+- [Introduction to single cell ATAC data analysis in R](https://www.youtube.com/watch?v=e2396GKFMRY&ab_channel=Sanbomics)
 
 ---------------------------------------------------------------------------------------
 

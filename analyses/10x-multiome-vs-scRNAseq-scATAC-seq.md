@@ -1,5 +1,6 @@
 # 10x Genomics Multiome vs. 10x matched scRNA-seq and scATAC-seq
 
+Multiome is a term for using different assays to probe different features in a biological space. The 10x Genomics Multiome kit directly combines scRNA-seq to look at gene expression and scATAC-seq to look at chromatin accessibility in the exact same cell.
 
 The processing of 10x scATAC-seq with matched scRNA-seq versus the 10x multiomic pipeline (which combines both scRNA-seq and scATAC-seq in a single experiment) differs in how the data is generated, processed, and integrated. Both pipelines aim to analyze transcriptomic and epigenomic data at the single-cell level, but they have different workflows and considerations due to the way the data is handled.
 
@@ -150,7 +151,12 @@ The study reports that 10x Genomics Multiome results in additional costs while i
 As described in [sc-rna-seq-snap/analyses/README.md](https://github.com/stjude-dnb-binfcore/sc-rna-seq-snap/tree/main/analyses) and [sc-atac-seq/analyses/README.md](https://github.com/stjude-dnb-binfcore/sc-atac-seq/tree/main/analyses).
 
 #### 10x Genomics Multiome
-- CellRanger-arc count
+- CellRanger-arc count. This step will:
+   a. Demultiplex the modalities
+   b. Pass demultiplex QC?
+   c. Obtain counts with CellRanger
+   d. Pass CellRanger QC?
+
   > Sequencing read alignments of snATAC-seq and snMultiome-seq: To process sequenced snATAC-seq and snMutiome-seq data, we used the CellRanger-atac count (v.2.0, 10x Genomics) and CellRanger-arc count (v.2.0, 10x Genomics) pipelines, respectively. 
 
 ### 2. `upstream-analysis` module (description="Pipeline for estimating QC metrics and filtering low quality cells.", required=True)
