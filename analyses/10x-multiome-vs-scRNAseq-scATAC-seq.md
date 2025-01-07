@@ -19,9 +19,11 @@ The processing of 10x scATAC-seq with matched scRNA-seq versus the 10x multiomic
 - A more integrated experimental design, where both the RNA and ATAC data are collected at the same time, meaning that both types of data share the exact same cell-level barcodes. This allows linking the RNA data to the chromatin accessibility data for the same cell. Cells are processed in two distinct channels and the matching of barcodes (and cells) allows the integration of the data afterward.
 
 **2. Data Processing Workflow**
+
 The pipelines for scATAC-seq with matched scRNA-seq and 10x multiomic data follow different paths in terms of data processing, integration, and analysis.
 
 **10x matched scRNA-seq and scATAC-seq**
+
 This pipeline involves separate processing for each modality (RNA and ATAC), followed by the integration of the results. The steps are:
 
 1. Preprocessing of scRNA-seq. As described in [sc-rna-seq-snap/analyses/README.md](https://github.com/stjude-dnb-binfcore/sc-rna-seq-snap/tree/main/analyses).
@@ -34,6 +36,7 @@ This pipeline involves separate processing for each modality (RNA and ATAC), fol
 
 
 **10x Genomics Multiome**
+
 In the multiomic pipeline, both RNA and ATAC data are collected simultaneously, so the workflow is more integrated. The steps are:
 
 1. Preprocessing
@@ -106,7 +109,7 @@ In the multiomic pipeline, both RNA and ATAC data are collected simultaneously, 
 
 9. How do conditions influence regulatory elements and downstream pathways?
 
-
+---------------------------------------------------------------------------------------
 **Methods**
 
 [Signac package](https://stuartlab.org/signac/)
@@ -119,6 +122,7 @@ In the multiomic pipeline, both RNA and ATAC data are collected simultaneously, 
 
 [Joint RNA and ATAC analysis: SNARE-seq](https://stuartlab.org/signac/articles/snareseq)
 
+---------------------------------------------------------------------------------------
 
 **Analysis modules**
 

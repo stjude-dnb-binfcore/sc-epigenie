@@ -21,14 +21,14 @@ To characterize the cell landscape of the tissue at single cell resolution. Ques
   - Chromatin accessibility in the brain of X condition.
   - Chromatin accessibility in the brain of X condition per cell type.
 
-
+---------------------------------------------------------------------------------------
 **Methods**
 
 [Signac package](https://stuartlab.org/signac/)
 
 [Signac and Seurat vignette](https://satijalab.org/seurat/articles/seurat5_atacseq_integration_vignette)
 
-
+---------------------------------------------------------------------------------------
 **Analysis modules**
 
 Each module is self-contained and can be executed independently or as part of a larger analysis pipeline. Below is a summary of each analysis module, including whether they are required or optional. Furthermore, the analysis modules should be run in the following recommended order:
@@ -61,7 +61,6 @@ Each module is self-contained and can be executed independently or as part of a 
    - `03_run_scDblFinder.Rmd`. To identify doublets from secondary motor cortex single-nucleus ATAC-seq datasets, we use single-cell RNA-seq doublets detection algorithm Scrublet
 
      > 01A_scATAC-Seq_data_Create_Matrice_Assay_Object_v3.R; 01B_scATAC-Seq_data_Combined_obj_Filter.new_v2.R
-
 
  
 3. `integrative-analysis` module (description="Pipeline for Integrative analysis.", required=True)
@@ -118,6 +117,7 @@ Each module is self-contained and can be executed independently or as part of a 
    - Pseudo-Trajectory: Use tools like Monocle or Slingshot to reconstruct cellular differentiation trajectories based on chromatin accessibility. This allows the identification of chromatin dynamics during transitions from one cell state to another (e.g., stem cell differentiation, immune response activation).
    - Cell Fate Decisions: Track changes in chromatin accessibility that correlate with specific stages of differentiation or responses to stimuli.
 
+---------------------------------------------------------------------------------------
 
 ## References
 
