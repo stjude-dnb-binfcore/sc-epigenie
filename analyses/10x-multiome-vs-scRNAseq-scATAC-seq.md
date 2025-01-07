@@ -11,14 +11,12 @@ The processing of 10x scATAC-seq with matched scRNA-seq versus the 10x multiomic
 ### 10x matched scRNA-seq and scATAC-seq
 
 - In this setup, two separate experiments (or assays) are performed: one for scATAC-seq and one for scRNA-seq.
-- These are matched data because each cell in the scRNA-seq experiment is identified in the scATAC-seq experiment, usually by using the same cell barcode. This allows linking the RNA data to the chromatin accessibility data for the same cell.
-- Cells are processed in two distinct channels and the matching of barcodes (and cells) allows the integration of the data afterward.
+- These are matched data because some cells from the same sample are used for the scRNA-seq experiment and some for the scATAC-seq experiment.
 
 ### 10x Genomics Multiome
 
 - The multiomic approach uses a single experiment where both scRNA-seq and scATAC-seq are captured from the same set of cells in a single run. It uses a combined protocol with unique barcodes for both RNA and ATAC-seq, enabling simultaneous profiling of both transcriptomic and epigenomic features.
-- A more integrated experimental design, where both the RNA and ATAC data are collected at the same time, meaning that both types of data share the exact same cell-level barcodes.
-
+- A more integrated experimental design, where both the RNA and ATAC data are collected at the same time, meaning that both types of data share the exact same cell-level barcodes. This allows linking the RNA data to the chromatin accessibility data for the same cell. Cells are processed in two distinct channels and the matching of barcodes (and cells) allows the integration of the data afterward.
 
 ## 2. Data Processing Workflow
 The pipelines for scATAC-seq with matched scRNA-seq and 10x multiomic data follow different paths in terms of data processing, integration, and analysis.
