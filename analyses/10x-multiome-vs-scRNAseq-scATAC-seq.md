@@ -126,13 +126,10 @@ In the multiomic pipeline, both RNA and ATAC data are collected simultaneously, 
 ### 1. `cellranger-analysis` module (description="Pipeline for running and summarizing Cell Ranger count for single or multiple libraries.", required=True)
 
 #### 10x matched scRNA-seq and scATAC-seq
-
-As described in [sc-rna-seq-snap/analyses/README.md](https://github.com/stjude-dnb-binfcore/sc-rna-seq-snap/tree/main/analyses) and [sc-atac-seq/analyses/README.md](https://github.com/stjude-dnb-binfcore/sc-atac-seq/tree/main/analyses).
+- As described in [sc-rna-seq-snap/analyses/README.md](https://github.com/stjude-dnb-binfcore/sc-rna-seq-snap/tree/main/analyses) and [sc-atac-seq/analyses/README.md](https://github.com/stjude-dnb-binfcore/sc-atac-seq/tree/main/analyses).
 
 #### 10x Genomics Multiome
-- CellRanger-arc count. This step will: (a) Demultiplex the modalities; (b) Pass demultiplex QC; (c) Obtain counts with CellRanger; and (d) Pass CellRanger QC
-
-  > Sequencing read alignments of snATAC-seq and snMultiome-seq: To process sequenced snATAC-seq and snMutiome-seq data, we used the CellRanger-atac count (v.2.0, 10x Genomics) and CellRanger-arc count (v.2.0, 10x Genomics) pipelines, respectively. 
+- CellRanger-arc count. This step will: (a) Demultiplex the modalities; (b) Pass demultiplex QC; (c) Obtain counts with CellRanger; and (d) Pass CellRanger QC.
 
 ### 2. `upstream-analysis` module (description="Pipeline for estimating QC metrics and filtering low quality cells.", required=True)
 
