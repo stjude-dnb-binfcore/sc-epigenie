@@ -76,7 +76,7 @@ In the multiomic pipeline, both RNA and ATAC data are collected simultaneously, 
 |  | Allows you to use existing pipelines for scRNA-seq and scATAC-seq separately, which may be advantageous if you need specialized tools for each modality. | Simultaneous profiling: You capture both the transcriptome and the epigenome in a single experiment, reducing potential mismatches or batch effects. |
 | Disadvantages | Requires a post-processing integration step, which can be more challenging and may introduce potential mismatches or biases. | Less flexibility: You must use the tools and workflows that are compatible with the 10x multiomic platform (e.g., Cell Ranger and Seurat). |
 |  | Separate experiments can sometimes lead to technical inconsistencies. | Requires a large amount of sequencing depth and high-quality data to capture both. |
-|  |  | nuclei isolation is mandatory for 10x Multiome because it is a requisite for scATAC-seq’s tagmentation step. This contrasts with scRNA-seq, which can be performed on nuclei and whole cells. You can get an idea of how important the whole-cell transcriptome would be for your experiment in our informative blog on single-nucleus RNA sequencing. A workaround is to combine a standalone whole-cell scRNA-seq experiment with a standalone (single-nuclei) ATAC-seq experiment by dividing the sample for two separate analyses. |
+|  |  | Nuclei isolation is mandatory for 10x Multiome because it is a requisite for scATAC-seq’s tagmentation step. This contrasts with scRNA-seq, which can be performed on nuclei and whole cells. You can get an idea of how important the whole-cell transcriptome would be for your experiment in our informative blog on single-nucleus RNA sequencing. A workaround is to combine a standalone whole-cell scRNA-seq experiment with a standalone (single-nuclei) ATAC-seq experiment by dividing the sample for two separate analyses. |
 |  |  | Compared to standalone scATAC-seq, 10x Genomics Multiome is currently outperformed in terms of sensitivity and library complexity. In a systematic benchmark study on peripheral blood mononuclear cells (De Rop et al., 2023), 10x Genomics Multiome produced half the unique fragment peaks as the most advanced 10x Single Cell ATAC protocol. |
 |  |  | Additional costs while it is less sensitive and efficient in sequencing that standalone scATAC-seq. This has to be taken into account in designs for which scATAC-seq is the primary focus of a study. For these designs, 10x Genomics Single Cell ATAC may be the preferred option. |
 
@@ -130,35 +130,25 @@ In the multiomic pipeline, both RNA and ATAC data are collected simultaneously, 
 As described in [sc-rna-seq-snap/analyses/README.md](https://github.com/stjude-dnb-binfcore/sc-rna-seq-snap/tree/main/analyses) and [sc-atac-seq/analyses/README.md](https://github.com/stjude-dnb-binfcore/sc-atac-seq/tree/main/analyses).
 
 #### 10x Genomics Multiome
-- CellRanger-arc count. This step will:
-   a. Demultiplex the modalities
-   b. Pass demultiplex QC?
-   c. Obtain counts with CellRanger
-   d. Pass CellRanger QC?
+- CellRanger-arc count. This step will: (a) Demultiplex the modalities; (b) Pass demultiplex QC; (c) Obtain counts with CellRanger; and (d) Pass CellRanger QC
 
   > Sequencing read alignments of snATAC-seq and snMultiome-seq: To process sequenced snATAC-seq and snMutiome-seq data, we used the CellRanger-atac count (v.2.0, 10x Genomics) and CellRanger-arc count (v.2.0, 10x Genomics) pipelines, respectively. 
 
 ### 2. `upstream-analysis` module (description="Pipeline for estimating QC metrics and filtering low quality cells.", required=True)
 
 #### 10x matched scRNA-seq and scATAC-seq
-
-As described in [sc-rna-seq-snap/analyses/README.md](https://github.com/stjude-dnb-binfcore/sc-rna-seq-snap/tree/main/analyses) and [sc-atac-seq/analyses/README.md](https://github.com/stjude-dnb-binfcore/sc-atac-seq/tree/main/analyses).
+- As described in [sc-rna-seq-snap/analyses/README.md](https://github.com/stjude-dnb-binfcore/sc-rna-seq-snap/tree/main/analyses) and [sc-atac-seq/analyses/README.md](https://github.com/stjude-dnb-binfcore/sc-atac-seq/tree/main/analyses).
 
 #### 10x Genomics Multiome
 - Quality control, normalization, feature selection, dimensionality reduction and clustering of snMutiome-seq data
   > For snMultiome-seq data containing profiles of both snRNA- and snATAC-seq data, we first performed separate processing and filtering of cells using the same steps as were described for the processing of separate sc/snRNA-seq and snATAC-seq assays. To obtain the final list of barcodes, we retained the cells that passed the quality control filters in both the snRNA- and snATAC-seq assays. In the result, we obtained filtered gene- and peak-count matrices for the same set of cells. We then performed TF-IDF normalization of the peak-count matrix, followed by LSI dimensionality reduction using the RunTFIDF and RunSVD Signac functions. For normalization and dimensionality reduction of the gene-count matrix, we used the SCTransform and RunPCA functions of Seurat with the same parameters as used for regular sc/snRNA-seq data processing. We next computed the weighted nearest neighbour (WNN) graph with the FindMultiModalNeighbors function using both data modalities. We used 1:30 PCA components from snRNA-seq and 2:30 LSI components from snATAC-seq for this analysis. We performed nonlinear dimensionality reduction of the resulting WNN graph using the RunUMAP function of Seurat. Finally, we obtained clusters with the FindClusters function using the WNN graph, setting the argument algorithm = 3 (SLM).
 
-- Identification of doublets in snATAC-seq and snMultiome-seq samples
-
-- Merging of snATAC-seq data across samples (cohort-level objects)
-
-- Merging of snATAC-seq data across cancers (pan-cancer-level objects)
+#### Identification of doublets in snATAC-seq and snMultiome-seq samples
 
 ### 3. `integrative-analysis` module (description="Pipeline for Integrative analysis.", required=True)
 
 #### 10x matched scRNA-seq and scATAC-seq
-
-As described in [sc-rna-seq-snap/analyses/README.md](https://github.com/stjude-dnb-binfcore/sc-rna-seq-snap/tree/main/analyses) and [sc-atac-seq/analyses/README.md](https://github.com/stjude-dnb-binfcore/sc-atac-seq/tree/main/analyses).
+- As described in [sc-rna-seq-snap/analyses/README.md](https://github.com/stjude-dnb-binfcore/sc-rna-seq-snap/tree/main/analyses) and [sc-atac-seq/analyses/README.md](https://github.com/stjude-dnb-binfcore/sc-atac-seq/tree/main/analyses).
 
 #### 10x Genomics Multiome
 - Inherently integrated since both RNA and ATAC data are generated from the same cells in a single experiment.
@@ -171,8 +161,7 @@ As described in [sc-rna-seq-snap/analyses/README.md](https://github.com/stjude-d
 
 
 ### 4. `cell-types-annotation` module (description="Pipeline for annotating cell types.", required=True)
-
-Cell type annotation of snATAC-seq and snMultiome-seq data.
+- Cell type annotation of snATAC-seq and snMultiome-seq data.
 
 ### 5. `peak-calling` module (description="Pipeline for calling peaks and Motif Enrichment Analysis.", required=False)
 
