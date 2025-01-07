@@ -16,7 +16,7 @@ Multiome Retina	DYE_7763	245790	2294836	10x ATAC (multiome)	10x	ATAC	yes	P0 Reti
 Multiome Retina	DYE_7764	245790	2294837	10x ATAC (multiome)	10x	ATAC	yes	E14.5 Retina	nucleus	age	mouse
 More Retina	DYE_2874	163737	1883585	10x ATAC	10x	ATAC	no	E14.5 Retina	cell	age	mouse
 More Retina	DYE_2875	163737	1883586	10x ATAC	10x	ATAC	no	E14.5 Retina	cell	age	mouse
-More Retina	DYE_2525	157682	1657575	10x RNA	10x	RNA	no	E14.5	cell	age	mouse
+More Retina	DYE_2525	157682	1657575	10x RNA	10x	RNA	no	E14.5 Retina	cell	age	mouse
 More Retina	DYE_2603	163737	1721277	10x ATAC	10x	ATAC	no	NRL Dep	cell	unknown	mouse
 More Retina	DYE_2597	163734	1721257	10x RNA	10x	RNA	no	NRL Dep	cell	unknown	mouse
 More Retina	DYE_2478	152367	NA	10x ATAC	10x	ATAC	no	Retina	cell	unknown	mouse

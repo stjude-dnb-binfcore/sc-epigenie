@@ -37,17 +37,17 @@ header-includes:
 params:
   root_dir: './'
   metadata_dir: './'
-  PROJECT_NAME: './'
-  PI_NAME: './'
-  TASK_ID: './'
-  PROJECT_LEAD_NAME: './'
-  DEPARTMENT: './'
-  LEAD_ANALYSTS: './'
-  GROUP_LEAD: './'
-  CONTACT_EMAIL: './'
-  PIPELINE: './'
-  START_DATE: './'
-  COMPLETION_DATE: './'
+  PROJECT_NAME: '.'
+  PI_NAME: '.'
+  TASK_ID: '.'
+  PROJECT_LEAD_NAME: '.'
+  DEPARTMENT: '.'
+  LEAD_ANALYSTS: '.'
+  GROUP_LEAD: '.'
+  CONTACT_EMAIL: '.'
+  PIPELINE: '.'
+  START_DATE: '.'
+  COMPLETION_DATE: '.'
 ---
 
 ```{r logo-file, echo=FALSE}
@@ -124,9 +124,9 @@ Reviewed by: _____________________   Date: ____________ \
   
 
 # Information about this notebook
-This is an exploratory analysis of the data in the project. We are investigating number of samples overall per condition and variables as defined in the `params`.
+This is an exploratory analysis of the data available for the testing phase for the `sc-atac-seq` pipeline(s). We are investigating number of samples overall per condition and variables as defined in the `params`.
 
-We are looking for cohorts that fit the following criteria.
+We are looking for cohorts that fit the following criteria as described in the [./analyses/README.md](https://github.com/stjude-dnb-binfcore/sc-atac-seq/tree/main/analyses).
 
   - Control vs condition (min. 3+3 samples)
   - Number of cells/sample - size of datasets might determined packages/pipelines to be used
@@ -194,11 +194,9 @@ raw_data_df <- read_excel(data_file) %>%
   write_tsv(file.path(input_dir, "cohorts_10x_rna_atac_testing_phase_not_processed.tsv"))
 ```
 
-
 # Read processed data file
 
 ```{r read-processed-data, include=FALSE, echo=TRUE}
-#df <- readr::read_tsv(v12_file, guess_max = 100000, show_col_types = FALSE) %>%
 df_processed <- raw_data_df %>%
   
   # Add metadata
@@ -213,6 +211,7 @@ df_processed <- raw_data_df %>%
                               TRUE ~ seq_unit),
          Sample = case_when(grepl("6wk Cerebellum", Sample) ~ "6 week cerebellum",
                             grepl("P0 Cerebellum,", Sample) ~ "P0 cerebellum",
+                            grepl("E14.5", Sample) ~ "E14.5 Retina",
                             TRUE ~ Sample),
          
          # Add condition col
@@ -224,20 +223,23 @@ df_processed <- raw_data_df %>%
   write_tsv(file.path(results_dir, "cohorts_10x_rna_atac_testing_phase_2024-12-17.tsv"))
 ```
 
-# Read Jackie data file (2025-01-03) and update table
+# Update processed data file by Jackie Norrie on 2025-01-03
 
-```{r read-jackie-data, include=FALSE, echo=TRUE}
+This is the `cohorts_10x_rna_atac_testing_phase_2024-12-17.tsv` file updated by Jackie Norrie on 2025-01-03 to fix empty cells and/or inconsistencies.
+
+```{r read-updated-processed-data, include=FALSE, echo=TRUE}
 df_processed_select <- df_processed %>%
   select(!c(SRM_id, SRM_Sample_id, seq_unit, condition))
 
-# Read data
+# Read and process data
 df_processed <- read_excel(jackie_data_file) %>%
   select(DYE, SRM_id, SRM_Sample_id, seq_unit, condition) %>%
   right_join(df_processed_select, by = join_by(DYE)) %>%
   mutate(seq_technology = case_when(grepl("RNA", assay) ~ "10Xv3",
                                     grepl("ATAC", assay) ~ "10Xv2"),
          seq_technology = case_when(grepl("yes", multiome_10x) ~ "10X",
-                                    TRUE ~ seq_technology)) %>%
+                                    TRUE ~ seq_technology),
+         seq_technology_assay = paste(seq_technology, assay, sep = "_"),) %>%
   select(experiment, everything()) %>%
   
   # Add tissue/location information
@@ -249,7 +251,6 @@ df_processed <- read_excel(jackie_data_file) %>%
 ```
 
 
-
 # 10x matched scRNA-seq and scATAC-seq cohort
 
 ```{r cohort-10x, include=FALSE, echo=TRUE}
@@ -259,7 +260,7 @@ df <- df_processed %>%
 
 ## Type of sequencing assay and unit
 
-We should investigate if there are samples from two different sequencing technologies and unit.
+We should investigate if there are samples from different sequencing technologies and unit.
 
 ```{r cohort-10x-assay-unit-sc, include=FALSE, echo=TRUE}
 # Was nucleus or whole cell used for the sequencing?
@@ -269,10 +270,10 @@ seq_unit_samples <- unique(df$seq_unit)
 assay_samples <- unique(df$assay)
 
 # What type of seq_technology was used?
-seq_technology_samples <- unique(df$seq_technology)
+seq_technology_assay_samples <- unique(df$seq_technology_assay)
 ```
 
-Single cell sequencing was done by using `r seq_unit_samples` and there are `r assay_samples` and `r seq_technology_samples` sequencing technologies in the database. Cohort is formed and processed accordingly. 
+Single cell sequencing was done by using `r seq_unit_samples` and there are `r seq_technology_assay_samples` sequencing technologies and assays in the database. Cohort is formed and processed accordingly. 
 
 ## Number of samples per experiment
 
@@ -300,12 +301,12 @@ cat("  \n</div>  \n")
 cat("  \n\\pagebreak  \n")
 ```
 
-## Number of samples per experiment, tissue, seq_unit, assay, condition, and sample
+## Number of samples per experiment, tissue, seq_unit, seq_technology_assay, condition, and sample
 
 ```{r, fig.align = "left", results = "asis", message = FALSE, warning = FALSE, echo = FALSE}
-tables1 <- df %>% count(experiment, tissue, seq_unit, assay, seq_technology, condition, Sample)
+tables1 <- df %>% count(experiment, tissue, seq_unit, seq_technology_assay, condition, Sample)
 cat("  \n<div style=\"font-size:80%\">  \n")
-caption_value = "Summary of samples per experiment, tissue, seq_unit, assay, seq_technology, condition, and Sample"
+caption_value = "Summary of samples per experiment, tissue, seq_unit, seq_technology_assay, condition, and Sample"
 
 print(knitr::kable(tables1, align = "lcccc", caption = caption_value))
 cat("  \n</div>  \n")
@@ -332,10 +333,10 @@ seq_unit_samples <- unique(df$seq_unit)
 assay_samples <- unique(df$assay)
 
 # What type of seq_technology was used?
-seq_technology_samples <- unique(df$seq_technology)
+seq_technology_assay_samples <- unique(df$seq_technology_assay)
 ```
 
-Single cell sequencing was done by using `r seq_unit_samples` and there are `r assay_samples` and `r seq_technology_samples` sequencing technologies in the database. Cohort is formed and processed accordingly. 
+Single cell sequencing was done by using `r seq_unit_samples` and there are `r seq_technology_assay_samples` sequencing technologies and assays in the database. Cohort is formed and processed accordingly. 
 
 ## Number of samples per experiment
 
@@ -363,12 +364,12 @@ cat("  \n</div>  \n")
 cat("  \n\\pagebreak  \n")
 ```
 
-## Number of samples per experiment, tissue, seq_unit, assay, seq_technology, condition, and sample
+## Number of samples per experiment, tissue, seq_unit, seq_technology_assay, condition, and sample
 
 ```{r, fig.align = "left", results = "asis", message = FALSE, warning = FALSE, echo = FALSE}
-tables1 <- df %>% count(experiment, tissue, seq_unit, assay, seq_technology, condition, Sample)
+tables1 <- df %>% count(experiment, tissue, seq_unit, seq_technology_assay, condition, Sample)
 cat("  \n<div style=\"font-size:80%\">  \n")
-caption_value = "Summary of samples per experiment, tissue, seq_unit, assay, seq_technology, condition, and Sample"
+caption_value = "Summary of samples per experiment, tissue, seq_unit, seq_technology_assay, condition, and Sample"
 
 print(knitr::kable(tables1, align = "lcccc", caption = caption_value))
 cat("  \n</div>  \n")
@@ -383,6 +384,11 @@ I have identified the following datasets that almost fit the criteria for the te
   
   - **10x Genomics Multiome**: `Multiome Retina` experiment with 1 replicate/age group (3 samples for 10x RNA (Multiome) + 3 samples for 10x ATAC (multiome).
 
+
+# References
+
+- `More Retina` experiment published by [Norrie et al., 2025](https://doi.org/10.1016/j.devcel.2024.12.014).
+- `Victoria Knockout` experiment published by [Honnell et al., 2022](https://www.nature.com/articles/s41467-021-27924-y#Sec13).
 
 
 ```{r echo=FALSE}
