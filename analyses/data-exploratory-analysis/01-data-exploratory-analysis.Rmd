@@ -223,9 +223,9 @@ df_processed <- raw_data_df %>%
   write_tsv(file.path(results_dir, "cohorts_10x_rna_atac_testing_phase_2024-12-17.tsv"))
 ```
 
-# Update processed data file by Jackie Norrie on 2025-01-03
+# Update processed data file per our conversation with Jackie Norrie
 
-This is the `cohorts_10x_rna_atac_testing_phase_2024-12-17.tsv` file updated by Jackie Norrie on 2025-01-03 to fix empty cells and/or inconsistencies.
+This is the `cohorts_10x_rna_atac_testing_phase_2024-12-17.tsv` file updated per our conversation with Jackie Norrie to fix empty cells and/or inconsistencies.
 
 ```{r read-updated-processed-data, include=FALSE, echo=TRUE}
 df_processed_select <- df_processed %>%
@@ -245,7 +245,13 @@ df_processed <- read_excel(jackie_data_file) %>%
   # Add tissue/location information
   mutate(tissue = case_when(grepl("Retina", experiment) ~ "Retina",
                             grepl("Cerebellum", experiment) ~ "Cerebellum",
-                            grepl("Victoria Knockout", experiment) ~ "Retina")) %>%
+                            grepl("Victoria Knockout", experiment) ~ "Retina"),
+         matched_sample_info = case_when(grepl("Cerebellum", experiment) ~ "same-mouse-same-tissue",
+                                         grepl("Multiome Retina", experiment) ~ "same-mouse-same-tissue",
+                                         grepl("More Retina", experiment) ~ "different-mouse-same-tissue-same-age",
+                                         grepl("Victoria Knockout", experiment) ~ "same-mouse-same-tissue",
+                                         grepl("Stressed Retina", experiment) ~ "same-mouse-same-tissue"),
+         wet_lab_info = case_when(grepl("DYE_4687", DYE) ~ "done later, not enough high quality cells in DYE2873")) %>%
   # save data 
   write_tsv(file.path(results_dir, glue::glue("cohorts_10x_rna_atac_testing_phase_{Sys.Date()}.tsv")))
 ```
@@ -255,7 +261,8 @@ df_processed <- read_excel(jackie_data_file) %>%
 
 ```{r cohort-10x, include=FALSE, echo=TRUE}
 df <- df_processed %>%
-  filter(multiome_10x == "no")
+  filter(multiome_10x == "no",
+         !matched_sample_info == "different-mouse-same-tissue-same-age")
 ```
 
 ## Type of sequencing assay and unit
@@ -387,7 +394,7 @@ I have identified the following datasets that almost fit the criteria for the te
 
 # References
 
-- `More Retina` experiment published by [Norrie et al., 2025](https://doi.org/10.1016/j.devcel.2024.12.014).
+- `More Retina` and `Stressed retina` experiments published by [Norrie et al., 2025](https://doi.org/10.1016/j.devcel.2024.12.014).
 - `Victoria Knockout` experiment published by [Honnell et al., 2022](https://www.nature.com/articles/s41467-021-27924-y#Sec13).
 
 
