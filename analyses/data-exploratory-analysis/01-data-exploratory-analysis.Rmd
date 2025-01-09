@@ -286,9 +286,8 @@ Single cell sequencing was done by using `r seq_unit_samples` and there are `r s
 
 ```{r, fig.align = "left", results = "asis", message = FALSE, warning = FALSE, echo = FALSE}
 tables1 <- df %>% count(experiment)
-cat("  \n<div style=\"font-size:80%\">  \n")
+cat("  \n<div align=\"center\" style=\"font-size:80%\">  \n")
 caption_value = "Summary of samples per experiment"
-
 print(knitr::kable(tables1, align = "lcccc", caption = caption_value))
 cat("  \n</div>  \n")
 cat("  \n\\pagebreak  \n")
@@ -299,9 +298,8 @@ Here, we investigate the number of libraries per assay, i.e., `seq_technology_as
 
 ```{r, fig.align = "left", results = "asis", message = FALSE, warning = FALSE, echo = FALSE}
 tables1 <- df %>% count(experiment, tissue, condition, Sample, seq_unit, seq_technology_assay)
-cat("  \n<div style=\"font-size:80%\">  \n")
+cat("  \n<div align=\"center\" style=\"font-size:80%\">  \n")
 caption_value = "Number of samples per seq_technology_assay"
-
 print(knitr::kable(tables1, align = "lcccc", caption = caption_value))
 cat("  \n</div>  \n")
 cat("  \n\\pagebreak  \n")
@@ -320,9 +318,8 @@ tables1 <- df %>%
   #select(experiment, tissue, condition, Sample, seq_unit, seq_technology_assay, seq_technology_assay_sum) %>%
   select(experiment, tissue, condition, Sample, seq_unit, seq_technology_assay) %>%
   group_by() 
-cat("  \n<div style=\"font-size:80%\">  \n")
+cat("  \n<div align=\"center\" style=\"font-size:80%\">  \n")
 caption_value = "Summary of samples"
-
 print(knitr::kable(tables1, align = "lcccc", caption = caption_value))
 cat("  \n</div>  \n")
 cat("  \n\\pagebreak  \n")
@@ -355,9 +352,8 @@ Single cell sequencing was done by using `r seq_unit_samples` and there are `r s
 
 ```{r, fig.align = "left", results = "asis", message = FALSE, warning = FALSE, echo = FALSE}
 tables1 <- df %>% count(experiment)
-cat("  \n<div style=\"font-size:80%\">  \n")
+cat("  \n<div align=\"center\" style=\"font-size:80%\">  \n")
 caption_value = "Summary of samples per experiment"
-
 print(knitr::kable(tables1, align = "lcccc", caption = caption_value))
 cat("  \n</div>  \n")
 cat("  \n\\pagebreak  \n")
@@ -368,9 +364,8 @@ Here, we investigate the number of libraries per assay, i.e., `seq_technology_as
 
 ```{r, fig.align = "left", results = "asis", message = FALSE, warning = FALSE, echo = FALSE}
 tables1 <- df %>% count(experiment, tissue, condition, Sample, seq_unit, seq_technology_assay)
-cat("  \n<div style=\"font-size:80%\">  \n")
+cat("  \n<div align=\"center\" style=\"font-size:80%\">  \n")
 caption_value = "Number of samples per seq_technology_assay"
-
 print(knitr::kable(tables1, align = "lcccc", caption = caption_value))
 cat("  \n</div>  \n")
 cat("  \n\\pagebreak  \n")
@@ -382,9 +377,8 @@ cat("  \n\\pagebreak  \n")
 tables1 <- df %>% 
   select(experiment, tissue, condition, Sample, seq_unit, seq_technology_assay) %>%
   group_by() 
-cat("  \n<div style=\"font-size:80%\">  \n")
+cat("  \n<div align=\"center\" style=\"font-size:80%\">  \n")
 caption_value = "Summary of samples"
-
 print(knitr::kable(tables1, align = "lcccc", caption = caption_value))
 cat("  \n</div>  \n")
 cat("  \n\\pagebreak  \n")

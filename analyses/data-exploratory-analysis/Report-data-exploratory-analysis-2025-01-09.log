@@ -1,4 +1,4 @@
-This is LuaHBTeX, Version 1.18.0 (TeX Live 2024)  (format=lualatex 2024.3.26)  9 JAN 2025 14:37
+This is LuaHBTeX, Version 1.18.0 (TeX Live 2024)  (format=lualatex 2024.3.26)  9 JAN 2025 14:43
  restricted system commands enabled.
 **/research_jude/rgs01_jude/dept/DNB/core_operations/Bioinformatics/achroni/Git
 Hub/sc-atac-seq/analyses/data-exploratory-analysis/plots/Report-data-explorator
@@ -1176,7 +1176,7 @@ Here is how much of LuaTeX's memory you used:
    avail lists: 1:2,2:1883,3:938,4:662,5:502,6:298,7:6524,8:69,9:1978,10:10,11:2
 20
  43269 multiletter control sequences out of 65536+600000
- 79 fonts using 24676099 bytes
+ 79 fonts using 24676299 bytes
  90i,15n,121p,1377b,452s stack positions out of 10000i,1000n,20000p,200000b,200000s
 </research/rgs01/applications/hpcf/authorized_apps/rhel8_apps/texlive/install/20
 24/texmf-dist/fonts/opentype/public/lm/lmmono10-italic.otf></research/rgs01/appl
