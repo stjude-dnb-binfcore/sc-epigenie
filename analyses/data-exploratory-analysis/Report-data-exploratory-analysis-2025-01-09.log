@@ -1,4 +1,4 @@
-This is LuaHBTeX, Version 1.18.0 (TeX Live 2024)  (format=lualatex 2024.3.26)  9 JAN 2025 14:43
+This is LuaHBTeX, Version 1.18.0 (TeX Live 2024)  (format=lualatex 2024.3.26)  9 JAN 2025 15:16
  restricted system commands enabled.
 **/research_jude/rgs01_jude/dept/DNB/core_operations/Bioinformatics/achroni/Git
 Hub/sc-atac-seq/analyses/data-exploratory-analysis/plots/Report-data-explorator
@@ -1146,21 +1146,30 @@ Underfull \hbox (badness 10000) in paragraph at lines 179--181
 LaTeX Font Info:    Font shape `TU/lmtt/bx/n' in size <10.95> not available
 (Font)              Font shape `TU/lmtt/b/n' tried instead on input line 206.
 [3]
-Overfull \vbox (2.00626pt too high) detected at line 339
+Overfull \vbox (2.00626pt too high) detected at line 348
  []
 
 [4] [5] [6]
-Overfull \hbox (2.64096pt too wide) in paragraph at lines 432--433
+Overfull \hbox (3.40248pt too wide) in paragraph at lines 445--446
  []\TU/lmr/m/n/10.95 seq_unit 
  []
 
 
-Overfull \hbox (2.64096pt too wide) in paragraph at lines 450--451
+Overfull \hbox (3.40248pt too wide) in paragraph at lines 463--464
  []\TU/lmr/m/n/10.95 seq_unit 
  []
 
-[7] [8] [9] [10] [11] [12] [13] (./Report-data-exploratory-analysis-2025-01-09.
-aux)
+[7]
+Overfull \hbox (0.98517pt too wide) in paragraph at lines 530--531
+ []\TU/lmr/m/n/10.95 seq_unit 
+ []
+
+
+Overfull \hbox (0.98517pt too wide) in paragraph at lines 546--547
+ []\TU/lmr/m/n/10.95 seq_unit 
+ []
+
+[8] [9] [10] [11] [12] [13] (./Report-data-exploratory-analysis-2025-01-09.aux)
  ***********
 LaTeX2e <2023-11-01> patch level 1
 L3 programming layer <2024-03-14>
@@ -1173,11 +1182,11 @@ Here is how much of LuaTeX's memory you used:
  660 words of node memory still in use:
    7 hlist, 2 vlist, 2 rule, 1 local_par, 8 glue, 4 kern, 1 penalty, 3 glyph, 13
  attribute, 66 glue_spec, 13 attribute_list, 1 write, 1 user_defined nodes
-   avail lists: 1:2,2:1883,3:938,4:662,5:502,6:298,7:6524,8:69,9:1978,10:10,11:2
+   avail lists: 1:2,2:2085,3:938,4:702,5:539,6:298,7:7082,8:69,9:1984,10:10,11:2
 20
  43269 multiletter control sequences out of 65536+600000
- 79 fonts using 24676299 bytes
- 90i,15n,121p,1377b,452s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 79 fonts using 24676199 bytes
+ 90i,15n,121p,1377b,399s stack positions out of 10000i,1000n,20000p,200000b,200000s
 </research/rgs01/applications/hpcf/authorized_apps/rhel8_apps/texlive/install/20
 24/texmf-dist/fonts/opentype/public/lm/lmmono10-italic.otf></research/rgs01/appl
 ications/hpcf/authorized_apps/rhel8_apps/texlive/install/2024/texmf-dist/fonts/o
@@ -1198,8 +1207,8 @@ ions/hpcf/authorized_apps/rhel8_apps/texlive/install/2024/texmf-dist/fonts/opent
 ype/public/lm/lmroman12-regular.otf></research/rgs01/applications/hpcf/authorize
 d_apps/rhel8_apps/texlive/install/2024/texmf-dist/fonts/opentype/public/lm/lmrom
 an17-regular.otf>
-Output written on Report-data-exploratory-analysis-2025-01-09.pdf (13 pages, 26
-9671 bytes).
+Output written on Report-data-exploratory-analysis-2025-01-09.pdf (13 pages, 27
+0732 bytes).
 
 PDF statistics: 265 PDF objects out of 1000 (max. 8388607)
  212 compressed objects within 3 object streams

@@ -2965,7 +2965,7 @@ sc-/sn-ATAC-Seq Analysis in 10X Genomics data</p>
 </blockquote>
 <p>Date started: Dec-16-2024<br />
 Date completed: ONGOING<br />
-Report generated: 14:43:07 CST 01/09/2025<br />
+Report generated: 15:15:59 CST 01/09/2025<br />
 </p>
 <p>Reviewed by: _____________________ Date: ____________<br />
 </p>
@@ -3093,11 +3093,20 @@ and/or inconsistencies.</p>
 <span id="cb8-22"><a href="#cb8-22" tabindex="-1"></a>                                         <span class="fu">grepl</span>(<span class="st">&quot;Victoria Knockout&quot;</span>, experiment) <span class="sc">~</span> <span class="st">&quot;same-mouse-same-tissue&quot;</span>,</span>
 <span id="cb8-23"><a href="#cb8-23" tabindex="-1"></a>                                         <span class="fu">grepl</span>(<span class="st">&quot;Stressed Retina&quot;</span>, experiment) <span class="sc">~</span> <span class="st">&quot;same-mouse-same-tissue&quot;</span>),</span>
 <span id="cb8-24"><a href="#cb8-24" tabindex="-1"></a>         <span class="at">wet_lab_info =</span> <span class="fu">case_when</span>(<span class="fu">grepl</span>(<span class="st">&quot;DYE_4687&quot;</span>, DYE) <span class="sc">~</span> <span class="st">&quot;done later, not enough high quality cells in DYE2873&quot;</span>),</span>
-<span id="cb8-25"><a href="#cb8-25" tabindex="-1"></a>         <span class="co">#unique_ID = row_number(),</span></span>
-<span id="cb8-26"><a href="#cb8-26" tabindex="-1"></a>         <span class="at">matched_sample_id =</span> <span class="fu">paste</span>(Sample, assay, <span class="at">sep =</span> <span class="st">&quot;_&quot;</span>)) <span class="sc">%&gt;%</span></span>
-<span id="cb8-27"><a href="#cb8-27" tabindex="-1"></a>    <span class="fu">arrange</span>(experiment, condition, Sample, assay) <span class="sc">%&gt;%</span></span>
-<span id="cb8-28"><a href="#cb8-28" tabindex="-1"></a>  <span class="co"># save data </span></span>
-<span id="cb8-29"><a href="#cb8-29" tabindex="-1"></a>  <span class="fu">write_tsv</span>(<span class="fu">file.path</span>(results_dir, glue<span class="sc">::</span><span class="fu">glue</span>(<span class="st">&quot;cohorts_10x_rna_atac_testing_phase_{Sys.Date()}.tsv&quot;</span>)))</span></code></pre></div>
+<span id="cb8-25"><a href="#cb8-25" tabindex="-1"></a>         </span>
+<span id="cb8-26"><a href="#cb8-26" tabindex="-1"></a>         <span class="co"># to create unique ID per each entry</span></span>
+<span id="cb8-27"><a href="#cb8-27" tabindex="-1"></a>         <span class="at">unique_ID =</span> <span class="fu">row_number</span>(),</span>
+<span id="cb8-28"><a href="#cb8-28" tabindex="-1"></a>         </span>
+<span id="cb8-29"><a href="#cb8-29" tabindex="-1"></a>         <span class="co"># to assign a number per Sample</span></span>
+<span id="cb8-30"><a href="#cb8-30" tabindex="-1"></a>         <span class="at">sample_ID =</span> <span class="fu">dense_rank</span>(Sample),</span>
+<span id="cb8-31"><a href="#cb8-31" tabindex="-1"></a>         </span>
+<span id="cb8-32"><a href="#cb8-32" tabindex="-1"></a>         <span class="co"># to create unique IDs per each sample - there were none in the database. We will use this to identify matched samples per cohort.</span></span>
+<span id="cb8-33"><a href="#cb8-33" tabindex="-1"></a>         <span class="at">matched_samples_ID =</span> <span class="fu">case_when</span>(<span class="fu">grepl</span>(<span class="st">&quot;same-mouse-same-tissue&quot;</span>, matched_sample_info) <span class="sc">~</span> <span class="fu">paste</span>(Sample, sample_ID, <span class="at">sep =</span> <span class="st">&quot;_&quot;</span>),</span>
+<span id="cb8-34"><a href="#cb8-34" tabindex="-1"></a>                                              <span class="fu">grepl</span>(<span class="st">&quot;different-mouse-same-tissue-same-age&quot;</span>, matched_sample_info) <span class="sc">~</span> <span class="fu">paste</span>(Sample, sample_ID, unique_ID, <span class="at">sep =</span> <span class="st">&quot;_&quot;</span>))) <span class="sc">%&gt;%</span></span>
+<span id="cb8-35"><a href="#cb8-35" tabindex="-1"></a>  <span class="fu">add_column</span>(<span class="at">PI =</span> <span class="st">&quot;Dyer&quot;</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb8-36"><a href="#cb8-36" tabindex="-1"></a>  <span class="fu">arrange</span>(experiment, condition, Sample, assay) <span class="sc">%&gt;%</span></span>
+<span id="cb8-37"><a href="#cb8-37" tabindex="-1"></a>  <span class="co"># save data </span></span>
+<span id="cb8-38"><a href="#cb8-38" tabindex="-1"></a>  <span class="fu">write_tsv</span>(<span class="fu">file.path</span>(results_dir, glue<span class="sc">::</span><span class="fu">glue</span>(<span class="st">&quot;cohorts_10x_rna_atac_testing_phase_{Sys.Date()}.tsv&quot;</span>)))</span></code></pre></div>
 <pre><code>## New names:
 ## • `` -&gt; `...12`</code></pre>
 </div>
@@ -3124,10 +3133,14 @@ technologies and unit.</p>
 <span id="cb11-5"><a href="#cb11-5" tabindex="-1"></a>assay_samples <span class="ot">&lt;-</span> <span class="fu">unique</span>(df<span class="sc">$</span>assay)</span>
 <span id="cb11-6"><a href="#cb11-6" tabindex="-1"></a></span>
 <span id="cb11-7"><a href="#cb11-7" tabindex="-1"></a><span class="co"># What type of seq_technology was used?</span></span>
-<span id="cb11-8"><a href="#cb11-8" tabindex="-1"></a>seq_technology_assay_samples <span class="ot">&lt;-</span> <span class="fu">unique</span>(df<span class="sc">$</span>seq_technology_assay)</span></code></pre></div>
+<span id="cb11-8"><a href="#cb11-8" tabindex="-1"></a>seq_technology_assay_samples <span class="ot">&lt;-</span> <span class="fu">unique</span>(df<span class="sc">$</span>seq_technology_assay)</span>
+<span id="cb11-9"><a href="#cb11-9" tabindex="-1"></a></span>
+<span id="cb11-10"><a href="#cb11-10" tabindex="-1"></a><span class="co"># What type of seq_technology was used?</span></span>
+<span id="cb11-11"><a href="#cb11-11" tabindex="-1"></a>PI_samples <span class="ot">&lt;-</span> <span class="fu">unique</span>(df<span class="sc">$</span>PI)</span></code></pre></div>
 <p>Single cell sequencing was done by using nucleus, cell and there are
 10Xv2_ATAC, 10Xv3_RNA sequencing technologies and assays in the
-database. Cohort is formed and processed accordingly.</p>
+database. Samples are generated by the Dyer lab. Cohort is formed and
+processed accordingly.</p>
 </div>
 <div id="number-of-samples-per-experiment" class="section level2" number="7.2">
 <h2><span class="header-section-number">7.2</span> Number of samples per
@@ -3163,15 +3176,16 @@ experiment</h2>
 <h2><span class="header-section-number">7.3</span> Number of samples per
 seq_technology_assay</h2>
 <p>Here, we investigate the number of libraries per assay, i.e.,
-<code>seq_technology_assay</code> and per <code>Sample</code>.</p>
+<code>seq_technology_assay</code> and per
+<code>matched_samples_ID</code>.</p>
 <div align="center" style="font-size:80%">
-<table>
+<table style="width:100%;">
 <caption>Number of samples per seq_technology_assay</caption>
 <colgroup>
 <col width="18%" />
 <col width="12%" />
 <col width="15%" />
-<col width="19%" />
+<col width="21%" />
 <col width="10%" />
 <col width="21%" />
 <col width="3%" />
@@ -3181,7 +3195,7 @@ seq_technology_assay</h2>
 <th align="left">experiment</th>
 <th align="center">tissue</th>
 <th align="center">condition</th>
-<th align="center">Sample</th>
+<th align="center">matched_samples_ID</th>
 <th align="center">seq_unit</th>
 <th align="left">seq_technology_assay</th>
 <th align="center">n</th>
@@ -3192,7 +3206,7 @@ seq_technology_assay</h2>
 <td align="left">Cerebellum</td>
 <td align="center">Cerebellum</td>
 <td align="center">age</td>
-<td align="center">6 week cerebellum</td>
+<td align="center">6 week cerebellum_1</td>
 <td align="center">cell</td>
 <td align="left">10Xv3_RNA</td>
 <td align="center">1</td>
@@ -3201,7 +3215,7 @@ seq_technology_assay</h2>
 <td align="left">Cerebellum</td>
 <td align="center">Cerebellum</td>
 <td align="center">age</td>
-<td align="center">6 week cerebellum</td>
+<td align="center">6 week cerebellum_1</td>
 <td align="center">nucleus</td>
 <td align="left">10Xv2_ATAC</td>
 <td align="center">2</td>
@@ -3210,7 +3224,7 @@ seq_technology_assay</h2>
 <td align="left">Cerebellum</td>
 <td align="center">Cerebellum</td>
 <td align="center">age</td>
-<td align="center">P0 cerebellum</td>
+<td align="center">P0 cerebellum_10</td>
 <td align="center">cell</td>
 <td align="left">10Xv3_RNA</td>
 <td align="center">1</td>
@@ -3219,7 +3233,7 @@ seq_technology_assay</h2>
 <td align="left">Cerebellum</td>
 <td align="center">Cerebellum</td>
 <td align="center">age</td>
-<td align="center">P0 cerebellum</td>
+<td align="center">P0 cerebellum_10</td>
 <td align="center">nucleus</td>
 <td align="left">10Xv2_ATAC</td>
 <td align="center">1</td>
@@ -3228,7 +3242,7 @@ seq_technology_assay</h2>
 <td align="left">Cerebellum</td>
 <td align="center">Cerebellum</td>
 <td align="center">sorted</td>
-<td align="center">ATOH HI</td>
+<td align="center">ATOH HI_2</td>
 <td align="center">cell</td>
 <td align="left">10Xv3_RNA</td>
 <td align="center">1</td>
@@ -3237,7 +3251,7 @@ seq_technology_assay</h2>
 <td align="left">Cerebellum</td>
 <td align="center">Cerebellum</td>
 <td align="center">sorted</td>
-<td align="center">ATOH HI</td>
+<td align="center">ATOH HI_2</td>
 <td align="center">nucleus</td>
 <td align="left">10Xv2_ATAC</td>
 <td align="center">1</td>
@@ -3246,7 +3260,7 @@ seq_technology_assay</h2>
 <td align="left">Cerebellum</td>
 <td align="center">Cerebellum</td>
 <td align="center">sorted</td>
-<td align="center">ATOH Low</td>
+<td align="center">ATOH Low_3</td>
 <td align="center">cell</td>
 <td align="left">10Xv3_RNA</td>
 <td align="center">1</td>
@@ -3255,7 +3269,7 @@ seq_technology_assay</h2>
 <td align="left">Cerebellum</td>
 <td align="center">Cerebellum</td>
 <td align="center">sorted</td>
-<td align="center">ATOH Low</td>
+<td align="center">ATOH Low_3</td>
 <td align="center">nucleus</td>
 <td align="left">10Xv2_ATAC</td>
 <td align="center">1</td>
@@ -3264,7 +3278,7 @@ seq_technology_assay</h2>
 <td align="left">Stressed Retina</td>
 <td align="center">Retina</td>
 <td align="center">LPS Injection</td>
-<td align="center">LPS</td>
+<td align="center">LPS_6</td>
 <td align="center">cell</td>
 <td align="left">10Xv3_RNA</td>
 <td align="center">1</td>
@@ -3273,7 +3287,7 @@ seq_technology_assay</h2>
 <td align="left">Stressed Retina</td>
 <td align="center">Retina</td>
 <td align="center">LPS Injection</td>
-<td align="center">LPS_ATAC</td>
+<td align="center">LPS_ATAC_7</td>
 <td align="center">nucleus</td>
 <td align="left">10Xv2_ATAC</td>
 <td align="center">1</td>
@@ -3282,7 +3296,7 @@ seq_technology_assay</h2>
 <td align="left">Stressed Retina</td>
 <td align="center">Retina</td>
 <td align="center">PBS Injection</td>
-<td align="center">PBS</td>
+<td align="center">PBS_11</td>
 <td align="center">cell</td>
 <td align="left">10Xv3_RNA</td>
 <td align="center">1</td>
@@ -3291,7 +3305,7 @@ seq_technology_assay</h2>
 <td align="left">Victoria Knockout</td>
 <td align="center">Retina</td>
 <td align="center">knock-out</td>
-<td align="center">SEKO_21</td>
+<td align="center">SEKO_21_13</td>
 <td align="center">cell</td>
 <td align="left">10Xv3_RNA</td>
 <td align="center">1</td>
@@ -3300,7 +3314,7 @@ seq_technology_assay</h2>
 <td align="left">Victoria Knockout</td>
 <td align="center">Retina</td>
 <td align="center">knock-out</td>
-<td align="center">SEKO_21</td>
+<td align="center">SEKO_21_13</td>
 <td align="center">nucleus</td>
 <td align="left">10Xv2_ATAC</td>
 <td align="center">1</td>
@@ -3309,7 +3323,7 @@ seq_technology_assay</h2>
 <td align="left">Victoria Knockout</td>
 <td align="center">Retina</td>
 <td align="center">knock-out</td>
-<td align="center">SEKO_25</td>
+<td align="center">SEKO_25_14</td>
 <td align="center">cell</td>
 <td align="left">10Xv3_RNA</td>
 <td align="center">1</td>
@@ -3318,7 +3332,7 @@ seq_technology_assay</h2>
 <td align="left">Victoria Knockout</td>
 <td align="center">Retina</td>
 <td align="center">knock-out</td>
-<td align="center">SEKO_25</td>
+<td align="center">SEKO_25_14</td>
 <td align="center">nucleus</td>
 <td align="left">10Xv2_ATAC</td>
 <td align="center">1</td>
@@ -3327,7 +3341,7 @@ seq_technology_assay</h2>
 <td align="left">Victoria Knockout</td>
 <td align="center">Retina</td>
 <td align="center">wt</td>
-<td align="center">Wt1</td>
+<td align="center">Wt1_15</td>
 <td align="center">cell</td>
 <td align="left">10Xv3_RNA</td>
 <td align="center">1</td>
@@ -3336,7 +3350,7 @@ seq_technology_assay</h2>
 <td align="left">Victoria Knockout</td>
 <td align="center">Retina</td>
 <td align="center">wt</td>
-<td align="center">Wt1</td>
+<td align="center">Wt1_15</td>
 <td align="center">nucleus</td>
 <td align="left">10Xv2_ATAC</td>
 <td align="center">1</td>
@@ -3345,7 +3359,7 @@ seq_technology_assay</h2>
 <td align="left">Victoria Knockout</td>
 <td align="center">Retina</td>
 <td align="center">wt</td>
-<td align="center">Wt2</td>
+<td align="center">Wt2_16</td>
 <td align="center">cell</td>
 <td align="left">10Xv3_RNA</td>
 <td align="center">1</td>
@@ -3354,7 +3368,7 @@ seq_technology_assay</h2>
 <td align="left">Victoria Knockout</td>
 <td align="center">Retina</td>
 <td align="center">wt</td>
-<td align="center">Wt2</td>
+<td align="center">Wt2_16</td>
 <td align="center">nucleus</td>
 <td align="left">10Xv2_ATAC</td>
 <td align="center">1</td>
@@ -3374,16 +3388,16 @@ samples</h2>
 <col width="18%" />
 <col width="12%" />
 <col width="15%" />
-<col width="20%" />
+<col width="21%" />
 <col width="10%" />
-<col width="22%" />
+<col width="21%" />
 </colgroup>
 <thead>
 <tr class="header">
 <th align="left">experiment</th>
 <th align="center">tissue</th>
 <th align="center">condition</th>
-<th align="center">Sample</th>
+<th align="center">matched_samples_ID</th>
 <th align="center">seq_unit</th>
 <th align="left">seq_technology_assay</th>
 </tr>
@@ -3393,7 +3407,7 @@ samples</h2>
 <td align="left">Cerebellum</td>
 <td align="center">Cerebellum</td>
 <td align="center">age</td>
-<td align="center">6 week cerebellum</td>
+<td align="center">6 week cerebellum_1</td>
 <td align="center">nucleus</td>
 <td align="left">10Xv2_ATAC</td>
 </tr>
@@ -3401,7 +3415,7 @@ samples</h2>
 <td align="left">Cerebellum</td>
 <td align="center">Cerebellum</td>
 <td align="center">age</td>
-<td align="center">6 week cerebellum</td>
+<td align="center">6 week cerebellum_1</td>
 <td align="center">nucleus</td>
 <td align="left">10Xv2_ATAC</td>
 </tr>
@@ -3409,7 +3423,7 @@ samples</h2>
 <td align="left">Cerebellum</td>
 <td align="center">Cerebellum</td>
 <td align="center">age</td>
-<td align="center">6 week cerebellum</td>
+<td align="center">6 week cerebellum_1</td>
 <td align="center">cell</td>
 <td align="left">10Xv3_RNA</td>
 </tr>
@@ -3417,7 +3431,7 @@ samples</h2>
 <td align="left">Cerebellum</td>
 <td align="center">Cerebellum</td>
 <td align="center">age</td>
-<td align="center">P0 cerebellum</td>
+<td align="center">P0 cerebellum_10</td>
 <td align="center">nucleus</td>
 <td align="left">10Xv2_ATAC</td>
 </tr>
@@ -3425,7 +3439,7 @@ samples</h2>
 <td align="left">Cerebellum</td>
 <td align="center">Cerebellum</td>
 <td align="center">age</td>
-<td align="center">P0 cerebellum</td>
+<td align="center">P0 cerebellum_10</td>
 <td align="center">cell</td>
 <td align="left">10Xv3_RNA</td>
 </tr>
@@ -3433,7 +3447,7 @@ samples</h2>
 <td align="left">Cerebellum</td>
 <td align="center">Cerebellum</td>
 <td align="center">sorted</td>
-<td align="center">ATOH HI</td>
+<td align="center">ATOH HI_2</td>
 <td align="center">nucleus</td>
 <td align="left">10Xv2_ATAC</td>
 </tr>
@@ -3441,7 +3455,7 @@ samples</h2>
 <td align="left">Cerebellum</td>
 <td align="center">Cerebellum</td>
 <td align="center">sorted</td>
-<td align="center">ATOH HI</td>
+<td align="center">ATOH HI_2</td>
 <td align="center">cell</td>
 <td align="left">10Xv3_RNA</td>
 </tr>
@@ -3449,7 +3463,7 @@ samples</h2>
 <td align="left">Cerebellum</td>
 <td align="center">Cerebellum</td>
 <td align="center">sorted</td>
-<td align="center">ATOH Low</td>
+<td align="center">ATOH Low_3</td>
 <td align="center">nucleus</td>
 <td align="left">10Xv2_ATAC</td>
 </tr>
@@ -3457,7 +3471,7 @@ samples</h2>
 <td align="left">Cerebellum</td>
 <td align="center">Cerebellum</td>
 <td align="center">sorted</td>
-<td align="center">ATOH Low</td>
+<td align="center">ATOH Low_3</td>
 <td align="center">cell</td>
 <td align="left">10Xv3_RNA</td>
 </tr>
@@ -3465,7 +3479,7 @@ samples</h2>
 <td align="left">Stressed Retina</td>
 <td align="center">Retina</td>
 <td align="center">LPS Injection</td>
-<td align="center">LPS</td>
+<td align="center">LPS_6</td>
 <td align="center">cell</td>
 <td align="left">10Xv3_RNA</td>
 </tr>
@@ -3473,7 +3487,7 @@ samples</h2>
 <td align="left">Stressed Retina</td>
 <td align="center">Retina</td>
 <td align="center">LPS Injection</td>
-<td align="center">LPS_ATAC</td>
+<td align="center">LPS_ATAC_7</td>
 <td align="center">nucleus</td>
 <td align="left">10Xv2_ATAC</td>
 </tr>
@@ -3481,7 +3495,7 @@ samples</h2>
 <td align="left">Stressed Retina</td>
 <td align="center">Retina</td>
 <td align="center">PBS Injection</td>
-<td align="center">PBS</td>
+<td align="center">PBS_11</td>
 <td align="center">cell</td>
 <td align="left">10Xv3_RNA</td>
 </tr>
@@ -3489,7 +3503,7 @@ samples</h2>
 <td align="left">Victoria Knockout</td>
 <td align="center">Retina</td>
 <td align="center">knock-out</td>
-<td align="center">SEKO_21</td>
+<td align="center">SEKO_21_13</td>
 <td align="center">nucleus</td>
 <td align="left">10Xv2_ATAC</td>
 </tr>
@@ -3497,7 +3511,7 @@ samples</h2>
 <td align="left">Victoria Knockout</td>
 <td align="center">Retina</td>
 <td align="center">knock-out</td>
-<td align="center">SEKO_21</td>
+<td align="center">SEKO_21_13</td>
 <td align="center">cell</td>
 <td align="left">10Xv3_RNA</td>
 </tr>
@@ -3505,7 +3519,7 @@ samples</h2>
 <td align="left">Victoria Knockout</td>
 <td align="center">Retina</td>
 <td align="center">knock-out</td>
-<td align="center">SEKO_25</td>
+<td align="center">SEKO_25_14</td>
 <td align="center">nucleus</td>
 <td align="left">10Xv2_ATAC</td>
 </tr>
@@ -3513,7 +3527,7 @@ samples</h2>
 <td align="left">Victoria Knockout</td>
 <td align="center">Retina</td>
 <td align="center">knock-out</td>
-<td align="center">SEKO_25</td>
+<td align="center">SEKO_25_14</td>
 <td align="center">cell</td>
 <td align="left">10Xv3_RNA</td>
 </tr>
@@ -3521,7 +3535,7 @@ samples</h2>
 <td align="left">Victoria Knockout</td>
 <td align="center">Retina</td>
 <td align="center">wt</td>
-<td align="center">Wt1</td>
+<td align="center">Wt1_15</td>
 <td align="center">nucleus</td>
 <td align="left">10Xv2_ATAC</td>
 </tr>
@@ -3529,7 +3543,7 @@ samples</h2>
 <td align="left">Victoria Knockout</td>
 <td align="center">Retina</td>
 <td align="center">wt</td>
-<td align="center">Wt1</td>
+<td align="center">Wt1_15</td>
 <td align="center">cell</td>
 <td align="left">10Xv3_RNA</td>
 </tr>
@@ -3537,7 +3551,7 @@ samples</h2>
 <td align="left">Victoria Knockout</td>
 <td align="center">Retina</td>
 <td align="center">wt</td>
-<td align="center">Wt2</td>
+<td align="center">Wt2_16</td>
 <td align="center">nucleus</td>
 <td align="left">10Xv2_ATAC</td>
 </tr>
@@ -3545,7 +3559,7 @@ samples</h2>
 <td align="left">Victoria Knockout</td>
 <td align="center">Retina</td>
 <td align="center">wt</td>
-<td align="center">Wt2</td>
+<td align="center">Wt2_16</td>
 <td align="center">cell</td>
 <td align="left">10Xv3_RNA</td>
 </tr>
@@ -3572,10 +3586,14 @@ sequencing technologies and unit.</p>
 <span id="cb13-5"><a href="#cb13-5" tabindex="-1"></a>assay_samples <span class="ot">&lt;-</span> <span class="fu">unique</span>(df<span class="sc">$</span>assay)</span>
 <span id="cb13-6"><a href="#cb13-6" tabindex="-1"></a></span>
 <span id="cb13-7"><a href="#cb13-7" tabindex="-1"></a><span class="co"># What type of seq_technology was used?</span></span>
-<span id="cb13-8"><a href="#cb13-8" tabindex="-1"></a>seq_technology_assay_samples <span class="ot">&lt;-</span> <span class="fu">unique</span>(df<span class="sc">$</span>seq_technology_assay)</span></code></pre></div>
+<span id="cb13-8"><a href="#cb13-8" tabindex="-1"></a>seq_technology_assay_samples <span class="ot">&lt;-</span> <span class="fu">unique</span>(df<span class="sc">$</span>seq_technology_assay)</span>
+<span id="cb13-9"><a href="#cb13-9" tabindex="-1"></a></span>
+<span id="cb13-10"><a href="#cb13-10" tabindex="-1"></a><span class="co"># What type of seq_technology was used?</span></span>
+<span id="cb13-11"><a href="#cb13-11" tabindex="-1"></a>PI_samples <span class="ot">&lt;-</span> <span class="fu">unique</span>(df<span class="sc">$</span>PI)</span></code></pre></div>
 <p>Single cell sequencing was done by using nucleus and there are
 10X_ATAC, 10X_RNA sequencing technologies and assays in the database.
-Cohort is formed and processed accordingly.</p>
+Samples are generated by the Dyer lab. Cohort is formed and processed
+accordingly.</p>
 </div>
 <div id="number-of-samples-per-experiment-1" class="section level2" number="8.2">
 <h2><span class="header-section-number">8.2</span> Number of samples per
@@ -3603,17 +3621,18 @@ experiment</h2>
 <h2><span class="header-section-number">8.3</span> Number of samples per
 seq_technology_assay</h2>
 <p>Here, we investigate the number of libraries per assay, i.e.,
-<code>seq_technology_assay</code> and per <code>Sample</code>.</p>
+<code>seq_technology_assay</code> and per
+<code>matched_samples_ID</code>.</p>
 <div align="center" style="font-size:80%">
 <table>
 <caption>Number of samples per seq_technology_assay</caption>
 <colgroup>
-<col width="19%" />
-<col width="9%" />
-<col width="13%" />
-<col width="16%" />
+<col width="17%" />
+<col width="8%" />
 <col width="12%" />
-<col width="25%" />
+<col width="22%" />
+<col width="11%" />
+<col width="23%" />
 <col width="3%" />
 </colgroup>
 <thead>
@@ -3621,7 +3640,7 @@ seq_technology_assay</h2>
 <th align="left">experiment</th>
 <th align="center">tissue</th>
 <th align="center">condition</th>
-<th align="center">Sample</th>
+<th align="center">matched_samples_ID</th>
 <th align="center">seq_unit</th>
 <th align="left">seq_technology_assay</th>
 <th align="center">n</th>
@@ -3632,7 +3651,7 @@ seq_technology_assay</h2>
 <td align="left">Multiome Retina</td>
 <td align="center">Retina</td>
 <td align="center">age</td>
-<td align="center">Adult Retina</td>
+<td align="center">Adult Retina_4</td>
 <td align="center">nucleus</td>
 <td align="left">10X_ATAC</td>
 <td align="center">1</td>
@@ -3641,7 +3660,7 @@ seq_technology_assay</h2>
 <td align="left">Multiome Retina</td>
 <td align="center">Retina</td>
 <td align="center">age</td>
-<td align="center">Adult Retina</td>
+<td align="center">Adult Retina_4</td>
 <td align="center">nucleus</td>
 <td align="left">10X_RNA</td>
 <td align="center">1</td>
@@ -3650,7 +3669,7 @@ seq_technology_assay</h2>
 <td align="left">Multiome Retina</td>
 <td align="center">Retina</td>
 <td align="center">age</td>
-<td align="center">E14.5 Retina</td>
+<td align="center">E14.5 Retina_5</td>
 <td align="center">nucleus</td>
 <td align="left">10X_ATAC</td>
 <td align="center">1</td>
@@ -3659,7 +3678,7 @@ seq_technology_assay</h2>
 <td align="left">Multiome Retina</td>
 <td align="center">Retina</td>
 <td align="center">age</td>
-<td align="center">E14.5 Retina</td>
+<td align="center">E14.5 Retina_5</td>
 <td align="center">nucleus</td>
 <td align="left">10X_RNA</td>
 <td align="center">1</td>
@@ -3668,7 +3687,7 @@ seq_technology_assay</h2>
 <td align="left">Multiome Retina</td>
 <td align="center">Retina</td>
 <td align="center">age</td>
-<td align="center">P0 Retina</td>
+<td align="center">P0 Retina_9</td>
 <td align="center">nucleus</td>
 <td align="left">10X_ATAC</td>
 <td align="center">1</td>
@@ -3677,7 +3696,7 @@ seq_technology_assay</h2>
 <td align="left">Multiome Retina</td>
 <td align="center">Retina</td>
 <td align="center">age</td>
-<td align="center">P0 Retina</td>
+<td align="center">P0 Retina_9</td>
 <td align="center">nucleus</td>
 <td align="left">10X_RNA</td>
 <td align="center">1</td>
@@ -3694,19 +3713,19 @@ samples</h2>
 <table>
 <caption>Summary of samples</caption>
 <colgroup>
-<col width="20%" />
-<col width="10%" />
-<col width="13%" />
-<col width="17%" />
+<col width="18%" />
+<col width="9%" />
 <col width="12%" />
-<col width="26%" />
+<col width="23%" />
+<col width="11%" />
+<col width="24%" />
 </colgroup>
 <thead>
 <tr class="header">
 <th align="left">experiment</th>
 <th align="center">tissue</th>
 <th align="center">condition</th>
-<th align="center">Sample</th>
+<th align="center">matched_samples_ID</th>
 <th align="center">seq_unit</th>
 <th align="left">seq_technology_assay</th>
 </tr>
@@ -3716,7 +3735,7 @@ samples</h2>
 <td align="left">Multiome Retina</td>
 <td align="center">Retina</td>
 <td align="center">age</td>
-<td align="center">Adult Retina</td>
+<td align="center">Adult Retina_4</td>
 <td align="center">nucleus</td>
 <td align="left">10X_ATAC</td>
 </tr>
@@ -3724,7 +3743,7 @@ samples</h2>
 <td align="left">Multiome Retina</td>
 <td align="center">Retina</td>
 <td align="center">age</td>
-<td align="center">Adult Retina</td>
+<td align="center">Adult Retina_4</td>
 <td align="center">nucleus</td>
 <td align="left">10X_RNA</td>
 </tr>
@@ -3732,7 +3751,7 @@ samples</h2>
 <td align="left">Multiome Retina</td>
 <td align="center">Retina</td>
 <td align="center">age</td>
-<td align="center">E14.5 Retina</td>
+<td align="center">E14.5 Retina_5</td>
 <td align="center">nucleus</td>
 <td align="left">10X_ATAC</td>
 </tr>
@@ -3740,7 +3759,7 @@ samples</h2>
 <td align="left">Multiome Retina</td>
 <td align="center">Retina</td>
 <td align="center">age</td>
-<td align="center">E14.5 Retina</td>
+<td align="center">E14.5 Retina_5</td>
 <td align="center">nucleus</td>
 <td align="left">10X_RNA</td>
 </tr>
@@ -3748,7 +3767,7 @@ samples</h2>
 <td align="left">Multiome Retina</td>
 <td align="center">Retina</td>
 <td align="center">age</td>
-<td align="center">P0 Retina</td>
+<td align="center">P0 Retina_9</td>
 <td align="center">nucleus</td>
 <td align="left">10X_ATAC</td>
 </tr>
@@ -3756,7 +3775,7 @@ samples</h2>
 <td align="left">Multiome Retina</td>
 <td align="center">Retina</td>
 <td align="center">age</td>
-<td align="center">P0 Retina</td>
+<td align="center">P0 Retina_9</td>
 <td align="center">nucleus</td>
 <td align="left">10X_RNA</td>
 </tr>
