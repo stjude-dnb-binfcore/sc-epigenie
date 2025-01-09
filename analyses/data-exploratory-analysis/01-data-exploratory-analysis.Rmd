@@ -124,10 +124,7 @@ Reviewed by: _____________________   Date: ____________ \
   
 
 # Information about this notebook
-This is an exploratory analysis of the data available for the testing phase for the `sc-atac-seq` pipeline(s). We are investigating number of samples overall per condition and variables as defined in the `params`.
-
-We are looking for cohorts that fit the following criteria as described in the [./analyses/README.md](https://github.com/stjude-dnb-binfcore/sc-atac-seq/tree/main/analyses).
-
+This is an exploratory analysis of the data available for the testing phase for the `sc-atac-seq` pipeline(s). We are investigating number of samples overall per condition and variables as defined in the `params`. We are looking for cohorts that fit the following criteria as described in the [./analyses/README.md](https://github.com/stjude-dnb-binfcore/sc-atac-seq/tree/main/analyses).
   - Control vs condition (min. 3+3 samples)
   - Number of cells/sample - size of datasets might determined packages/pipelines to be used
   - Single cell/Single-nucleus ATAC
@@ -138,7 +135,7 @@ We are looking for cohorts that fit the following criteria as described in the [
 
 # Set up
 
-```{r load-library, include=FALSE, echo=TRUE}
+```{r load-library, echo=TRUE}
 suppressPackageStartupMessages({
   library(tidyverse)
   library(knitr)
@@ -148,7 +145,7 @@ suppressPackageStartupMessages({
 
 # Directories and paths to file Inputs/Outputs
 
-```{r set-dir-and-file-names, include=FALSE, echo=TRUE}
+```{r set-dir-and-file-names, echo=TRUE}
 attach(params)
 analysis_dir <- file.path(root_dir, "analyses", "data-exploratory-analysis") 
 
@@ -184,7 +181,7 @@ a4height <- 11.7
 
 # Read raw data file
 
-```{r read-raw-data, include=FALSE, echo=TRUE}
+```{r read-raw-data, echo=TRUE}
 # Read metadata
 raw_data_df <- read_excel(data_file) %>%
   
@@ -196,7 +193,7 @@ raw_data_df <- read_excel(data_file) %>%
 
 # Read processed data file
 
-```{r read-processed-data, include=FALSE, echo=TRUE}
+```{r read-processed-data, echo=TRUE}
 df_processed <- raw_data_df %>%
   
   # Add metadata
@@ -224,10 +221,9 @@ df_processed <- raw_data_df %>%
 ```
 
 # Update processed data file per our conversation with Jackie Norrie
-
 This is the `cohorts_10x_rna_atac_testing_phase_2024-12-17.tsv` file updated per our conversation with Jackie Norrie to fix empty cells and/or inconsistencies.
 
-```{r read-updated-processed-data, include=FALSE, echo=TRUE}
+```{r read-updated-processed-data, echo=TRUE}
 df_processed_select <- df_processed %>%
   select(!c(SRM_id, SRM_Sample_id, seq_unit, condition))
 
@@ -239,7 +235,7 @@ df_processed <- read_excel(jackie_data_file) %>%
                                     grepl("ATAC", assay) ~ "10Xv2"),
          seq_technology = case_when(grepl("yes", multiome_10x) ~ "10X",
                                     TRUE ~ seq_technology),
-         seq_technology_assay = paste(seq_technology, assay, sep = "_"),) %>%
+         seq_technology_assay = paste(seq_technology, assay, sep = "_")) %>%
   select(experiment, everything()) %>%
   
   # Add tissue/location information
@@ -251,25 +247,29 @@ df_processed <- read_excel(jackie_data_file) %>%
                                          grepl("More Retina", experiment) ~ "different-mouse-same-tissue-same-age",
                                          grepl("Victoria Knockout", experiment) ~ "same-mouse-same-tissue",
                                          grepl("Stressed Retina", experiment) ~ "same-mouse-same-tissue"),
-         wet_lab_info = case_when(grepl("DYE_4687", DYE) ~ "done later, not enough high quality cells in DYE2873")) %>%
+         wet_lab_info = case_when(grepl("DYE_4687", DYE) ~ "done later, not enough high quality cells in DYE2873"),
+         #unique_ID = row_number(),
+         matched_sample_id = paste(Sample, assay, sep = "_")) %>%
+    arrange(experiment, condition, Sample, assay) %>%
   # save data 
   write_tsv(file.path(results_dir, glue::glue("cohorts_10x_rna_atac_testing_phase_{Sys.Date()}.tsv")))
 ```
 
-
 # 10x matched scRNA-seq and scATAC-seq cohort
+We will filter based on matched samples and paired assays. The `Sample` column indicates the unique sample used for sequencing.
 
-```{r cohort-10x, include=FALSE, echo=TRUE}
+```{r cohort-10x, echo=TRUE}
 df <- df_processed %>%
   filter(multiome_10x == "no",
-         !matched_sample_info == "different-mouse-same-tissue-same-age")
+         
+         # we will keep experiments that assays were performed at the same animal and tissue
+         matched_sample_info == "same-mouse-same-tissue")
 ```
 
 ## Type of sequencing assay and unit
-
 We should investigate if there are samples from different sequencing technologies and unit.
 
-```{r cohort-10x-assay-unit-sc, include=FALSE, echo=TRUE}
+```{r cohort-10x-assay-unit-sc, echo=TRUE}
 # Was nucleus or whole cell used for the sequencing?
 seq_unit_samples <- unique(df$seq_unit)
 
@@ -294,45 +294,51 @@ cat("  \n</div>  \n")
 cat("  \n\\pagebreak  \n")
 ```
 
-\pagebreak
-
-## Number of samples per experiment, seq_unit, assay, and condition
+## Number of samples per seq_technology_assay
+Here, we investigate the number of libraries per assay, i.e., `seq_technology_assay` and per `Sample`.
 
 ```{r, fig.align = "left", results = "asis", message = FALSE, warning = FALSE, echo = FALSE}
-tables1 <- df %>% count(experiment, seq_unit, assay, condition)
+tables1 <- df %>% count(experiment, tissue, condition, Sample, seq_unit, seq_technology_assay)
 cat("  \n<div style=\"font-size:80%\">  \n")
-caption_value = "Summary of samples per experiment, seq_unit, assay, and condition"
+caption_value = "Number of samples per seq_technology_assay"
 
 print(knitr::kable(tables1, align = "lcccc", caption = caption_value))
 cat("  \n</div>  \n")
 cat("  \n\\pagebreak  \n")
 ```
 
-## Number of samples per experiment, tissue, seq_unit, seq_technology_assay, condition, and sample
+## Summary of samples 
+
+```{r}
+#df1 <- df %>%
+#  group_by(experiment, tissue, condition, Sample, seq_unit, seq_technology_assay) %>%
+#  summarise(seq_technology_assay_sum = str_c(seq_technology_assay, collapse = ";"))
+```
 
 ```{r, fig.align = "left", results = "asis", message = FALSE, warning = FALSE, echo = FALSE}
-tables1 <- df %>% count(experiment, tissue, seq_unit, seq_technology_assay, condition, Sample)
+tables1 <- df %>% 
+  #select(experiment, tissue, condition, Sample, seq_unit, seq_technology_assay, seq_technology_assay_sum) %>%
+  select(experiment, tissue, condition, Sample, seq_unit, seq_technology_assay) %>%
+  group_by() 
 cat("  \n<div style=\"font-size:80%\">  \n")
-caption_value = "Summary of samples per experiment, tissue, seq_unit, seq_technology_assay, condition, and Sample"
+caption_value = "Summary of samples"
 
 print(knitr::kable(tables1, align = "lcccc", caption = caption_value))
 cat("  \n</div>  \n")
 cat("  \n\\pagebreak  \n")
 ```
-
 
 # 10x Genomics Multiome cohort
 
-```{r cohort-10x-multiomic, include=FALSE, echo=TRUE}
+```{r cohort-10x-multiomic, echo=TRUE}
 df <- df_processed %>%
   filter(multiome_10x == "yes")
 ```
 
 ## Type of sequencing assay and seq_unit
-
 We should investigate if there are samples from two different sequencing technologies and unit.
 
-```{r cohort-10x-multiomic-assay-unit-sc, include=FALSE, echo=TRUE}
+```{r cohort-10x-multiomic-assay-unit-sc, echo=TRUE}
 # Was nucleus or whole cell used for the sequencing?
 seq_unit_samples <- unique(df$seq_unit)
 
@@ -357,26 +363,27 @@ cat("  \n</div>  \n")
 cat("  \n\\pagebreak  \n")
 ```
 
-\pagebreak
-
-## Number of samples per experiment, seq_unit, assay, and condition
+## Number of samples per seq_technology_assay
+Here, we investigate the number of libraries per assay, i.e., `seq_technology_assay` and per `Sample`.
 
 ```{r, fig.align = "left", results = "asis", message = FALSE, warning = FALSE, echo = FALSE}
-tables1 <- df %>% count(experiment, seq_unit, assay, condition)
+tables1 <- df %>% count(experiment, tissue, condition, Sample, seq_unit, seq_technology_assay)
 cat("  \n<div style=\"font-size:80%\">  \n")
-caption_value = "Summary of samples per experiment, seq_unit, assay, and condition"
+caption_value = "Number of samples per seq_technology_assay"
 
 print(knitr::kable(tables1, align = "lcccc", caption = caption_value))
 cat("  \n</div>  \n")
 cat("  \n\\pagebreak  \n")
 ```
 
-## Number of samples per experiment, tissue, seq_unit, seq_technology_assay, condition, and sample
+## Summary of samples 
 
 ```{r, fig.align = "left", results = "asis", message = FALSE, warning = FALSE, echo = FALSE}
-tables1 <- df %>% count(experiment, tissue, seq_unit, seq_technology_assay, condition, Sample)
+tables1 <- df %>% 
+  select(experiment, tissue, condition, Sample, seq_unit, seq_technology_assay) %>%
+  group_by() 
 cat("  \n<div style=\"font-size:80%\">  \n")
-caption_value = "Summary of samples per experiment, tissue, seq_unit, seq_technology_assay, condition, and Sample"
+caption_value = "Summary of samples"
 
 print(knitr::kable(tables1, align = "lcccc", caption = caption_value))
 cat("  \n</div>  \n")
@@ -384,19 +391,14 @@ cat("  \n\\pagebreak  \n")
 ```
 
 # Notes 
-
-I have identified the following datasets that almost fit the criteria for the testing phase:
+I have identified the following datasets that **almost** fit the criteria for the testing phase:
 
   - **10x matched scRNA-seq and scATAC-seq**: `Victoria Knockout` experiment with 1 replicate/knock-out group (4 samples for 10x RNA + 4 samples 10x ATAC). Replicates could be potentially grouped together and have 2 replicates for WT and 2 replicates for knock-out.
-  
   - **10x Genomics Multiome**: `Multiome Retina` experiment with 1 replicate/age group (3 samples for 10x RNA (Multiome) + 3 samples for 10x ATAC (multiome).
 
-
 # References
-
 - `More Retina` and `Stressed retina` experiments published by [Norrie et al., 2025](https://doi.org/10.1016/j.devcel.2024.12.014).
 - `Victoria Knockout` experiment published by [Honnell et al., 2022](https://www.nature.com/articles/s41467-021-27924-y#Sec13).
-
 
 ```{r echo=FALSE}
 detach(params)
@@ -405,8 +407,6 @@ detach(params)
 \pagebreak
 
 # Session Info
-
 ```{r echo=FALSE}
 sessionInfo()
 ```
-
