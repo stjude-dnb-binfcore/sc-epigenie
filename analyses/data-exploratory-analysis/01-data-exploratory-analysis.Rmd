@@ -125,6 +125,7 @@ Reviewed by: _____________________   Date: ____________ \
 
 # Information about this notebook
 This is an exploratory analysis of the data available for the testing phase for the `sc-atac-seq` pipeline(s). We are investigating number of samples overall per condition and variables as defined in the `params`. We are looking for cohorts that fit the following criteria as described in the [./analyses/README.md](https://github.com/stjude-dnb-binfcore/sc-atac-seq/tree/main/analyses).
+
   - Control vs condition (min. 3+3 samples)
   - Number of cells/sample - size of datasets might determined packages/pipelines to be used
   - Single cell/Single-nucleus ATAC
@@ -187,7 +188,7 @@ raw_data_df <- read_excel(data_file) %>%
   
   # save data under a more descriptive file name
   # all edits will be made on this one and not on the RAW data
-  # RAW data were edited manually by Antonia Chroni to add typo of experiment and type of kit for multiomic 10x
+  # RAW data were edited manually by Antonia Chroni to add type of experiment and type of kit for multiomic 10x
   write_tsv(file.path(input_dir, "cohorts_10x_rna_atac_testing_phase_not_processed.tsv"))
 ```
 
@@ -402,7 +403,7 @@ cat("  \n\\pagebreak  \n")
 # Notes 
 I have identified the following datasets that **almost** fit the criteria for the testing phase:
 
-  - **10x matched scRNA-seq and scATAC-seq**: `Victoria Knockout` experiment with 1 replicate/knock-out group (4 samples for 10x RNA + 4 samples 10x ATAC). Replicates could be potentially grouped together and have 2 replicates for WT and 2 replicates for knock-out.
+  - **10x matched scRNA-seq and scATAC-seq**: `Victoria Knockout` experiment with 1 replicate/knock-out group (4 samples for 10x RNA + 4 samples 10x ATAC). Replicates could be potentially grouped together and have 2 replicates for WT and 2 replicates for knock-out. I am unsure how to integrate properly single-cell-RNA-seq with single-nucleus-ATAC-seq data.
   - **10x Genomics Multiome**: `Multiome Retina` experiment with 1 replicate/age group (3 samples for 10x RNA (Multiome) + 3 samples for 10x ATAC (multiome).
 
 # References
