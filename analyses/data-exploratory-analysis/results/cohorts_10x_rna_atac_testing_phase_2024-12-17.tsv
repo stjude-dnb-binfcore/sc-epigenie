@@ -1,0 +1,34 @@
+experiment	DYE	SRM_id	SRM_Sample_id	Kit	seq_technology	assay	multiome_10x	Sample	seq_unit	condition	species
+Cerebellum	DYE0314	277093	NA	10x RNA	10x	RNA	no	ATOH Low	nucleus	treatment	mouse
+Cerebellum	DYE0315	277093	NA	10x RNA	10x	RNA	no	ATOH HI	nucleus	treatment	mouse
+Cerebellum	DYE0316	277094	NA	10x ATAC	10x	ATAC	no	ATOH Low	nucleus	treatment	mouse
+Cerebellum	DYE0317	277094	NA	10x ATAC	10x	ATAC	no	ATOH HI	nucleus	treatment	mouse
+Cerebellum	DYE_2869	180168	1883579	10x RNA	10x	RNA	no	P0 cerebellum	nucleus	age	mouse
+Cerebellum	DYE_2870	NA	1883580	10x RNA	10x	RNA	no	6 week cerebellum	nucleus	age	mouse
+Cerebellum	DYE_2872	180170	1883583	10x ATAC	10x	ATAC	no	P0 cerebellum	nucleus	age	mouse
+Cerebellum	DYE_2873	NA	1883584	10x ATAC	10x	ATAC	no	6 week cerebellum	nucleus	age	mouse
+Cerebellum	DYE_4687	208969	2089363	10x ATAC	10x	ATAC	no	6 week cerebellum	nucleus	age	mouse
+Multiome Retina	DYE_7759	245789	2294832	10x RNA (Multiome)	10x	RNA	yes	Adult Retina	nucleus	age	mouse
+Multiome Retina	DYE_7760	245789	2294833	10x RNA (Multiome)	10x	RNA	yes	P0 Retina	nucleus	age	mouse
+Multiome Retina	DYE_7761	245789	2294834	10x RNA (Multiome)	10x	RNA	yes	E14.5 Retina	nucleus	age	mouse
+Multiome Retina	DYE_7762	245790	2294835	10x ATAC (multiome)	10x	ATAC	yes	Adult Retina	nucleus	age	mouse
+Multiome Retina	DYE_7763	245790	2294836	10x ATAC (multiome)	10x	ATAC	yes	P0 Retina	nucleus	age	mouse
+Multiome Retina	DYE_7764	245790	2294837	10x ATAC (multiome)	10x	ATAC	yes	E14.5 Retina	nucleus	age	mouse
+More Retina	DYE_2874	163737	1883585	10x ATAC	10x	ATAC	no	E14.5 Retina	cell	age	mouse
+More Retina	DYE_2875	163737	1883586	10x ATAC	10x	ATAC	no	E14.5 Retina	cell	age	mouse
+More Retina	DYE_2525	157682	1657575	10x RNA	10x	RNA	no	E14.5 Retina	cell	age	mouse
+More Retina	DYE_2603	163737	1721277	10x ATAC	10x	ATAC	no	NRL Dep	cell	unknown	mouse
+More Retina	DYE_2597	163734	1721257	10x RNA	10x	RNA	no	NRL Dep	cell	unknown	mouse
+More Retina	DYE_2478	152367	NA	10x ATAC	10x	ATAC	no	Retina	cell	unknown	mouse
+More Retina	DYE_2479	152367	NA	10x ATAC	10x	ATAC	no	Retina	cell	unknown	mouse
+Victoria Knockout	DYE_2519	157682	1657569	10x RNA	10x	RNA	no	Wt1	nucleus	knock-out	mouse
+Victoria Knockout	DYE_2520	157682	1657570	10x RNA	10x	RNA	no	Wt2	nucleus	knock-out	mouse
+Victoria Knockout	DYE_2521	157682	1657571	10x RNA	10x	RNA	no	SEKO_21	nucleus	knock-out	mouse
+Victoria Knockout	DYE_2522	157682	1657572	10x RNA	10x	RNA	no	SEKO_25	nucleus	knock-out	mouse
+Victoria Knockout	DYE_2529	157684	1657591	10x ATAC	10x	ATAC	no	Wt1	nucleus	knock-out	mouse
+Victoria Knockout	DYE_2530	157684	1657592	10x ATAC	10x	ATAC	no	Wt2	nucleus	knock-out	mouse
+Victoria Knockout	DYE_2531	157684	1657593	10x ATAC	10x	ATAC	no	SEKO_21	nucleus	knock-out	mouse
+Victoria Knockout	DYE_2532	157684	1657594	10x ATAC	10x	ATAC	no	SEKO_25	nucleus	knock-out	mouse
+Stressed Retina	DYE_4666	206690	2074625	10x RNA	10x	RNA	no	PBS	cell	unknown	mouse
+Stressed Retina	DYE_4667	206690	2074626	10x RNA	10x	RNA	no	LPS	cell	unknown	mouse
+Stressed Retina	DYE_4671	206686	2074611	10x ATAC	10x	ATAC	no	LPS_ATAC	cell	unknown	mouse

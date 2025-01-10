@@ -1,0 +1,34 @@
+experiment	DYE	SRM_id	SRM_Sample_id	seq_unit	condition	Kit	seq_technology	assay	multiome_10x	Sample	species	seq_technology_assay	tissue	matched_sample_info	wet_lab_info	unique_ID	sample_ID	matched_samples_ID	PI
+Cerebellum	DYE_2873	180170	1883584	nucleus	age	10x ATAC	10Xv2	ATAC	no	6 week cerebellum	mouse	10Xv2_ATAC	Cerebellum	same-mouse-same-tissue	NA	8	1	6 week cerebellum_1	Dyer
+Cerebellum	DYE_4687	208969	2089363	nucleus	age	10x ATAC	10Xv2	ATAC	no	6 week cerebellum	mouse	10Xv2_ATAC	Cerebellum	same-mouse-same-tissue	done later, not enough high quality cells in DYE2873	9	1	6 week cerebellum_1	Dyer
+Cerebellum	DYE_2870	180168	1883580	cell	age	10x RNA	10Xv3	RNA	no	6 week cerebellum	mouse	10Xv3_RNA	Cerebellum	same-mouse-same-tissue	NA	6	1	6 week cerebellum_1	Dyer
+Cerebellum	DYE_2872	180170	1883583	nucleus	age	10x ATAC	10Xv2	ATAC	no	P0 cerebellum	mouse	10Xv2_ATAC	Cerebellum	same-mouse-same-tissue	NA	7	10	P0 cerebellum_10	Dyer
+Cerebellum	DYE_2869	180168	1883579	cell	age	10x RNA	10Xv3	RNA	no	P0 cerebellum	mouse	10Xv3_RNA	Cerebellum	same-mouse-same-tissue	NA	5	10	P0 cerebellum_10	Dyer
+Cerebellum	DYE0317	277094	2460155	nucleus	sorted	10x ATAC	10Xv2	ATAC	no	ATOH HI	mouse	10Xv2_ATAC	Cerebellum	same-mouse-same-tissue	NA	4	2	ATOH HI_2	Dyer
+Cerebellum	DYE0315	277093	2460153	cell	sorted	10x RNA	10Xv3	RNA	no	ATOH HI	mouse	10Xv3_RNA	Cerebellum	same-mouse-same-tissue	NA	2	2	ATOH HI_2	Dyer
+Cerebellum	DYE0316	277094	2460154	nucleus	sorted	10x ATAC	10Xv2	ATAC	no	ATOH Low	mouse	10Xv2_ATAC	Cerebellum	same-mouse-same-tissue	NA	3	3	ATOH Low_3	Dyer
+Cerebellum	DYE0314	277093	2460152	cell	sorted	10x RNA	10Xv3	RNA	no	ATOH Low	mouse	10Xv3_RNA	Cerebellum	same-mouse-same-tissue	NA	1	3	ATOH Low_3	Dyer
+More Retina	DYE_2874	163737	1883585	cell	age	10x ATAC	10Xv2	ATAC	no	E14.5 Retina	mouse	10Xv2_ATAC	Retina	different-mouse-same-tissue-same-age	NA	16	5	E14.5 Retina_5_16	Dyer
+More Retina	DYE_2875	163737	1883586	cell	age	10x ATAC	10Xv2	ATAC	no	E14.5 Retina	mouse	10Xv2_ATAC	Retina	different-mouse-same-tissue-same-age	NA	17	5	E14.5 Retina_5_17	Dyer
+More Retina	DYE_2525	157682	1657575	cell	age	10x RNA	10Xv3	RNA	no	E14.5 Retina	mouse	10Xv3_RNA	Retina	different-mouse-same-tissue-same-age	NA	18	5	E14.5 Retina_5_18	Dyer
+More Retina	DYE_2478	152367	1603316	cell	none	10x ATAC	10Xv2	ATAC	no	Retina	mouse	10Xv2_ATAC	Retina	different-mouse-same-tissue-same-age	NA	21	12	Retina_12_21	Dyer
+More Retina	DYE_2479	152367	1603317	cell	none	10x ATAC	10Xv2	ATAC	no	Retina	mouse	10Xv2_ATAC	Retina	different-mouse-same-tissue-same-age	NA	22	12	Retina_12_22	Dyer
+More Retina	DYE_2603	163737	1721277	cell	sorted	10x ATAC	10Xv2	ATAC	no	NRL Dep	mouse	10Xv2_ATAC	Retina	different-mouse-same-tissue-same-age	NA	19	8	NRL Dep_8_19	Dyer
+More Retina	DYE_2597	163734	1721257	cell	sorted	10x RNA	10Xv3	RNA	no	NRL Dep	mouse	10Xv3_RNA	Retina	different-mouse-same-tissue-same-age	NA	20	8	NRL Dep_8_20	Dyer
+Multiome Retina	DYE_7762	245790	2294835	nucleus	age	10x ATAC (multiome)	10X	ATAC	yes	Adult Retina	mouse	10X_ATAC	Retina	same-mouse-same-tissue	NA	13	4	Adult Retina_4	Dyer
+Multiome Retina	DYE_7759	245789	2294832	nucleus	age	10x RNA (Multiome)	10X	RNA	yes	Adult Retina	mouse	10X_RNA	Retina	same-mouse-same-tissue	NA	10	4	Adult Retina_4	Dyer
+Multiome Retina	DYE_7764	245790	2294837	nucleus	age	10x ATAC (multiome)	10X	ATAC	yes	E14.5 Retina	mouse	10X_ATAC	Retina	same-mouse-same-tissue	NA	15	5	E14.5 Retina_5	Dyer
+Multiome Retina	DYE_7761	245789	2294834	nucleus	age	10x RNA (Multiome)	10X	RNA	yes	E14.5 Retina	mouse	10X_RNA	Retina	same-mouse-same-tissue	NA	12	5	E14.5 Retina_5	Dyer
+Multiome Retina	DYE_7763	245790	2294836	nucleus	age	10x ATAC (multiome)	10X	ATAC	yes	P0 Retina	mouse	10X_ATAC	Retina	same-mouse-same-tissue	NA	14	9	P0 Retina_9	Dyer
+Multiome Retina	DYE_7760	245789	2294833	nucleus	age	10x RNA (Multiome)	10X	RNA	yes	P0 Retina	mouse	10X_RNA	Retina	same-mouse-same-tissue	NA	11	9	P0 Retina_9	Dyer
+Stressed Retina	DYE_4667	206690	2074626	cell	LPS Injection	10x RNA	10Xv3	RNA	no	LPS	mouse	10Xv3_RNA	Retina	same-mouse-same-tissue	NA	32	6	LPS_6	Dyer
+Stressed Retina	DYE_4671	206686	2074611	nucleus	LPS Injection	10x ATAC	10Xv2	ATAC	no	LPS_ATAC	mouse	10Xv2_ATAC	Retina	same-mouse-same-tissue	NA	33	7	LPS_ATAC_7	Dyer
+Stressed Retina	DYE_4666	206690	2074625	cell	PBS Injection	10x RNA	10Xv3	RNA	no	PBS	mouse	10Xv3_RNA	Retina	same-mouse-same-tissue	NA	31	11	PBS_11	Dyer
+Victoria Knockout	DYE_2531	157684	1657593	nucleus	knock-out	10x ATAC	10Xv2	ATAC	no	SEKO_21	mouse	10Xv2_ATAC	Retina	same-mouse-same-tissue	NA	29	13	SEKO_21_13	Dyer
+Victoria Knockout	DYE_2521	157682	1657571	cell	knock-out	10x RNA	10Xv3	RNA	no	SEKO_21	mouse	10Xv3_RNA	Retina	same-mouse-same-tissue	NA	25	13	SEKO_21_13	Dyer
+Victoria Knockout	DYE_2532	157684	1657594	nucleus	knock-out	10x ATAC	10Xv2	ATAC	no	SEKO_25	mouse	10Xv2_ATAC	Retina	same-mouse-same-tissue	NA	30	14	SEKO_25_14	Dyer
+Victoria Knockout	DYE_2522	157682	1657572	cell	knock-out	10x RNA	10Xv3	RNA	no	SEKO_25	mouse	10Xv3_RNA	Retina	same-mouse-same-tissue	NA	26	14	SEKO_25_14	Dyer
+Victoria Knockout	DYE_2529	157684	1657591	nucleus	wt	10x ATAC	10Xv2	ATAC	no	Wt1	mouse	10Xv2_ATAC	Retina	same-mouse-same-tissue	NA	27	15	Wt1_15	Dyer
+Victoria Knockout	DYE_2519	157682	1657569	cell	wt	10x RNA	10Xv3	RNA	no	Wt1	mouse	10Xv3_RNA	Retina	same-mouse-same-tissue	NA	23	15	Wt1_15	Dyer
+Victoria Knockout	DYE_2530	157684	1657592	nucleus	wt	10x ATAC	10Xv2	ATAC	no	Wt2	mouse	10Xv2_ATAC	Retina	same-mouse-same-tissue	NA	28	16	Wt2_16	Dyer
+Victoria Knockout	DYE_2520	157682	1657570	cell	wt	10x RNA	10Xv3	RNA	no	Wt2	mouse	10Xv3_RNA	Retina	same-mouse-same-tissue	NA	24	16	Wt2_16	Dyer
