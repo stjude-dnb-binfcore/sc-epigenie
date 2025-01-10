@@ -95,7 +95,7 @@ Each module is self-contained and can be executed independently or as part of a 
 
     > Transcription factor footprinting analysis/06_scATAC-Seq_data_Peak_calling.R
  
-5. `differential-accessibility-analysis` module (description="Pipeline for differentially expressed genes.", required=False)
+6. `differential-accessibility-analysis` module (description="Pipeline for differentially expressed genes.", required=False)
    
    - Identify differential chromatin accessibility between conditions (e.g., disease vs. healthy, treatment vs. control) using tools like edgeR, DESeq2, or MAST (for single-cell RNA-seq).
    - Find differentially accessible peaks (DAPs) to discover regions of the genome whose accessibility changes in response to biological conditions or cell states.
@@ -104,15 +104,15 @@ Each module is self-contained and can be executed independently or as part of a 
    > 09_scATAC-Seq_data_DE_Analysis_Combined.R
 
 
-6. `plotting-genomic-regions-analysis` module. We can plot the frequency of Tn5 integration across regions of the genome for cells grouped by cluster, cell type, or any other metadata stored in the object for any genomic region using the CoveragePlot() function.
+7. `plotting-genomic-regions-analysis` module. We can plot the frequency of Tn5 integration across regions of the genome for cells grouped by cluster, cell type, or any other metadata stored in the object for any genomic region using the CoveragePlot() function.
 
    > I have done that...
 
-7. `gene-ontology-enrichment-analysis` module. 
+8. `gene-ontology-enrichment-analysis` module. 
 
    - Gene ontology (GO) enrichment analysis. Gene set enrichment analysis was processed with ‘enrichGO’ function (parameters: OrgDb = org.Hs.eg.db, ont = ‘BP’) of the clusterProfiler package (version 4.4.4). The marker peaks of cell type used as input (FDR ≤ 0.05 & Log2FC ≥ 0.25) were annotated based on proximity to the TSS of the nearest genes.
 
-8. `trajectory-analysis` module
+9. `trajectory-analysis` module
 
    - Pseudo-Trajectory: Use tools like Monocle or Slingshot to reconstruct cellular differentiation trajectories based on chromatin accessibility. This allows the identification of chromatin dynamics during transitions from one cell state to another (e.g., stem cell differentiation, immune response activation).
    - Cell Fate Decisions: Track changes in chromatin accessibility that correlate with specific stages of differentiation or responses to stimuli.

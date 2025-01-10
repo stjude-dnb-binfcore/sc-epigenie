@@ -164,12 +164,12 @@ In the multiomic pipeline, both RNA and ATAC data are collected simultaneously, 
 | cellranger-analysis | separate for each modality - different pipeline | CellRanger-arc count to align and demultiplex modalities |
 | upstream-analysis | separate processing and filtering for each modality - different pipeline - identify doublets | separate processing and filtering for each modality - identify doublets |
 | integrative-analysis | Seurat, Harmony, liger for scRNA-seq/Seurat, Harmony for scATAC-seq | Signac |
-| cell-types-annotation | e.g., Integrate with scRNA-seq and label transfer | ... |
-| peak-calling | yes | ... |
-| differential-accessibility-analysis | yes | ... |
-| plotting-genomic-regions-analysis | yes | ... |
-| gene-ontology-enrichment-analysis | yes | ... |
-| trajectory-analysis | yes | ... |
+| cell-types-annotation | e.g., Integrate with scRNA-seq and label transfer |  |
+| peak-calling | yes |  |
+| differential-accessibility-analysis | yes |  |
+| plotting-genomic-regions-analysis | yes |  |
+| gene-ontology-enrichment-analysis | yes |  |
+| trajectory-analysis | yes |  |
 
 
 ## References
