@@ -1,9 +1,9 @@
 # the following parameters are the same across the project and might be needed in more than one module #
-root_dir: "/research/dept/dnb/core_operations/Bioinformatics/achroni/GitHub/sc-atac-seq" # path to the main dir of the project where GitHub repo lives
-data_dir: "/research/dept/dnb/core_operations/Bioinformatics/achroni/GitHub/sc-atac-seq/analyses/cellranger-analysis/results/02_cellranger_count" # path to data dir of the project with CellRanger output results
-metadata_dir: "/research/dept/dnb/core_operations/Bioinformatics/achroni/GitHub/sc-atac-seq/data" # path to metadata dir of the project
+root_dir: "./sc-atac-seq" # path to the main dir of the project where GitHub repo lives
+data_dir: "./sc-atac-seq/analyses/cellranger-analysis/results/02_cellranger_count" # path to data dir of the project with CellRanger output results
+metadata_dir: "./test-dataset" # path to metadata dir of the project
 genome_name: "GRCm39" # define genome reference and versioning
-PROJECT_NAME: "test-dataset"
+PROJECT_NAME: "mouse-test-dataset"
 PI_NAME: "NA"
 TASK_ID: "NA"
 PROJECT_LEAD_NAME: "NA"
@@ -12,13 +12,16 @@ LEAD_ANALYSTS: "Antonia Chroni, PhD"
 GROUP_LEAD: "Cody A. Ramirez, PhD"
 CONTACT_EMAIL: "antonia.chroni@stjude.org"
 PIPELINE: "Standard sc-/sn-ATAC-Seq Analysis in 10X Genomics data"
-START_DATE: "Dec-16-2024"
+START_DATE: "NA"
 COMPLETION_DATE: "ONGOING"
 
 
 # the following parameters are set up as default values and/or are specific for the following modules: 
 # `./analyses/fastqc-analysis`
-fastqc_dir: "." #path to the fastqc files for the `fastqc-analysis` module
+# path to the fastqc files for the `fastqc-analysis` module
+fastqc_dir: 
+  - /.
+#  - /.
 
 # `./analyses/cellranger-analysis`
 genome_reference_path: "./" #path to genome reference to be used for the `cellranger-analysis` module
