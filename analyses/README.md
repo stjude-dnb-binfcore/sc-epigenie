@@ -2,36 +2,14 @@
 
 This repository contains a collection of analysis modules designed to process and analyze single cell ATAC (scATAC) data from 10X sequencing technology. 
 
----------------------------------------------------------------------------------------
-**Data for testing phase**
-
-  - Control vs condition (min. 3+3 samples)
-  - Number of cells/sample - size of datasets might determined packages/pipelines to be used
-  - Single cell/Single-nucleus ATAC?
-  - Integration of scRNA-seq and scATAC-seq data from the same biological system (multiple modalities)
-  - Pipeline for same samples but not same cells with scRNA-seq and scATAC-seq
-  - Annotate scATAC-seq cells via label transfer by using scRNA data: cell type annotation
-  - Available bulk ATAC-seq data for the same samples () - this could be used for cell type annotation
-
----------------------------------------------------------------------------------------
-
-**Aim**
-
-To characterize the cell landscape of the tissue at single cell resolution. Questions to address:
-  - Chromatin accessibility in the brain of X condition.
-  - Chromatin accessibility in the brain of X condition per cell type.
-
----------------------------------------------------------------------------------------
-**Methods**
-
-[Signac package](https://stuartlab.org/signac/)
-
-[Signac and Seurat vignette](https://satijalab.org/seurat/articles/seurat5_atacseq_integration_vignette)
-
----------------------------------------------------------------------------------------
 **Analysis modules**
 
 Each module is self-contained and can be executed independently or as part of a larger analysis pipeline. Below is a summary of each analysis module, including whether they are required or optional. Furthermore, the analysis modules should be run in the following recommended order:
+
+
+🚧 ⚠️🚧 ⚠️🚧 ⚠️🚧 ⚠️🚧⚠️ **Currently under construction** 🚧 ⚠️ 🚧 ⚠️🚧 ⚠️🚧 ⚠️
+
+
 
 1. `cellranger-analysis` module (description="Pipeline for running and summarizing Cell Ranger count for single or multiple libraries.", required=True)
 
@@ -117,62 +95,6 @@ Each module is self-contained and can be executed independently or as part of a 
    - Pseudo-Trajectory: Use tools like Monocle or Slingshot to reconstruct cellular differentiation trajectories based on chromatin accessibility. This allows the identification of chromatin dynamics during transitions from one cell state to another (e.g., stem cell differentiation, immune response activation).
    - Cell Fate Decisions: Track changes in chromatin accessibility that correlate with specific stages of differentiation or responses to stimuli.
 
----------------------------------------------------------------------------------------
-
-## References
-
-- [Jessa et al., 2022](https://www.nature.com/articles/s41588-022-01205-w). Human/mouse pediatric H3K27M gliomas; scATAC joined with sc/sNRNA along with pipeline; scMultiome data. 
-   > [Available code](https://github.com/fungenomics/HGG-oncohistones?tab=readme-ov-file)
-  
-   > [Normal human fetal brain scRNA-seq reference dataset](https://github.com/fungenomics/HGG-oncohistones#human-fetal-brain-scrnaseq-data)
-
-- [Kim et al., 2024](https://www.nature.com/articles/s41467-024-44742-0#Sec7). Leveraging single-cell ATAC-seq and RNA-seq to identify disease-critical fetal and adult brain cell types.
-
-- [Zeng et.al, 2024](https://www.nature.com/articles/s43588-024-00622-7). Deciphering cell types by integrating scATAC-seq data with genome sequences. SANGO method for accurate single-cell annotation by integrating genome sequences around the accessibility peaks within scATAC data.
-  > datasets BoneMarrowA, BoneMarrowB, LungA, LungB, Kidney, Liver, Heart, LargeIntestineA, LargeIntestineB, SmallIntestine, WholeBrainA, WholeBrainB, Cerebellum and PreFrontalCortex are derived from the adult mouse atlas data
- 
-  > datasets are sequenced using the sciATAC-seq technology56 and annotated through the mm9 reference genome
- 
-  > [SANGO GitHub code](https://github.com/cquzys/SANGO)
-  
-  
-- [Fang. et al., 2021](https://www.nature.com/articles/s41467-021-21583-9) Comprehensive analysis of single cell ATAC-seq data with SnapATAC.
-  
-  > New method called SnapATAC —that does not require population-level peak annotation prior to clustering. Instead, it resolves cellular heterogeneity by directly comparing the similarity in genome-wide accessibility profiles between cells. We also adopt a technique, ensemble Nyström method20,21, that improves the computational efficiency and enables the analysis of scATAC-seq from up to a million cells on typical hardware.
-  
-  > SnapATAC also incorporates many existing tools, such as integration of scATAC-seq and scRNA-seq dataset19, prediction of enhancer–promoter interaction, discovery of key transcription factors22, identification of differentially accessible elements23, construction of trajectories during cellular differentiation, correction of batch effect24 and classification of new dataset based on existing cell atlas19, into one single package to maximize its utility and functionalities.
-  
-  > [SnapTools GitHub pipeline](https://github.com/r3fang/SnapTools)
- 
-  > [SnapATAC GitHub pipeline](https://github.com/r3fang/SnapATAC)
-
-- [Zu et al., 2023](https://www.nature.com/articles/s41586-023-06824-9). Single-cell analysis of chromatin accessibility in the adult mouse brain.
-  
-  > A comprehensive atlas of candidate cis-regulatory DNA elements (cCREs) in the **adult mouse brain**, generated by analysing chromatin accessibility in 2.3 million individual brain cells from 117 anatomical dissections.
-  
-
-- [Chen et al., 2019](https://link.springer.com/article/10.1186/s13059-019-1854-5) Assessment of computational methods for the analysis of single-cell ATAC-seq data.
-  
-  > Benchmarking paper
-  
-  > Human hematopoiesis I (Buenrostro et al. [21]); sci-ATAC-seq mouse tissues (Cusanovich et al. [1]); Human hematopoiesis II (10X PBMCs); Simulated scATAC-seq datasets
-
-
-- [Berest et al., 2022](https://link.springer.com/protocol/10.1007/978-1-0716-2756-3_15) Integration of scATAC-Seq with scRNA-Seq Data.
-  
-  > python but also R packages utilized for integration
-  
-  > might be useful, not sure - TO READ
-
-- [Altay and Vingron, 2024](https://academic.oup.com/nargab/article/6/4/lqae135/7815643) scATAcat: cell-type annotation for scATAC-seq data.
-  
-  > [scATAcat is available as a python package](https://github.com/aybugealtay/scATAcat)
-  
-  > scATAcat is a tool for annotation of cell-types in scATAC-seq data based on characterized bulk ATAC-seq data.
-
-
-- [MPG Primer: Understand Single Cell ATAC-Seq Data Analysis (2024)](https://www.youtube.com/watch?v=sUq4yTIJqvk&ab_channel=BroadInstitute)
-- [Introduction to single cell ATAC data analysis in R](https://www.youtube.com/watch?v=e2396GKFMRY&ab_channel=Sanbomics)
 
 
 ## Contact
