@@ -1,6 +1,6 @@
 # the following parameters are the same across the project and might be needed in more than one module #
 root_dir: "./sc-atac-seq" # path to the main dir of the project where GitHub repo lives
-data_dir: "./sc-atac-seq/analyses/cellranger-analysis/results/02_cellranger_count" # path to data dir of the project with CellRanger output results
+data_dir: "./sc-atac-seq/analyses/cellranger-analysis/results/02_cellranger_count/DefaultParameters" # path to data dir of the project with CellRanger output results
 metadata_dir: "./test-dataset" # path to metadata dir of the project
 genome_name: "GRCm39" # define genome reference and versioning
 PROJECT_NAME: "mouse-test-dataset"
