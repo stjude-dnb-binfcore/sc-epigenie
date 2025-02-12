@@ -21,7 +21,7 @@ module load singularity/4.1.1
 ```
 
 
-1. Pull the singularity container from the `sc-rna-seq-snap` root_dir
+1. Pull the singularity container from the `sc-atac-seq` root_dir
 ```
 singularity pull docker://achronistjude/rstudio_4.4.0_seurat_4.4.0:latest
 ```
@@ -42,9 +42,9 @@ User can run analysis module while on interactive node after executing the conta
 bash run-terminal.sh
 ```
 
-Then user may navigate to their module of interest, `./sc-rna-seq-snap/analyses/<module_of_interest>`. For example:
+Then user may navigate to their module of interest, `./sc-atac-seq/analyses/<module_of_interest>`. For example:
 ```
-cd ./sc-rna-seq-snap/analyses/upstream-analysis
+cd ./sc-atac-seq/analyses/upstream-analysis
 bash run-upstream-analysis.sh
 ```
 
@@ -83,12 +83,12 @@ These folders cache history and user info. Then, kill the interactive session, s
 ## Authors
 
 Antonia Chroni, PhD ([@AntoniaChroni](https://github.com/AntoniaChroni)) and 
-Walid Abu Al-Afia ([@walidabualafia](https://github.com/walidabualafia))
+Walid Abu Al-Afia ([@walidabualafia](https://github.com/walidabualafia)).
 
 
 ## Contact
 
-Contributions, issues, and feature requests are welcome! Please feel free to check [issues](https://github.com/stjude-dnb-binfcore/sc-rna-seq-snap/issues).
+Contributions, issues, and feature requests are welcome! Please feel free to check [issues](https://github.com/stjude-dnb-binfcore/sc-atac-seq/issues).
 
 ---
 
