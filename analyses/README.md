@@ -1,6 +1,6 @@
-# How to use analysis modules in the single cell ATAC seq workflow (scATACseq)
+# How to use analysis modules in the single-cell ATAC (nucleus) ATAC-seq workflow (scATACseq)
 
-This repository contains a collection of analysis modules designed to process and analyze single cell ATAC (scATAC) data from 10X sequencing technology. 
+This repository contains a collection of analysis modules designed to process and analyze single-cell ATAC (nucleus) ATAC-seq data from 10X sequencing technology. 
 
 **Analysis modules**
 

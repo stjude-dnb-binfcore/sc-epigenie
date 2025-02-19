@@ -11,9 +11,9 @@
 </p>
 
 
-# Single cell/Single-nucleus ATAC seq workflow  (scATACseq)
+# Single-cell (nucleus) ATAC-seq workflow  (scATACseq)
 
-This repository contains a collection of analysis modules designed to process and analyze single cell ATAC (scATAC) data from 10X sequencing technology.  
+This repository contains a collection of analysis modules designed to process and analyze single-cell ATAC (nucleus) ATAC-seq data from 10X sequencing technology.  
 
 
 ## To access the code in this repository:
