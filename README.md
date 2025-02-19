@@ -1,12 +1,17 @@
-<p align="center">
-  <img src="figures/img/DNB-BINF-Core-logo.png" alt="ScATACSeq repository logo" width="560px" />
+<p align="center";">
+  <img src="figures/img/DNB-BINF-Core-logo.png" alt="sc-atac-seq repository logo" width="560px" />
 </p>
-<p align="center">
-  <a href="https://www.repostatus.org/#active"><img src="https://www.repostatus.org/badges/latest/active.svg?style=for-the-badge" alt="The project has reached a stable, usable state and is being actively developed." /></a>
-
+<p align="center";">
+  <a href="https://www.repostatus.org/#active">
+    <img src="https://www.repostatus.org/badges/latest/active.svg?style=for-the-badge" alt="The project has reached a stable, usable state and is being actively developed." />
+  </a>
+  <a href="https://github.com/stjude-dnb-binfcore/sc-atac-seq">
+    <img src="https://img.shields.io/badge/version-1.0.0-brightgreen" alt="Version" />
+  </a>
 </p>
 
-# Single cell/Single-nucleus ATAC Seq workflow (ScATACSeq)
+
+# Single cell/Single-nucleus ATAC seq workflow  (scATACseq)
 
 This repository contains a collection of analysis modules designed to process and analyze single cell ATAC (scATAC) data from 10X sequencing technology.  
 
