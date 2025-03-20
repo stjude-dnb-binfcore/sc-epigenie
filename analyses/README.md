@@ -9,10 +9,9 @@ Each module is self-contained and can be executed independently or as part of a 
 
 🚧 ⚠️🚧 ⚠️🚧 ⚠️🚧 ⚠️🚧⚠️ **Currently under construction** 🚧 ⚠️ 🚧 ⚠️🚧 ⚠️🚧 ⚠️
 
-
-1. `cellranger-analysis` module (description="Pipeline for running and summarizing Cell Ranger count for single or multiple libraries.", required=True)
-
-2. `upstream-analysis` module (description="Pipeline for estimating QC metrics and filtering low quality cells.", required=True)
+1. `fastqc-analysis` module (description="Pipeline for FastQC quality control tool for high throughput sequence data analysis.", required=True)
+2. `cellranger-analysis` module (description="Pipeline for running and summarizing Cell Ranger count for single or multiple libraries.", required=True)
+3. `upstream-analysis` module (description="Pipeline for estimating QC metrics and filtering low quality cells.", required=True)
 
 
 
