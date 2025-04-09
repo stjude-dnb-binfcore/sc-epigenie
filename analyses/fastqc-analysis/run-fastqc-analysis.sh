@@ -6,8 +6,6 @@ set -o pipefail
 # set up running directory
 cd "$(dirname "${BASH_SOURCE[0]}")" 
 
-#!/bin/bash
-
 ########################################################################
 # Read metadata_dir from YAML configuration file
 metadata_dir=$(grep 'metadata_dir:' ../../project_parameters.Config.yaml | awk '{print $2}')
