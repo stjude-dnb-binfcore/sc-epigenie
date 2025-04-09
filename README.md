@@ -8,24 +8,45 @@
 
 # Single cell/Single-nucleus ATAC Seq workflow (ScATACSeq)
 
-This repository contains a collection of analysis modules designed to process and analyze single cell ATAC (scATAC) data from 10X sequencing technology.  
+ScATACSeq is a comprehensive suite of tools and workflows for analyzing single-cell ATAC (scATAC-Seq) data from 10X Genomics sequencing technology supporting human, mouse, and dual genome cohorts. ScATACSeq is an initiative of the [Bioinformatics Core](https://www.stjude.org/research/departments/developmental-neurobiology/shared-resources/bioinformatic-core.html) at the Department of Developmental Neurobiology at the St. Jude Children's Research Hospital.
 
 
-## To access the code in this repository:
+## Table of Contents
+1. [Getting Started](#getting-started)
+2. [Installation](#installation)
+3. [Tutorial and Documentation](#tutorial-and-documentation)
+4. [How to Use the Repository](#how-to-use-the-repository)
+   - [Accessing the Code](#accessing-the-code)
+   - [Running the Code](#running-the-code)
+5. [Requesting Resources from the HPCF Cluster](#requesting-resources-from-the-hpcf-cluster)
 
-### Clone option
-1. Clone the repository
-```
-git clone https://github.com/stjude-dnb-binfcore/sc-atac-seq.git
-```
 
-### Fork option
-1. Fork the repository on your own account from the main page of the `stjude-dnb-binfcore/sc-atac-seq` by clicking the “Fork” button
+## Getting Started
+
+### Installation
+
+To begin using the ScATACSeq pipeline, follow the instructions below to set up the environment and run the code. A pre-built [Docker image](https://github.com/stjude-dnb-binfcore/sc-atac-seq/blob/main/run-container/README.md) is available for easy setup, containing all the necessary tools, packages, and dependencies to seamlessly run the code and analysis modules. 
+
+### Tutorial and Documentation
+
+Not yet available 🚧 🚧 🚧 
+
+
+### How to Use the Repository
+
+#### Accessing the Code
+
+1. Fork the repository
+
+Navigate to the main page of the `stjude-dnb-binfcore/sc-atac-seq` repository and click the "Fork" button.
 
 <img width="650" alt="how-to-fork-repo-1" src="https://github.com/user-attachments/assets/1fc0a459-2c8c-4d2e-ab6b-6abaafae963e">
 
 
-2. Change the name if you like, but probably not; click “Create fork”
+2. Create Your Fork
+
+You can change the name of the forked repository (optional - unless you will use it for multiple projects). Click "Create fork" to proceed.
+
 
 <img width="650" alt="how-to-fork-repo-2" src="https://github.com/user-attachments/assets/914a3db5-6e87-41fb-baf2-a50ffdb2a7c0">
 
@@ -35,41 +56,78 @@ git clone https://github.com/stjude-dnb-binfcore/sc-atac-seq.git
 <img width="650" alt="how-to-fork-repo-3" src="https://github.com/user-attachments/assets/073abb78-3993-4527-a574-859fd3046d39">
 
 
-## To run the code in this repository:
+4. Clone Your Fork
 
-1. Replace the `project_parameters.Config.yaml` with your file paths and parameters.
+Once you have created the fork, clone it to your local machine:
 
-2. Navigate to an analysis module and run the shell script of interest:
+```
+git clone https://github.com/<FORK_NAME>.git
+```
+
+#### Running the Code
+
+1. Configure Your Parameters
+
+Replace the `project_parameters.Config.yaml` file with your own file paths and parameters.
+
+
+2. Navigate to an Analysis Module
+
+Change to the relevant directory and run the desired shell script:
+
 ```
 cd ./sc-atac-seq/analyses/<module_of_interest>
 ```
 
-**If you have forked the repo, you will need to do the following steps before running the script of interest. If you have cloned the repo, you can skip this.**
+3. Sync Your Fork
 
-You need to do `sync fork` of your project repo at GitHub before running a module, if your branch is behind the main branch of the `stjude-dnb-binfcore/sc-atac-seq:main`. This will update the main branch of your project repo with the new code and modules (if any). This will add code and not break any analyses already run in your project repo. 
+If your fork is behind the main repository (`stjude-dnb-binfcore/sc-atac-seq:main`), sync it to ensure you have the latest updates. This will update the main branch of your project repo with the new code and modules (if any). This will add code and not break any analyses already run in your project repo. 
 
-Then navigate to your `./sc-atac-seq` project repo and ensure you are at the `main` branch (in case you have featured branches). If not, you will need to `git checkout` to the main branch.
 ```
 git branch
 git checkout main
-```
-
-Finally, `git pull` to get the most updated changes and code in your project repo. Please be mindful of any changes in files in your project repo that you have done, e.g., `project_parameters.Config.yaml`. You will need to commit or stash (or restore) the changes to the yaml before completing the pull.
-```
 git pull
 ```
 
+Finally, `git pull` to get the most updated changes and code in your project repo. Please be mindful of any local changes in files in your project repo that you have done, e.g., `project_parameters.Config.yaml`. You will need to commit or stash (or restore) the changes to the yaml before completing the pull.
+
+```
+git status
+git add project_parameters.Config.yaml
+git commit -m "Update yaml"
+```
+
+```
+git config pull.rebase false
+git pull
+```
+
+### Requesting Resources from the HPCF Cluster
+
+While we provide estimates for the computational resources required (based on 8 samples with approximately 50,000 cells), users may need to adjust memory settings based on cohort size and analysis requirements.
+
+Important Considerations:
+
+  - Adjust memory requests according to the size of your cohort and specific analysis needs.
+  - For St. Jude users, refer to the [Introduction to the HPCF cluster](https://wiki.stjude.org/display/HPCF/Introduction+to+the+HPCF+cluster#IntroductiontotheHPCFcluster-queuesQueues:) for detailed guidance.
+  - For St. Jude users, if you require more than 1 TB of memory, use the `large_mem` queue to ensure proper resource allocation.
+  
 
 ### Below is the main directory structure listing the analyses and data files used in this repository
 
 ```
 ├── analyses
-|  ├── ...
-|  └── README.md
+|  ├── cellranger-analysis
+|  ├── fastqc-analysis
+|  ├── README.md
+|  └── upstream-analysis
 ├── figures
 ├── LICENSE
 ├── project_parameters.Config.yaml
 ├── README.md
+├── run-container
+├── run-rstudio.sh
+├── run-terminal.sh
 └── SECURITY.md
 ```
 
