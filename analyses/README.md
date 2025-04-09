@@ -6,12 +6,12 @@ This repository contains a collection of analysis modules designed to process an
 
 Each module is self-contained and can be executed independently or as part of a larger analysis pipeline. Below is a summary of each analysis module, including whether they are required or optional. Furthermore, the analysis modules should be run in the following recommended order:
 
-
-🚧 ⚠️🚧 ⚠️🚧 ⚠️🚧 ⚠️🚧⚠️ **Currently under construction** 🚧 ⚠️ 🚧 ⚠️🚧 ⚠️🚧 ⚠️
-
 1. `fastqc-analysis` module (description="Pipeline for FastQC quality control tool for high throughput sequence data analysis.", required=True)
 2. `cellranger-analysis` module (description="Pipeline for running and summarizing Cell Ranger count for single or multiple libraries.", required=True)
 3. `upstream-analysis` module (description="Pipeline for estimating QC metrics and filtering low quality cells.", required=True)
+
+
+🚧 🚧 🚧 Analysis modules under development 🚧 🚧 🚧
 
 
 
