@@ -10,10 +10,13 @@ Each module is self-contained and can be executed independently or as part of a 
 2. `cellranger-analysis` module (description="Pipeline for running and summarizing Cell Ranger count for single or multiple libraries.", required=True)
 3. `upstream-analysis` module (description="Pipeline for estimating QC metrics and filtering low quality cells.", required=True)
 
+________________________________________________________________________________________ 
 
-🚧 🚧 🚧 Analysis modules under development 🚧 🚧 🚧
+🚧🚧🚧 Analysis Modules Under Development 🚧🚧🚧
 
+The analysis modules are currently being developed. Please check back later for updates!
 
+________________________________________________________________________________________
 
 
 ## Contact

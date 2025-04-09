@@ -29,7 +29,7 @@ To begin using the ScATACSeq pipeline, follow the instructions below to set up t
 
 ### Tutorial and Documentation
 
-Not yet available 🚧 🚧 🚧 
+Currently under construction. Stay tuned! 🚧🚧🚧 
 
 
 ### How to Use the Repository
