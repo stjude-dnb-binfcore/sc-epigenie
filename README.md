@@ -109,8 +109,9 @@ While we provide estimates for the computational resources required (based on 8 
 Important Considerations:
 
   - Adjust memory requests according to the size of your cohort and specific analysis needs.
-  - For St. Jude users, refer to the [Introduction to the HPCF cluster](https://wiki.stjude.org/display/HPCF/Introduction+to+the+HPCF+cluster#IntroductiontotheHPCFcluster-queuesQueues:) for detailed guidance.
-  - For St. Jude users, if you require more than 1 TB of memory, use the `large_mem` queue to ensure proper resource allocation.
+  - For St. Jude users:
+    - Refer to the [Introduction to the HPCF cluster](https://wiki.stjude.org/display/HPCF/Introduction+to+the+HPCF+cluster#IntroductiontotheHPCFcluster-queuesQueues:) for detailed guidance.
+    - If you require more than 1 TB of memory, use the `large_mem` queue to ensure proper resource allocation.
   
 
 ### Below is the main directory structure listing the analyses and data files used in this repository
