@@ -23,7 +23,7 @@ queue="standard"
 # Function to check if there are any running jobs with the title pattern `ID.DST<some number here>`
 check_jobs() {
     # Query bjobs and filter for jobs with titles matching the pattern
-    bjobs_output=$(bjobs | grep "DYE[0-9]*")
+    bjobs_output=$(bjobs | grep "DST[0-9]*")
 
     # If the output is empty, there are no matching jobs
     if [ -z "$bjobs_output" ]; then
