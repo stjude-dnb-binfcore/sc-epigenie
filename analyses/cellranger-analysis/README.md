@@ -33,7 +33,7 @@ This folder contains scripts tasked to run and summarize Cell Ranger count for s
 
 This module uses CellRanger-atac v2.1.0 for the alignment.
 
-For more information, on how to review  the web summary file in the output folder of the Cell Ranger ATAC analysis software, please see [Interpreting Cell Ranger ATAC Web Summary Files for Single Cell ATAC Assay](chrome-extension://efaidnbmnnnibpcajpcglclefindmkaj/https://cdn.10xgenomics.com/image/upload/v1660261285/support-documents/CG000202_TechnicalNote_InterpretingCellRangerATACWebSummaryFiles_RevB.pdf).
+For more information, on how to review  the web summary file in the output folder of the Cell Ranger ATAC analysis software, please see the [Interpreting Cell Ranger ATAC Web Summary Files for Single Cell ATAC Assay](https://www.10xgenomics.com/support/epi-atac/documentation/steps/sequencing/interpreting-cell-ranger-atac-web-summary-files-for-single-cell-atac-assay) file.
 
 
 ## Folder structure 
