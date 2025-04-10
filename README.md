@@ -6,9 +6,9 @@
 
 </p>
 
-# Single cell/Single-nucleus ATAC Seq workflow (ScATACSeq)
+# Single cell ATAC-sequencing Workflow (scATAC-seq)
 
-ScATACSeq is a comprehensive suite of tools and workflows for analyzing single-cell ATAC (scATAC-Seq) data from 10X Genomics sequencing technology supporting human, mouse, and dual genome cohorts. ScATACSeq is an initiative of the [Bioinformatics Core](https://www.stjude.org/research/departments/developmental-neurobiology/shared-resources/bioinformatic-core.html) at the Department of Developmental Neurobiology at the St. Jude Children's Research Hospital.
+`scATAC-seq` is a comprehensive suite of tools and workflows for analyzing single-cell ATAC (scATAC-Seq) data from 10X Genomics sequencing technology supporting human, mouse, and dual genome cohorts. `scATAC-seq` is an initiative of the [Bioinformatics Core](https://www.stjude.org/research/departments/developmental-neurobiology/shared-resources/bioinformatic-core.html) at the Department of Developmental Neurobiology at the St. Jude Children's Research Hospital.
 
 
 ## Table of Contents
@@ -25,7 +25,7 @@ ScATACSeq is a comprehensive suite of tools and workflows for analyzing single-c
 
 ### Installation
 
-To begin using the ScATACSeq pipeline, follow the instructions below to set up the environment and run the code. A pre-built [Docker image](https://github.com/stjude-dnb-binfcore/sc-atac-seq/blob/main/run-container/README.md) is available for easy setup, containing all the necessary tools, packages, and dependencies to seamlessly run the code and analysis modules. 
+To begin using the `scATAC-seq` workflow, follow the instructions below to set up the environment and run the code. A pre-built [Docker image](https://github.com/stjude-dnb-binfcore/sc-atac-seq/blob/main/run-container/README.md) is available for easy setup, containing all the necessary tools, packages, and dependencies to seamlessly run the code and analysis modules. 
 
 ### Tutorial and Documentation
 
@@ -104,7 +104,7 @@ git pull
 
 ### Requesting Resources from the HPCF Cluster
 
-While we provide estimates for the computational resources required (based on 8 samples with approximately 50,000 cells), users may need to adjust memory settings based on cohort size and analysis requirements.
+While we provide estimates for the computational resources required (based on 4 samples with approximately 80,000 cells), users may need to adjust memory settings based on cohort size and analysis requirements.
 
 Important Considerations:
 
