@@ -35,7 +35,7 @@ echo "$cellranger_parameters"  # Output: This is a string with quotes.
 module_dir=$rootdir/analyses/cellranger-analysis
 echo "$module_dir"
 
-results_dir=results-test4
+results_dir=results-test1
 echo "$results_dir"
 
 mkdir -p ./$results_dir/01_logs
@@ -95,7 +95,7 @@ tail -n +2 "$SAMPLES_FILE" | sort -t$'\t' -k2,2 | cut -f 1-3 | while IFS=$'\t' r
 
   # Check if the command was successful
   if [ $? -eq 0 ]; then
-    echo "cellranger-atac count completed successfully for sample $SAMPLE."
+    echo "Cellranger-atac count completed successfully for sample $SAMPLE."
   else
     echo "Error: cellranger-atac count failed for sample $SAMPLE."
   fi

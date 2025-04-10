@@ -17,10 +17,11 @@ echo "$rootdir"
 ########################################################################
 # Set up variables
 prefix="${rootdir}/analyses/cellranger-analysis"
+results_dir=results-test1
 
 ########################################################################
 # Create directories to save output files to
-mkdir -p ${prefix}/results
+mkdir -p ${prefix}/$results_dir
 
 ########################################################################
 # File in which we store the output text to verify the job execution order.

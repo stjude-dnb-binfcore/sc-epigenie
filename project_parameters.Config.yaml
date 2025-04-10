@@ -1,31 +1,28 @@
 # the following parameters are the same across the project and might be needed in more than one module #
 root_dir: "./sc-atac-seq" # path to the main dir of the project where GitHub repo lives
 data_dir: "./sc-atac-seq/analyses/cellranger-analysis/results/02_cellranger_count/DefaultParameters" # path to data dir of the project with CellRanger output results
-metadata_dir: "./test-dataset" # path to metadata dir of the project
-genome_name: "GRCm39" # define genome reference and versioning
-PROJECT_NAME: "mouse-test-dataset"
-PI_NAME: "NA"
+metadata_dir: "./project_metadata" # path to metadata dir of the project
+genome_name: "mm10" # define genome reference and versioning. Options: "GRCh38", "GRCm39" ("mm10"), "GRCh38ANDGRCm39" ("GRCh38_mm10"), and "GRCh38_GFP_tdTomato", for human, mouse, and dual index genomes, respectively.
+PROJECT_NAME: "Victoria_Knockout - Testing cohort"
+PI_NAME: "Michael A. Dyer, PhD"
 TASK_ID: "NA"
 PROJECT_LEAD_NAME: "NA"
 DEPARTMENT: "Developmental Neurobiology"
 LEAD_ANALYSTS: "Antonia Chroni, PhD"
 GROUP_LEAD: "Cody A. Ramirez, PhD"
 CONTACT_EMAIL: "antonia.chroni@stjude.org"
-PIPELINE: "Standard sc-/sn-ATAC-Seq Analysis in 10X Genomics data"
+PIPELINE: "Standard scATAC-Seq Analysis in 10X Genomics data"
 START_DATE: "NA"
 COMPLETION_DATE: "ONGOING"
 
-
 # the following parameters are set up as default values and/or are specific for the following modules: 
 # `./analyses/fastqc-analysis`
-# path to the fastqc files for the `fastqc-analysis` module
-fastqc_dir: 
-  - /.
-#  - /.
+# FASTQ paths to the fastqc files with format: `path1/*R1-R3*.fastq.gz` are extracted from the `metadata_dir`.
+# No need to manually define variables
 
 # `./analyses/cellranger-analysis`
-genome_reference_path: "./" #path to genome reference to be used for the `cellranger-analysis` module
+genome_reference_path: "./reference_genomes/cellranger-sc-atac-seq/2020-A/mus_musculus/mm10/downloads/refdata-cellranger-arc-mm10-2020-A-2.0.0" #path to genome reference to be used for the `cellranger-analysis` module
 cellranger_parameters: "DefaultParameters" # or "ForcedCells8000Parameters" etc
-genome_name_cellranger: "GRCm39" #please define the genome of preference for dual genomes. In case for single genomes, please use the same as used for `genome_name`.
+genome_name_cellranger: "mm10" #please define the genome of preference for dual genomes. In case for single genomes, please use the same as used for `genome_name`.
 
 # `./analyses/upstream-analysis`
