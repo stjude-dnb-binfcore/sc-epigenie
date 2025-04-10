@@ -24,5 +24,6 @@ COMPLETION_DATE: "ONGOING"
 genome_reference_path: "./reference_genomes/cellranger-sc-atac-seq/2020-A/mus_musculus/mm10/downloads/refdata-cellranger-arc-mm10-2020-A-2.0.0" #path to genome reference to be used for the `cellranger-analysis` module
 cellranger_parameters: "DefaultParameters" # or "ForcedCells8000Parameters" etc
 genome_name_cellranger: "mm10" #please define the genome of preference for dual genomes. In case for single genomes, please use the same as used for `genome_name`.
+sample_prefix: "DYE"  # define the prefix with the Sample ID used for the samples of the project. This requires that all of the Sample IDs are the same, e.g., DYE001, DYE002, DYE003 and so on.
 
 # `./analyses/upstream-analysis`
