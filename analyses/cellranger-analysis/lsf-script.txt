@@ -1,8 +1,0 @@
-#BSUB -P project
-#BSUB -J cellranger-analysis
-#BSUB -oo job.out -eo job.err
-#BSUB -n 2
-#BSUB -R "rusage[mem=16GB] span[hosts=1]"
-#BSUB -cwd "."
-
-bash run-cellranger-analysis.sh
