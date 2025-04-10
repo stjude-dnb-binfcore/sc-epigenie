@@ -1,4 +1,4 @@
-# Pipeline for running and summarizing Cell Ranger count for single or multiple libraries for sc-/sn-ATAC-Seq Analysis in 10X Genomics data
+# Pipeline for running and summarizing Cell Ranger count for single or multiple libraries for single-cell ATAC (scATAC-Seq) data analysis in 10X Genomics data
 
 ## Usage
 
@@ -27,7 +27,7 @@ Please note that this will run the analysis module outside of the container whil
 
 ## Folder content
 
-This folder contains scripts tasked to run and summarize Cell Ranger count for single or multiple libraries for sc-/sn-ATAC-Seq Analysis in 10X Genomics data across the project. For more information and updates, please see [Cell Ranger support page](https://support.10xgenomics.com/single-cell-atac/software/pipelines/latest/using/count).
+This folder contains scripts tasked to run and summarize Cell Ranger count for single or multiple libraries for single-cell ATAC (scATAC-Seq) data analysis in 10X Genomics data across the project. For more information and updates, please see [Cell Ranger support page](https://support.10xgenomics.com/single-cell-atac/software/pipelines/latest/using/count).
 
 This module uses CellRanger-atac v2.1.0 for the alignment.
 
@@ -43,9 +43,9 @@ The structure of this folder is as follows:
 ├── results
 |   ├── 01_logs
 |   ├── 02_cellranger_count
-|   |   └── DefaultParameters
+|   |   └── ${cellranger_parameters}
 |   └── 03_cellranger_count_summary
-|       └── DefaultParameters
+|       └── ${cellranger_parameters}
 ├── submit-multiple-jobs.sh
 └── waiter.sh
 ```
