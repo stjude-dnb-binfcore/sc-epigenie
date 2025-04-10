@@ -44,7 +44,7 @@ while true; do
     if check_jobs; then
         echo "$(date +"%D"): $(date +"%T"): No matching jobs found. Submitting the job..." >> waiter.log
         # Submit your job here
-        bsub -P summarize_CellRanger -q ${queue} -n 1 -R "rusage[mem=2GB]" -R "span[hosts=1]" -J j2 -o ${prefix}/j2.out -e ${prefix}/j2.err ${prefix}/j2.bsub
+        bsub -P summarize_CellRanger -q standard -n 1 -R "rusage[mem=2GB]" -R "span[hosts=1]" -J j2 -o ${prefix}/j2.out -e ${prefix}/j2.err ${prefix}/j2.bsub
         break
     else
         echo "$(date +"%D"): $(date +"%T"): Matching jobs found. Sleeping for 10 seconds..." >> waiter.log
