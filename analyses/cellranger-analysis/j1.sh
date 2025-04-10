@@ -62,7 +62,14 @@ fi
 # Single-Library Analysis with cellranger-atac count
 # https://software.10xgenomics.com/single-cell-atac/software/pipelines/latest/using/count
 # To generate single cell accessibility counts for a single library
-cd ./$results_dir/02_cellranger_count/${cellranger_parameters}
+# cd ./$results_dir/02_cellranger_count/${cellranger_parameters}
+
+output_dir="./$results_dir/02_cellranger_count/${cellranger_parameters}"
+cd ${output_dir}
+
+#ID_path="${output_dir}/${ID}"
+# Ensure output directory exists
+# mkdir -p "$ID_path"  # Create the output directory if it doesn't exist
 
 # Loop through each line of the TSV file (skipping the header)
 # Using `cut` to extract the first three columns (ID, SAMPLE, FASTQ)
@@ -92,7 +99,6 @@ tail -n +2 "$SAMPLES_FILE" | sort -t$'\t' -k2,2 | cut -f 1-3 | while IFS=$'\t' r
       --localmem=48 \
       --jobmode=lsf"
 
-
   # Check if the command was successful
   if [ $? -eq 0 ]; then
     echo "Cellranger-atac count completed successfully for sample $SAMPLE."
@@ -101,3 +107,4 @@ tail -n +2 "$SAMPLES_FILE" | sort -t$'\t' -k2,2 | cut -f 1-3 | while IFS=$'\t' r
   fi
 
 done
+########################################################################

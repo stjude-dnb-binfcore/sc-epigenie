@@ -17,7 +17,6 @@ echo "$rootdir"
 ########################################################################
 # Set up variables
 prefix="${rootdir}/analyses/cellranger-analysis"
-queue="standard"
 
 ########################################################################
 # Read multiple values and assign them to variables by parsing yaml file
@@ -52,3 +51,4 @@ while true; do
         sleep 10
     fi
 done
+
