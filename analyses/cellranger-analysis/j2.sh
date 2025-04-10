@@ -23,7 +23,7 @@ echo "$genome_name_cellranger"  # Output: This is a string with quotes.
 
 ########################################################################
 # Create directories to save output files to
-results_dir=results-test1
+results_dir=results
 echo "$results_dir"
 
 mkdir -p ./$results_dir/03_cellranger_count_summary

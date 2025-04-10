@@ -35,7 +35,7 @@ echo "$cellranger_parameters"  # Output: This is a string with quotes.
 module_dir=$rootdir/analyses/cellranger-analysis
 echo "$module_dir"
 
-results_dir=results-test1
+results_dir=results
 echo "$results_dir"
 
 mkdir -p ./$results_dir/01_logs

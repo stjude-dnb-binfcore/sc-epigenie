@@ -17,7 +17,7 @@ echo "$rootdir"
 ########################################################################
 # Set up variables
 prefix="${rootdir}/analyses/cellranger-analysis"
-results_dir=results-test1
+results_dir=results
 
 ########################################################################
 # Create directories to save output files to
