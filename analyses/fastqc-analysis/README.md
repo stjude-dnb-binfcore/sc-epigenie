@@ -32,6 +32,7 @@ bsub < lsf-script.txt
 
 
 ## Folder content
+
 This folder contains a script tasked to run FastQC quality control tool for all libraries across the project. Each libary directory contains the following files:
 - R1 (50bp forward read): This file contains the actual sequence of interest from the experiment. For ATAC-seq or similar applications, R1 typically corresponds to the sequencing of the fragment after the transposase action (for ATAC-seq, this is where you are looking for the inserted fragments). So R1 is crucial for the actual biological signal.
 

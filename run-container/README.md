@@ -1,6 +1,6 @@
 # Running the Container for Single cell ATAC-sequencing Workflow (scATAC-seq)
 
-We provide a Dockerfile and Definition file that include all tools, packages, and dependencies necessary for running the `sc-atac-seq` analysis modules. These are customized for `Rstudio/R v4.4.0` and `Seurat v4.4.0`.
+We provide a Dockerfile and Definition file that include all tools, packages, and dependencies necessary for running the **scATAC-seq** analysis modules. These are customized for `Rstudio/R v4.4.0` and `Seurat v4.4.0`.
 
 For more information on how to access and run the container, please review the [README file for Docker image](https://github.com/stjude-dnb-binfcore/sc-rna-seq-snap/blob/main/run-container/README.md).
 
