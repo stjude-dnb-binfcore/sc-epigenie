@@ -1,8 +1,8 @@
 # the following parameters are the same across the project and might be needed in more than one module #
-root_dir: "./sc-atac-seq" # path to the main dir of the project where GitHub repo lives
-data_dir: "./sc-atac-seq/analyses/cellranger-analysis/results/02_cellranger_count/DefaultParameters" # path to data dir of the project with CellRanger output results
-metadata_dir: "./project_metadata" # path to metadata dir of the project
-genome_name: "mm10" # define genome reference and versioning. Options: "GRCh38", "GRCm39" ("mm10"), "GRCh38ANDGRCm39" ("GRCh38_mm10"), and "GRCh38_GFP_tdTomato", for human, mouse, and dual index genomes, respectively.
+root_dir: "/sc-atac-seq" # path to the main dir of the project where GitHub repo lives
+data_dir: "/sc-atac-seq/analyses/cellranger-analysis/results/02_cellranger_count/DefaultParameters" # path to data dir of the project with CellRanger output results
+metadata_dir: "/data/project_metadata" # path to metadata dir of the project
+genome_name: "GRCm39" # define genome reference and versioning. Options: (1) human: "GRCh38"; (2) mouse: "GRCm39" and "mm10"; and (3) dual index genomes: "GRCh38ANDGRCm39" and "GRCh38_mm10".
 PROJECT_NAME: "Victoria_Knockout - Testing cohort"
 PI_NAME: "Michael A. Dyer, PhD"
 TASK_ID: "NA"
@@ -23,7 +23,7 @@ COMPLETION_DATE: "ONGOING"
 # `./analyses/cellranger-analysis`
 genome_reference_path: "./reference_genomes/cellranger-sc-atac-seq/2020-A/mus_musculus/mm10/downloads/refdata-cellranger-arc-mm10-2020-A-2.0.0" #path to genome reference to be used for the `cellranger-analysis` module
 cellranger_parameters: "DefaultParameters" # or "ForcedCells8000Parameters" etc
-genome_name_cellranger: "mm10" #please define the genome of preference for dual genomes. In case for single genomes, please use the same as used for `genome_name`.
+genome_name_cellranger: "GRCm39" #please define the genome of preference for dual genomes. In case for single genomes, please use the same as used for `genome_name`.
 sample_prefix: "DYE"  # define the prefix with the Sample ID used for the samples of the project. This requires that all of the Sample IDs are the same, e.g., DYE001, DYE002, DYE003 and so on.
 
 # `./analyses/upstream-analysis`
