@@ -22,7 +22,7 @@ if [ ! -f "$metadata_file" ]; then
 fi
 
 ########################################################################
-# Define the column name for FASTQ (adjust to your actual header name)
+# Define the column name for FASTQ - this is by default as defined in the `project_metadata.tsv` file
 fastq_column_name="FASTQ"
 
 # Extract the column number of FASTQ from the header (first line)
