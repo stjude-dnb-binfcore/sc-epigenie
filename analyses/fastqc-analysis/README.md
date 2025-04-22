@@ -59,7 +59,7 @@ The structure of this folder is as follows:
 ├── results
 |   ├── 01-fastqc-reports
 |   ├── 02-multiqc-reports
-|   └──multiqc_report.html
+|   └── multiqc_report.html
 └── run-fastqc-analysis.sh
 ```
 
