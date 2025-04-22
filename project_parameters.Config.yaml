@@ -1,8 +1,8 @@
 # the following parameters are the same across the project and might be needed in more than one module #
-root_dir: "./sc-atac-seq" # path to the main dir of the project where GitHub repo lives
-data_dir: "./sc-atac-seq/analyses/cellranger-analysis/results/02_cellranger_count" # path to data dir of the project with CellRanger output results
-metadata_dir: "./test-dataset" # path to metadata dir of the project
-genome_name: "GRCm39" # define genome reference and versioning
+root_dir: "/sc-atac-seq" # path to the main dir of the project where GitHub repo lives
+data_dir: "/sc-atac-seq/analyses/cellranger-analysis/results/02_cellranger_count" # path to data dir of the project with CellRanger output results
+metadata_dir: "/data/project_metadata" # path to metadata dir of the project
+genome_name: "GRCm39" # define genome reference and versioning. Options: (1) human: "GRCh38"; (2) mouse: "GRCm39" and "mm10"; and (3) dual index genomes: "GRCh38ANDGRCm39" and "GRCh38_mm10".
 PROJECT_NAME: "mouse-test-dataset"
 PI_NAME: "NA"
 TASK_ID: "NA"
@@ -18,10 +18,8 @@ COMPLETION_DATE: "ONGOING"
 
 # the following parameters are set up as default values and/or are specific for the following modules: 
 # `./analyses/fastqc-analysis`
-# path to the fastqc files for the `fastqc-analysis` module
-fastqc_dir: 
-  - /.
-#  - /.
+# FASTQ paths to the fastqc files with format: `path1/*R1-R3*.fastq.gz` are extracted from the `metadata_dir`.
+# No need to manually define variables
 
 # `./analyses/cellranger-analysis`
 genome_reference_path: "./" #path to genome reference to be used for the `cellranger-analysis` module
