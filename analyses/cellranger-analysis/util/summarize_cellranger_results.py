@@ -11,7 +11,8 @@ Date: 			April 10th, 2025
   
   
 import os, sys, argparse, glob, numpy, pandas
-  
+import pandas as pd
+    
   
 def dir_path(string):
   if os.path.isdir(string):
@@ -29,14 +30,64 @@ parser.add_argument('--genome', type=str, help='Only specify the genome you want
 #Converts argument strings to objects and assigns them as attributes of the namespace; e.g. --id -> args.id
 args = parser.parse_args()
 MasterDF = pandas.DataFrame()
+
+
+# CellRanger Atac algorithm does not return values in the `summary.csv` file in percentages as it is supposed to.
+# We need to check first and then convert tp pct to ensure correct flagging
+
+# List of columns to check
+percent_columns = [
+    "Confidently mapped read pairs",
+    "Fraction of genome in peaks",
+    "Fraction of high-quality fragments in cells",
+    "Fraction of high-quality fragments overlapping TSS",
+    "Fraction of high-quality fragments overlapping peaks",
+    "Fraction of transposition events in peaks in cells",
+    "Fragments in nucleosome-free regions",
+    "Non-nuclear read pairs",
+    "Percent duplicates",
+    "Q30 bases in barcode",
+    "Q30 bases in read 1",
+    "Q30 bases in read 2",
+    "Q30 bases in sample index i1",
+    "TSS enrichment score",
+    "Unmapped read pairs",
+    "Valid barcodes"
+]
+
+def convert_to_percent(df, columns):
+    for col in columns:
+        if col in df.columns:
+            # Check if the column is in [0, 1] and convert to %
+            if df[col].max() <= 1.0:
+                df[col] = df[col] * 100
+    return df
   
+# Replace 'args.dir' with your actual path or use argparse
+# base_dir = "/path/to/your/data"
+
 for filename in glob.glob(os.path.join(args.dir, "*", "outs", "summary.csv")):
+    print(f"Processing: {filename}")
+    df = pd.read_csv(filename)
+
+    df = convert_to_percent(df, percent_columns)
+
+    # Save a new version
+    dir_name = os.path.dirname(filename)
+    base_name = os.path.basename(filename).replace(".csv", "_converted.csv")
+    new_path = os.path.join(dir_name, base_name)
+
+    df.to_csv(new_path, index=False)
+    print(f"Saved new version to: {new_path}")
+    
+  
+for filename in glob.glob(os.path.join(args.dir, "*", "outs", "summary_converted.csv")):
   
   # print(filename)
   df = pandas.read_csv(filename)
   df = df.replace(",", "", regex=True)
   df = df.replace("%", "", regex=True)
-      
+  
   #df = df.astype('float')
   # This converts only numeric columns, and ignores the rest
   for col in df.columns:
