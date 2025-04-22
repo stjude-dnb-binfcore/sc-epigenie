@@ -1,0 +1,3 @@
+ID	SAMPLE	FASTQ	condition	tissue_type
+sample1	seq_submission_code1_sample1	/<absolute_filepath>/seq_submission_code1	WT	Retina
+sample2	seq_submission_code2_sample2	/<absolute_filepath>/seq_submission_code2	Knock-out	Retina
