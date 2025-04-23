@@ -89,7 +89,7 @@ tail -n +2 "$SAMPLES_FILE" | sort -t$'\t' -k2,2 | cut -f 1-3 | while IFS=$'\t' r
   
   # Submit job to LSF with appropriate options
   # Avoid setting too many cores – 6 is a sweet spot; higher doesn’t scale linearly and may delay scheduling.
-  bsub -J "${ID}_atac" -n 6 -M 48000 -R "rusage[mem=8000]" -o "${logs_dir}/${ID}.out" -e "${logs_dir}/${ID}.err" \
+  bsub -J "atac_${ID}" -n 6 -M 48000 -R "rusage[mem=8000]" -o "${logs_dir}/${ID}.out" -e "${logs_dir}/${ID}.err" \
    "cellranger-atac count \
       --id="${ID}" \
       --reference="${genome_reference_path}" \
