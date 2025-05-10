@@ -28,7 +28,7 @@ echo "$sample_prefix"  # Output: This is a string with quotes.
 # Function to check if there are any running jobs with the title pattern `ID.DST<some number here>`
 check_jobs() {
     # Query bjobs and filter for jobs with titles matching the pattern
-    bjobs_output=$(bjobs | grep "$sample_prefix[0-9]*")
+    bjobs_output=$(bjobs | grep -E "^${sample_prefix}[0-9]+")
 
     # If the output is empty, there are no matching jobs
     if [ -z "$bjobs_output" ]; then
