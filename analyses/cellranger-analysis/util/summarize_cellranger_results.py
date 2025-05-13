@@ -112,7 +112,7 @@ for filename in glob.glob(os.path.join(args.dir, "*", "outs", "summary_converted
            TotalWarnings += 1
   elif args.genome == "GRCh38":
           if df.iloc[0]["GRCh38 Estimated number of cells"] < 500:
-             Warnings = Warnings + "GRCh38 Estimated Number of Cells < 500, "
+             Warnings = Warnings + "GRCh38 Estimated Number of cells < 500, "
              TotalWarnings += 1
   elif args.genome == "GRCm39":
           if df.iloc[0]["GRCm39 Estimated number of cells"] < 500:
@@ -124,12 +124,12 @@ for filename in glob.glob(os.path.join(args.dir, "*", "outs", "summary_converted
             MajorWarnings = MajorWarnings + "Estimated number of cells < 100, "
             TotalWarnings += 1
   elif args.genome == "GRCh38":
-           if df.iloc[0]["GRCh38 Estimated number of cells Partitions"] < 100:
-              MajorWarnings = MajorWarnings + "GRCh38 Estimated number of cells Partitions < 100, "
+           if df.iloc[0]["GRCh38 Estimated number of cells"] < 100:
+              MajorWarnings = MajorWarnings + "GRCh38 Estimated number of cells < 100, "
               TotalWarnings += 1
   elif args.genome == "GRCm39":
-           if df.iloc[0]["GRCm39 Estimated number of cells Partitions"] < 100:
-              MajorWarnings = MajorWarnings + "GRCm39 Estimated number of cells Partitions < 100, "
+           if df.iloc[0]["GRCm39 Estimated number of cells"] < 100:
+              MajorWarnings = MajorWarnings + "GRCm39 Estimated number of cells < 100, "
               TotalWarnings += 1
            
   # Mapping Metrics
@@ -147,15 +147,15 @@ for filename in glob.glob(os.path.join(args.dir, "*", "outs", "summary_converted
              TotalWarnings += 1
       
   if args.genome == None:
-        if 2 < df.iloc[0]["Fraction of genome in peaks"] < 20:
+        if df.iloc[0]["Fraction of genome in peaks"] < 0.02 or df.iloc[0]["Fraction of genome in peaks"] > 0.20:
               MajorWarnings = MajorWarnings + "Fraction of genome in peaks < 2% or > 20%, "
               TotalWarnings += 1
   elif args.genome == "GRCh38":
-         if 2 < df.iloc[0]["GRCh38 Fraction of genome in peaks"] < 20:
+        if df.iloc[0]["GRCh38 Fraction of genome in peaks"] < 0.02 or df.iloc[0]["GRCh38 Fraction of genome in peaks"] > 0.20:
               MajorWarnings = MajorWarnings + "GRCh38 Fraction of genome in peaks < 2% or > 20%, "
               TotalWarnings += 1
   elif args.genome == "GRCm39":
-          if 2 < df.iloc[0]["GRCm39 Fraction of genome in peaks"] < 20:
+        if df.iloc[0]["GRCm39 Fraction of genome in peaks"] < 0.02 or df.iloc[0]["GRCm39 Fraction of genome in peaks"] > 0.20:
               MajorWarnings = MajorWarnings + "GRCm39 Fraction of genome in peaks < 2% or > 20%, "
               TotalWarnings += 1
       
@@ -284,15 +284,15 @@ for filename in glob.glob(os.path.join(args.dir, "*", "outs", "summary_converted
                 
   if args.genome == None:
           if df.iloc[0]["TSS enrichment score"] < 5:
-              MajorWarnings = MajorWarnings + "TSS enrichment score < 5%, "
+              MajorWarnings = MajorWarnings + "TSS enrichment score < 5, "
               TotalWarnings += 1
   elif args.genome == "GRCh38":
           if df.iloc[0]["GRCh38 TSS enrichment score"] < 5:
-              MajorWarnings = MajorWarnings + "GRCh38 TSS enrichment score < 5%, "
+              MajorWarnings = MajorWarnings + "GRCh38 TSS enrichment score < 5, "
               TotalWarnings += 1
   elif args.genome == "GRCm39":
           if df.iloc[0]["GRCm39 TSS enrichment score"] < 5:
-              MajorWarnings = MajorWarnings + "GRCm39 TSS enrichment score < 5%, "
+              MajorWarnings = MajorWarnings + "GRCm39 TSS enrichment score < 5, "
               TotalWarnings += 1
               
   if args.genome == None:

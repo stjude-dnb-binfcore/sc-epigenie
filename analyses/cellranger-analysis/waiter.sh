@@ -16,39 +16,43 @@ echo "$rootdir"
 
 ########################################################################
 # Set up variables
-prefix="${rootdir}/analyses/cellranger-analysis"
+jobdir="${rootdir}/analyses/cellranger-analysis"
 
 ########################################################################
-# Read multiple values and assign them to variables by parsing yaml file
-sample_prefix=$(cat ${rootdir}/project_parameters.Config.yaml | grep 'sample_prefix:' | awk '{print $2}')
-sample_prefix=${sample_prefix//\"/}  # Removes all double quotes
-echo "$sample_prefix"  # Output: This is a string with quotes.
+# Define array with sample_prefix
+mapfile -t sample_prefix < <(grep '^ *-' ${rootdir}/project_parameters.Config.yaml | sed 's/^ *- *//')
+
+# Print the sample_prefix for debugging
+echo "Extracted sample_prefix:"
+for p in "${sample_prefix[@]}"; do
+    echo "$p"
+done
 
 ########################################################################
-# Function to check if there are any running jobs with the title pattern `ID.DST<some number here>`
+# Function to check if there are any running jobs with the title pattern `WT123`, `KNOCKOUT456`, etc.
 check_jobs() {
-    # Query bjobs and filter for jobs with titles matching the pattern
-    bjobs_output=$(bjobs | grep "$sample_prefix[0-9]*")
-
-    # If the output is empty, there are no matching jobs
-    if [ -z "$bjobs_output" ]; then
-        return 0  # No matching jobs
-    else
-        return 1  # Matching jobs found
-    fi
+    # Loop through each prefix and check for jobs
+    for job_prefix in "${sample_prefix[@]}"; do
+        pattern="${job_prefix}[0-9]+"
+        # Check for jobs using the pattern
+        if bjobs | grep -E "$pattern" > /dev/null; then
+            echo "Found matching job: $pattern"
+            return 1  # Jobs still running
+        fi
+    done
+    return 0  # No matching jobs
 }
- 
+
 
 # Loop until no matching jobs are found
 while true; do
     if check_jobs; then
         echo "$(date +"%D"): $(date +"%T"): No matching jobs found. Submitting the job..." >> waiter.log
         # Submit your job here
-        bsub -P summarize_CellRanger -q standard -n 1 -R "rusage[mem=2GB]" -R "span[hosts=1]" -J j2 -o ${prefix}/j2.out -e ${prefix}/j2.err ${prefix}/j2.bsub
+        bsub -P summarize_CellRanger -q standard -n 1 -R "rusage[mem=2GB]" -R "span[hosts=1]" -J j2 -o ${jobdir}/j2.out -e ${jobdir}/j2.err ${jobdir}/j2.bsub
         break
     else
         echo "$(date +"%D"): $(date +"%T"): Matching jobs found. Sleeping for 10 seconds..." >> waiter.log
         sleep 10
     fi
-done
-
+done 

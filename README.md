@@ -6,13 +6,13 @@
     <img src="https://www.repostatus.org/badges/latest/active.svg?style=for-the-badge" alt="The project has reached a stable, usable state and is being actively developed." />
   </a>
   <a href="https://github.com/stjude-dnb-binfcore/sc-atac-seq">
-    <img src="https://img.shields.io/badge/version-1.0.0-brightgreen" alt="Version" />
+    <img src="https://img.shields.io/badge/version-1.0.0.beta-brightgreen" alt="Version" />
   </a>
 </p>
 
 # Single cell ATAC-sequencing Workflow (scATAC-seq)
 
-**scATAC-seq** is a comprehensive suite of tools and workflows for analyzing single-cell ATAC (scATAC-Seq) data from 10X Genomics sequencing technology supporting human, mouse, and dual genome cohorts. **scATAC-seq** is an initiative of the [Bioinformatics Core](https://www.stjude.org/research/departments/developmental-neurobiology/shared-resources/bioinformatic-core.html) at the Department of Developmental Neurobiology at the St. Jude Children's Research Hospital.
+**scATAC-seq** is a comprehensive suite of tools and workflows for analyzing single-cell ATAC (scATAC-Seq) data from 10X Genomics sequencing technology supporting human and mouse genome cohorts. **scATAC-seq** is an initiative of the [Bioinformatics Core](https://www.stjude.org/research/departments/developmental-neurobiology/shared-resources/bioinformatic-core.html) at the Department of Developmental Neurobiology at the St. Jude Children's Research Hospital.
 
 
 ## Table of Contents
@@ -35,14 +35,13 @@ To begin using the **scATAC-seq** workflow, follow the instructions below to set
 
 Currently under construction. Stay tuned! 🚧🚧🚧 
 
-
 ### Preparing project metadata
 
-The pipeline requires a TSV file containing essential metadata for cohort analysis. The file must be named `project_metadata.tsv`. It can include one or more samples, as long as it contains at least the following columns in this exact order: `ID`, `SAMPLE`, and `FASTQ`. The `ID` column must contain unique values. Additional metadata columns can be added and arranged as needed by the user (though not required). 
+The pipeline requires a TSV file containing essential metadata for cohort analysis. The file must be named `project_metadata.tsv`. It can include one or more samples, as long as it contains at least the following columns in this exact order: `ID`, `SAMPLE`, and `FASTQ`. The `ID` column must contain unique values. The `SAMPLE` column must contain the `seq_submission_code` along with the ID, e.g., `seq_submission_code1_sample1` or the corresponding library name. The `FASTQ` column must contain the file path to the fastq files. For samples with top-ups or multiple technical replicates, list all associated library names and FASTQ file paths in the same row, using commas to separate each path. Additional metadata columns can be added and arranged as needed by the user (though not required).
 
 The file can be stored anywhere, but its filepath must be specified in the `project_parameters.Config.yaml` file.
 
-For user convenience, an example [project_metadata.tsv](https://github.com/stjude-dnb-binfcore/sc-atac-seq/blob/main/data/project_metadata) file is provided.
+For user convenience, an example [project_metadata.tsv](https://github.com/stjude-dnb-binfcore/sc-rna-seq-snap/blob/main/data/project_metadata) file is provided.
 
 
 ### How to Use the Repository
@@ -143,8 +142,7 @@ Important Considerations:
 ├── analyses
 |  ├── cellranger-analysis
 |  ├── fastqc-analysis
-|  ├── README.md
-|  └── upstream-analysis
+|  └── README.md
 ├── figures
 ├── LICENSE
 ├── project_parameters.Config.yaml
