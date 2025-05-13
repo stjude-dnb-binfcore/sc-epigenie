@@ -1,16 +1,16 @@
 <p align="center";">
-  <img src="figures/img/DNB-BINF-Core-logo.png" alt="sc-atac-seq repository logo" width="560px" />
+  <img src="figures/img/DNB-BINF-Core-logo.png" alt="sc-epigenie repository logo" width="560px" />
 </p>
 <p align="center";">
   <a href="https://www.repostatus.org/#active">
     <img src="https://www.repostatus.org/badges/latest/active.svg?style=for-the-badge" alt="The project has reached a stable, usable state and is being actively developed." />
   </a>
-  <a href="https://github.com/stjude-dnb-binfcore/sc-atac-seq">
+  <a href="https://github.com/stjude-dnb-binfcore/sc-epigenie">
     <img src="https://img.shields.io/badge/version-1.0.0.beta-brightgreen" alt="Version" />
   </a>
 </p>
 
-# Single cell ATAC-sequencing Workflow (scATAC-seq)
+# scEpiGenie: A Workflow for Single-cell ATAC-seq (scATAC-seq)
 
 **scATAC-seq** is a comprehensive suite of tools and workflows for analyzing single-cell ATAC (scATAC-Seq) data from 10X Genomics sequencing technology supporting human and mouse genome cohorts. **scATAC-seq** is an initiative of the [Bioinformatics Core](https://www.stjude.org/research/departments/developmental-neurobiology/shared-resources/bioinformatic-core.html) at the Department of Developmental Neurobiology at the St. Jude Children's Research Hospital.
 
@@ -29,7 +29,7 @@
 
 ### Installation
 
-To begin using the **scATAC-seq** workflow, follow the instructions below to set up the environment and run the code. A pre-built [Docker image](https://github.com/stjude-dnb-binfcore/sc-atac-seq/blob/main/run-container/README.md) is available for easy setup, containing all the necessary tools, packages, and dependencies to seamlessly run the code and analysis modules. 
+To begin using the **scATAC-seq** workflow, follow the instructions below to set up the environment and run the code. A pre-built [Docker image](https://github.com/stjude-dnb-binfcore/sc-epigenie/blob/main/run-container/README.md) is available for easy setup, containing all the necessary tools, packages, and dependencies to seamlessly run the code and analysis modules. 
 
 ### Tutorial and Documentation
 
@@ -48,11 +48,11 @@ For user convenience, an example [project_metadata.tsv](https://github.com/stjud
 
 #### Accessing the Code
 
-We recommend that users fork the `sc-atac-seq` repository and then clone their forked repository to their local machine. Team members should use the [stjude-dnb-binfcore](https://github.com/stjude-dnb-binfcore) account, while others can use their preferred GitHub account. We welcome collaborations, so please feel free to reach out if you're interested in being added to the `stjude-dnb-binfcore` account.
+We recommend that users fork the `sc-epigenie` repository and then clone their forked repository to their local machine. Team members should use the [stjude-dnb-binfcore](https://github.com/stjude-dnb-binfcore) account, while others can use their preferred GitHub account. We welcome collaborations, so please feel free to reach out if you're interested in being added to the `stjude-dnb-binfcore` account.
 
 1. Fork the repository
 
-Navigate to the main page of the `stjude-dnb-binfcore/sc-atac-seq` repository and click the "Fork" button.
+Navigate to the main page of the `stjude-dnb-binfcore/sc-epigenie` repository and click the "Fork" button.
 
 <img width="650" alt="how-to-fork-repo-1" src="https://github.com/user-attachments/assets/1fc0a459-2c8c-4d2e-ab6b-6abaafae963e">
 
@@ -90,14 +90,14 @@ Replace the `project_parameters.Config.yaml` file with your own file paths and p
 Change to the relevant directory and run the desired shell script:
 
 ```
-cd ./sc-atac-seq/analyses/<module_of_interest>
+cd ./sc-epigenie/analyses/<module_of_interest>
 ```
 
 3. Sync Your Fork
 
-User needs to ensure that the main branch of the forked repository is always up to date with `stjude-dnb-binfcore/sc-atac-seq:main`. 
+User needs to ensure that the main branch of the forked repository is always up to date with `stjude-dnb-binfcore/sc-epigenie:main`. 
 
-If your fork is behind the main repository (`stjude-dnb-binfcore/sc-atac-seq:main`), sync it to ensure you have the latest updates. This will update the main branch of your project repo with the new code and modules (if any). This will add code and not break any analyses already run in your project repo. 
+If your fork is behind the main repository (`stjude-dnb-binfcore/sc-epigenie:main`), sync it to ensure you have the latest updates. This will update the main branch of your project repo with the new code and modules (if any). This will add code and not break any analyses already run in your project repo. 
 
 When syncing your forked repository with the main repository, please be cautious of any changes made to the following files, as they are typically modified and specified for project data analysis:
 
@@ -155,7 +155,7 @@ Important Considerations:
 
 ## Contact
 
-Contributions, issues, and feature requests are welcome! Please feel free to check [issues](https://github.com/stjude-dnb-binfcore/sc-atac-seq/issues).
+Contributions, issues, and feature requests are welcome! Please feel free to check [issues](https://github.com/stjude-dnb-binfcore/sc-epigenie/issues).
 
 ---
 

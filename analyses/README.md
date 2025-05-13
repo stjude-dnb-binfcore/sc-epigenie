@@ -1,4 +1,4 @@
-# Using Analysis Modules in Single cell ATAC-sequencing Workflow (scATAC-seq)
+# Using Analysis Modules in scEpiGenie: A Workflow for Single-cell ATAC-seq (scATAC-seq)
 
 This repository contains a collection of analysis modules designed to process and analyze single-cell ATAC (scATAC-Seq) data from 10X sequencing technology. 
 
@@ -19,7 +19,7 @@ ________________________________________________________________________________
 
 ## Contact
 
-Contributions, issues, and feature requests are welcome! Please feel free to check [issues](https://github.com/stjude-dnb-binfcore/sc-atac-seq/issues).
+Contributions, issues, and feature requests are welcome! Please feel free to check [issues](https://github.com/stjude-dnb-binfcore/sc-epigenie/issues).
 
 ---
 
