@@ -12,9 +12,7 @@ Each module is self-contained and can be executed independently or as part of a 
 ________________________________________________________________________________________ 
 🚧🚧🚧 Analysis Modules Under Development 🚧🚧🚧
 
-The analysis modules are currently under development. Please check back soon for updates! 
-
-Stay tuned for what's coming next:
+The following analysis modules are currently under development. Please check back soon for updates and stay tuned for what's coming next!
 
 3. `upstream-analysis` module (description="Pipeline for estimating QC metrics and filtering low quality cells.", required=True)
 ________________________________________________________________________________________
