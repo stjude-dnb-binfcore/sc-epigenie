@@ -41,7 +41,7 @@ The pipeline requires a TSV file containing essential metadata for cohort analys
 
 The file can be stored anywhere, but its filepath must be specified in the `project_parameters.Config.yaml` file.
 
-For user convenience, an example [project_metadata.tsv](https://github.com/stjude-dnb-binfcore/sc-rna-seq-snap/blob/main/data/project_metadata) file is provided.
+For user convenience, an example [project_metadata.tsv](https://github.com/stjude-dnb-binfcore/sc-epigenie/blob/main/data/project_metadata) file is provided.
 
 
 ### How to Use the Repository
