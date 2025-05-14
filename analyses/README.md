@@ -1,4 +1,4 @@
-# Using Analysis Modules in Single cell ATAC-sequencing Workflow (scATAC-seq)
+# Using Analysis Modules in scEpiGenie: A Workflow for Single-cell ATAC-seq (scATAC-seq)
 
 This repository contains a collection of analysis modules designed to process and analyze single-cell ATAC (scATAC-Seq) data from 10X sequencing technology. 
 
@@ -12,14 +12,15 @@ Each module is self-contained and can be executed independently or as part of a 
 ________________________________________________________________________________________ 
 🚧🚧🚧 Analysis Modules Under Development 🚧🚧🚧
 
-The analysis modules are currently being developed. Please check back later for updates!
+The following analysis modules are currently under development. Please check back soon for updates and stay tuned for what's coming next!
+
 3. `upstream-analysis` module (description="Pipeline for estimating QC metrics and filtering low quality cells.", required=True)
 ________________________________________________________________________________________
 
 
 ## Contact
 
-Contributions, issues, and feature requests are welcome! Please feel free to check [issues](https://github.com/stjude-dnb-binfcore/sc-atac-seq/issues).
+Contributions, issues, and feature requests are welcome! Please feel free to check [issues](https://github.com/stjude-dnb-binfcore/sc-epigenie/issues).
 
 ---
 
