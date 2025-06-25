@@ -1,0 +1,520 @@
+---
+title: "Signac QC for sc-ATAC-Seq Analysis in 10X Genomics data"
+author: "Antonia Chroni for SJCRH DNB_BINF_Core"
+papersize: a4
+fontsize: 11pt
+links-as-notes: true
+output:
+  html_document:
+    toc: TRUE
+    toc_float: TRUE
+    df_print: paged
+    code_folding: hide
+    toc_depth: 2
+    highlight: tango
+    number_sections: TRUE
+  pdf_document:
+    toc: TRUE
+    highlight: tango
+    number_sections: TRUE
+    latex_engine: lualatex
+    keep_tex: FALSE
+    fig_caption: yes
+    fig_crop: no
+    fig_height: 2
+    fig_width: 3
+    toc_depth: 2
+always_allow_html: TRUE
+urlcolor: blue
+linkcolor: black
+citecolor: blue
+geometry: margin=1in
+header-includes: 
+  - \usepackage{titling}
+  - \usepackage{fancyhdr}
+  - \usepackage{graphicx}
+  - \usepackage{float}
+params:
+  data_dir: "."
+  genome_name: "."
+  assay: "."
+  annotation_Ensembl: "."
+  species: "."
+  object_species: "."
+  min.cutoff_value: "."
+  condition_value1: "."
+  condition_value2: "."
+  condition_value3: "."
+  nCount_peaks_min: "."
+  nCount_peaks_max: "."
+  nFeature_peaks_min: "."
+  nFeature_peaks_max: "."
+  peak_region_fragments_min: "."
+  peak_region_fragments_max: "."
+  pct_reads_in_peaks_value: "."
+  blacklist_ratio_value: "."
+  duplicate_value: "."
+  mitochondrial_value: "."
+  TSS.enrichment_value: "."
+  nucleosome_signal_value: "."
+  use_threshold_filtering: "."
+  use_condition_split: "."
+  print_pdf: "."
+  grouping: "."
+  root_dir: "."
+  metadata_dir: "."
+  metadata_file: "."
+  PROJECT_NAME: "."
+  PI_NAME: "."
+  TASK_ID: "."
+  PROJECT_LEAD_NAME: "."
+  DEPARTMENT: "."
+  LEAD_ANALYSTS: "."
+  GROUP_LEAD: "."
+  CONTACT_EMAIL: "."
+  PIPELINE: "."
+  START_DATE: "."
+  COMPLETION_DATE: "."
+---
+
+```{r logo-file, echo=FALSE}
+attach(params)
+# Insert logo on the top of the html report 
+logo_file <- file.path(root_dir, "figures", "img", "DNB-BINF-Core-logo.png")
+htmltools::img(src = knitr::image_uri(logo_file), alt = "logo", style = "position:absolute; top:0; left:0; padding:0px; height:120px;")
+detach(params)
+```
+
+\addtolength{\headheight}{2.0cm} 
+\fancypagestyle{plain}{} 
+\thispagestyle{fancy}
+\fancyhead[L]{\includegraphics[height=120px]{`r logo_file`}}
+\renewcommand{\headrulewidth}{0pt}
+
+<style type="text/css">
+:root {--DNB_BINF_Core_color: #00427B;}
+
+h1.title {margin-top: 130px;
+          margin-bottom: 25px;
+          font-size: 36px;}
+
+.nobullet li {list-style-type: none;}
+
+.reporthead {font-size: 20px;}
+
+body { /* Normal */
+  font-size: 16px;
+  font-style: Arial, Helvetica, sans-serif;}
+
+h1 {color: var(--DNB_BINF_Core_color);
+    font-size: 28px;
+    margin-top: 50px;}
+
+h2 {color: var(--DNB_BINF_Core_color);
+    font-size: 20px;}
+
+.list-group-item.active, .list-group-item.active:focus, .list-group-item.active:hover {
+  background-color: var(--DNB_BINF_Core_color);}
+</style>
+
+<a href="https://wiki.stjude.org/display/CAB">
+
+</a>
+
+\pagebreak
+
+<div class="reporthead"><br/>
+**PI: `r params$PI_NAME`**  
+**Project: `r params$PROJECT_NAME`**  
+Task: `r params$TASK_ID`  
+Project Lead(s): `r params$PROJECT_LEAD_NAME`  
+Department: `r params$DEPARTMENT`  
+
+<br />  
+
+DNB Bioinformatics Core Analysis Team: 
+<br />  
+
+>**Lead Analyst(s): `r params$LEAD_ANALYSTS`**  
+>Group Lead: `r params$GROUP_LEAD`  
+<br />
+>**Contact E-mail:** `r params$CONTACT_EMAIL`  
+>**DNB Bioinformatics Core Pipeline:** `r params$PIPELINE`  
+
+Date started: `r params$START_DATE`  
+Date completed:  `r params$COMPLETION_DATE`  
+Report generated: `r format(Sys.time(), '%H:%M:%S %Z %m/%d/%Y')` \
+
+Reviewed by: _____________________   Date: ____________ \
+</div>
+\pagebreak
+  
+# Information about this notebook
+
+This script includes the pre-processing workflow for 10X sc-ATAC-Seq data and performs QC based on Signac functions. For more information or updates, please see [Signac](https://stuartlab.org/signac/articles/pbmc_vignette). 
+
+# Set up
+```{r load-library, echo=TRUE}
+suppressPackageStartupMessages({
+  library(Signac)
+  library(Seurat)
+  library(hdf5r)
+  library(tidyverse)
+  library(readr)
+  library(Matrix)
+  library(parallel)
+  library(GenomeInfoDb)
+  library(patchwork)
+  library(ggraph)
+  library(clustree)
+  library(cowplot)
+  library(harmony)
+  library(ggrepel)
+  library(RColorBrewer)
+  library(AnnotationHub)
+  library(future)
+  library(scooter)
+  
+  ####################################################
+  # These don't exist in the container - TO ADD!!! - June 10, 2025
+  #BiocManager::install("GenomeInfoDb") #translation between chromosome names
+  #BiocManager::install("biovizBase")
+  
+  # https://bioconductor.org/packages/release/bioc/vignettes/AnnotationHub/inst/doc/AnnotationHub.html#annotationhub-objects
+  library(AnnotationHub)
+  #library(ensembldb)
+  library(GenomeInfoDb) #translation between chromosome names
+  library(biovizBase)
+  ####################################################
+  
+  # Evaluate ggrepel
+  options(ggrepel.max.overlaps = Inf, repr.plot.width=12, repr.plot.height=8)
+  
+  # Evaluate Seurat R expressions asynchronously when possible using future package
+  options(future.globals.maxSize = future_globals_value) 
+  #plan(multisession, workers = parallelly::availableCores())
+  # If future is defaulting to multisession, override it to run in the main process. You can revert later using plan("multisession").
+  plan("sequential") # Forces everything to run in main R session. 
+})
+```
+
+# Directories and paths to file Inputs/Outputs
+```{r set-dir-and-file-names, echo=TRUE}
+attach(params)
+analysis_dir <- file.path(root_dir, "analyses", "upstream-analysis") 
+module_results_dir <- file.path(analysis_dir, paste0("results"))
+
+# Input files
+# Construct the full path first
+input_path <- file.path(data_dir, sample_name[i], "outs")
+
+# Then list files with pattern
+counts_file <- dir(path = input_path, pattern = "filtered_peak_bc_matrix.h5", full.names = TRUE, recursive = TRUE)
+counts_file
+
+meta_file <- dir(path = input_path, pattern = "singlecell.csv", full.names = TRUE, recursive = TRUE)
+meta_file
+
+# your `fragments.tsv.gz.tbi` file needs to be at the same working directory as your `fragments.tsv.gz` file
+all_fragments_file <- dir(path = input_path, pattern = "fragments.tsv.gz", full.names = TRUE, recursive = TRUE)
+# Include files that match the "fragments.tsv.gz" pattern
+fragments_file <- all_fragments_file[grepl("fragments\\.tsv\\.gz$", all_fragments_file)]
+fragments_file
+
+project_metadata_file <- file.path(metadata_dir, metadata_file) # metadata input file
+palette_file <- file.path(root_dir, "figures", "palettes", "qc_color_palette.tsv")
+gradient_palette_file <- file.path(root_dir, "figures", "palettes", "gradient_color_palette.tsv")
+
+source(paste0(root_dir, "/figures/scripts/theme_plot.R"))
+source(paste0(analysis_dir, "/util/function-run-QC.R"))
+source(paste0(analysis_dir, "/util/function-process-signac.R"))
+source(paste0(analysis_dir, "/util/function-create-UMAP.R"))
+```
+
+```{r echo=FALSE, warning=FALSE}
+opts_chunk$set(fig.align='center',
+               external=TRUE,
+               echo=FALSE,
+               warning=FALSE,
+               fig.pos='H')
+a4width <- 8.3
+a4height <- 11.7
+```
+
+# Read metadata file and define `sample_name`
+
+```{r read-project-metadat, echo=TRUE}
+project_metadata <- read.csv(project_metadata_file, sep = "\t", header = TRUE)
+sample_name <- unique(as.character(project_metadata$ID))
+sample_name <- sort(sample_name, decreasing = FALSE)
+print(sample_name)
+```
+
+# Read palette file(s)
+
+```{r define-parameters-for-plots, echo=TRUE}
+# Fix random seed for reproducible results
+set.seed(12345)
+
+# Read color palette
+palette_df <- readr::read_tsv(palette_file, guess_max = 100000, show_col_types = FALSE) 
+gradient_palette_df <- readr::read_tsv(gradient_palette_file, guess_max = 100000, show_col_types = FALSE) 
+```
+
+# Read in 10x data 
+
+When pre-processing chromatin data, Signac uses information from two related input files, both of which can be created using CellRanger:
+
+- **Peak/Cell matrix.** This is analogous to the gene expression count matrix used to analyze single-cell RNA-seq. **However, instead of genes, each row of the matrix represents a region of the genome (a peak), that is predicted to represent a region of open chromatin.** Each value in the matrix represents the number of Tn5 integration sites for each single barcode (i.e. a cell) that map within each peak. You can find more detail on the 10X Website.
+
+- **Fragment file.** **This represents a full list of all unique fragments captured by the assay and their number of reads across all single cells.** It is a substantially larger file, is slower to work with, and is stored on-disk (instead of in memory). However, the advantage of retaining this file is that it contains all fragments associated with each single cell, as opposed to only fragments that map to peaks. More information about the fragment file can be found on the [10x Genomics website](https://www.10xgenomics.com/support/jp/software/cell-ranger-atac/latest/analysis/outputs/fragments-file).
+
+We start by creating a Seurat object using the peak/cell matrix and cell metadata generated by cellranger-atac, and store the path to the fragment file on disk in the Seurat object:
+
+```{r read-process-data, echo=TRUE}
+cat("Beginning to process sample:", sample_name[i], "\n")
+
+# Read files
+counts <- Read10X_h5(filename = counts_file)
+meta <- read.csv(file = meta_file, header = TRUE, row.names = 1)
+
+# Create chromatin and seurat objects
+chrom_assay <- CreateChromatinAssay(counts = counts, sep = c(":", "-"), genome = genome_name, fragments = fragments_file, min.cells = 10, min.features = 200)
+seurat_obj <- CreateSeuratObject(counts = chrom_assay, assay = assay, meta.data = meta)
+
+# Assign a sample ID to all cells from a specific sample
+seurat_obj$ID <- sample_name[i]
+
+# Add metadata from `project_metadata` file
+project_metadata_sample <- project_metadata %>% dplyr::filter(ID == sample_name[i])
+
+# Ensure rownames in metadata match those IDs
+rownames(project_metadata_sample) <- project_metadata_sample$ID
+
+# Merge using AddMetaData()
+seurat_obj <- AddMetaData(seurat_obj, metadata = project_metadata_sample[seurat_obj$ID, ])
+
+# Update orig.ident using ID column
+seurat_obj$orig.ident <- seurat_obj@meta.data$ID
+
+cat("Number of cells before filter for", sample_name[i], ":", "\n")
+cells_before_filter_num <- print(ncol(seurat_obj)) # Number of cells before filter
+```
+
+We need to add gene annotations to the seurat object for the genome reference. This will allow downstream functions to pull the gene annotation information directly from the object.
+
+Multiple patches are released for each genome assembly. When dealing with mapped data (such as the 10x Genomics files we will be using), it is advisable to use the annotations from the same assembly patch that was used to perform the mapping.
+
+From the dataset summary, we can see that the reference package 10x Genomics used to perform the mapping was `r genome_name`. For more information on the various Ensembl releases, you can refer to the [Table of Assemblies](https://useast.ensembl.org/info/website/archives/assembly.html) and [Build Notes for Reference Packages](https://www.10xgenomics.com/support/software/cell-ranger/downloads/cr-ref-build-steps#ref-2020-a).
+
+```{r add-gene-annotation, echo=TRUE}
+ah <- AnnotationHub()
+query(ah, annotation_Ensembl)
+
+# Search for the Ensembl for species in AnnotationHub
+annotation_Ensembl_value <- ah[[object_species]]
+
+# Extract and Load gene annotations from EnsDb for genome reference
+# https://www.10xgenomics.com/support/software/cell-ranger/downloads/cr-ref-build-steps#mouse-ref-2024-a
+annotations <- GetGRangesFromEnsDb(ensdb = annotation_Ensembl_value)
+
+# Ensure chromosome naming style matches (e.g., "chr1" vs "1") by changing to UCSC style to avoid any conflicts downstream
+seqlevelsStyle(annotations) <- 'UCSC' 
+genome(annotations) <- genome_name # Match your reference genome
+
+# Add the gene information to the object
+Annotation(seurat_obj) <- annotations
+```
+
+# Computing QC Metrics
+
+We can now compute some QC metrics for the scATAC-seq experiment. We currently suggest the following metrics below to assess data quality. As with scRNA-seq, the expected range of values for these parameters will vary depending on your biological system, cell viability, and other factors.
+
+- **Nucleosome banding pattern/Nucleosome Signal**: The histogram of DNA fragment sizes (determined from the paired-end sequencing reads) should exhibit a strong nucleosome banding pattern corresponding to the length of DNA wrapped around a single nucleosome. We calculate this per single cell, and **quantify the approximate ratio of mononucleosomal to nucleosome-free fragments (stored as nucleosome_signal)**.
+
+- **Transcriptional start site (TSS) enrichment score**: The [ENCODE project](https://www.encodeproject.org/data-standards/terms/) has defined an ATAC-seq targeting score based on the ratio of fragments centered at the TSS to fragments in TSS-flanking regions. Poor ATAC-seq experiments typically will have a low TSS enrichment score. We can compute this metric for each cell with the TSSEnrichment() function, and the results are stored in metadata under the column name TSS.enrichment.
+
+- **Total number of fragments in peaks**: A measure of cellular sequencing depth / complexity. Cells with very few reads may need to be excluded due to low sequencing depth. Cells with extremely high levels may represent doublets, nuclei clumps, or other artefacts.
+
+- **Fraction of fragments in peaks**: Represents the fraction of all fragments that fall within ATAC-seq peaks. Cells with low values (i.e. <15-20%) often represent low-quality cells or technical artifacts that should be removed. Note that this value can be sensitive to the set of peaks used.
+
+- **Ratio reads in genomic blacklist regions**: The ENCODE project has provided a list of blacklist regions, representing reads which are often associated with artefactual signal. Cells with a high proportion of reads mapping to these areas (compared to reads mapping to peaks) often represent technical artifacts and should be removed. ENCODE blacklist regions for human (hg19 and hg38), mouse (mm9 and mm10), Drosophila (dm3 and dm6), and C. elegans (ce10 and ce11) are included in the Signac package. The FractionCountsInRegion() function can be used to calculate the fraction of all counts within a given set of regions per cell. We can use this function and the blacklist regions to find the fraction of blacklist counts per cell.
+
+Note that the last three metrics can be obtained from the output of CellRanger (which is stored in the object metadata), but can also be calculated for non-10x datasets using Signac.
+
+```{r add-qc-metrics, echo=TRUE}
+cat("Generating QC metrics for sample", sample_name[i], "\n")
+seurat_obj <- create_qc_metrics(seurat_obj = seurat_obj)
+```
+
+# Plotting QC metrics before filtering
+
+The relationship between variables stored in the object metadata can be visualized using the DensityScatter() function. This can also be used to quickly find suitable cutoff values for different QC metrics by setting quantiles=TRUE:
+
+```{r DensityScatter-before-filtering, fig.width = 12, fig.height = 5, fig.fullwidth = TRUE, echo=TRUE}
+name <- paste0(plots_dir, "/", glue::glue("01-DensityScatter-before-filtering.png"))
+p1 <- DensityScatter(seurat_obj, x = 'nCount_peaks', y = 'TSS.enrichment', log_x = TRUE, quantiles = TRUE)
+p2 <- DensityScatter(seurat_obj, x = 'nucleosome_signal', y = 'TSS.enrichment', log_x = TRUE, quantiles = TRUE)
+p <- print(p1 + ggtitle(sample_name[i]) + p2 + ggtitle(sample_name[i])) # Add a dynamic title using sample_name[i]
+ggsave(file = name, width = 12, height = 5, device = "png")
+```
+
+In the generated Density scatter plot, we see the number of counts and the TSS enrichment score. Each cell is colored by the density of points. The vertical red lines are the quantiles for the count of peaks: 5%, 10%, 90% and 95%, and the horizontal red lines are the TSS enrichment scores.
+
+We can inspect the TSS enrichment scores by grouping the cells based on the score and plotting the accessibility signal over all TSS sites. Setting the fast=TRUE option in TSSEnrichment() will only compute the TSS enrichment score without storing the entire cell by position matrix of Tn5 insertion frequency for each cell, and can save memory. However, setting fast=TRUE will not allow downstream plotting of the TSS enrichment signal for different groups of cells using the TSSPlot() function, shown here:
+
+```{r TSSPlot-before-filtering, fig.width = 6, fig.height = 5, fig.fullwidth = TRUE, echo=TRUE}
+name <- paste0(plots_dir, "/", glue::glue("02-TSSPlot-before-filtering.png"))
+p <- TSSPlot(seurat_obj, group.by = 'high.tss') + NoLegend()
+p <- print(p + ggtitle(sample_name[i])) # Add a dynamic title using sample_name[i]
+ggsave(file = name, width = 6, height = 5, device = "png")
+```
+
+Next, we can look at the fragment length periodicity for all the cells, and group by cells with high or low nucleosomal signal strength. That is known as nucleosome signal and it is a measure of how well nucleosome positioning is preserved in the ATAC-seq data. It is calculated based on the periodicity of fragment lengths (mononucleosome, dinucleosome, etc.). Example:
+
+| Group     | Meaning                                   | Count  |
+| --------- | ----------------------------------------- | ------ |
+| `Low NS`  | Nucleosome signal < 4 → likely good cells | 19,972 |
+| `High NS` | Nucleosome signal > 4 → potentially noisy | 34     |
+
+You can see that cells that are outliers for the mononucleosomal / nucleosome-free ratio (based on the plots below) have different nucleosomal banding patterns. The remaining cells exhibit a pattern that is typical for a successful ATAC-seq experiment.
+
+```{r FragmentHistogram-before-filtering, fig.width = 10, fig.height = 5, fig.fullwidth = TRUE, echo=TRUE}
+# The following code fails - maybe it does when values are very low for one of the categories - not sure.
+#name <- paste0(plots_dir, "/", glue::glue("FragmentHistogram-before-filtering.png"))
+#print(FragmentHistogram(object = seurat_obj, group.by = 'nucleosome_group_category'))
+#ggsave(file = name, width = 10, height = 5, device = "png")
+```
+
+```{r, fig.align = "left", results = "asis", message = FALSE, warning = FALSE, echo = FALSE}
+tables1 <- seurat_obj@meta.data %>% count(nucleosome_group_category)
+cat("  \n<div align=\"center\" style=\"font-size:80%\">  \n")
+caption_value = "Nucleosome signal: count of cells"
+print(knitr::kable(tables1, align = "lcccc", caption = caption_value))
+cat("  \n</div>  \n")
+cat("  \n\\pagebreak  \n")
+```
+
+```{r vln-plot-before-filtering-1, fig.width = 15, fig.height = 6, fig.fullwidth = TRUE, echo=TRUE}
+name <- paste0(plots_dir, "/", glue::glue("03-vln-plot-before-filtering-1.png"))
+p <- print(VlnPlot(object = seurat_obj, 
+              features = c("nCount_peaks", "nFeature_peaks", "TSS.enrichment", "nucleosome_signal", "blacklist_ratio"),
+              pt.size = 0.1, ncol = 5) + 
+             plot_annotation(title = glue::glue("Before-filtering: {sample_name[i]}")))
+ggsave(file = name, width = 15, height = 6, device = "png")
+```
+
+```{r vln-plot-before-filtering-2, fig.width = 15, fig.height = 6, fig.fullwidth = TRUE, echo=TRUE}
+name <- paste0(plots_dir, "/", glue::glue("04-vln-plot-before-filtering-2.png"))
+p <- print(VlnPlot(object = seurat_obj,
+                   features = c("pct_reads_in_peaks", "peak_region_fragments", "mitochondrial", "duplicate"),
+                     #"pct_reads_in_peaks_promoters", "pct_reads_in_peaks_enhancers", 
+                   pt.size = 0.1, ncol = 4) + plot_annotation(title = glue::glue("Before-filtering: {sample_name[i]}")))
+ggsave(file = name, width = 15, height = 6, device = "png")
+```
+
+# Save object before filtering
+
+```{r save-seurat-obj-raw, echo=TRUE}
+# We will rename the object so we can save it with the desired naming for cell barcodes. If we overwrite it, the code breaks for some reason.
+seurat_obj_raw <- seurat_obj
+cell_names <- gsub("-1$", "", colnames(seurat_obj_raw)) # We will remove the -1 suffix from cell barcodes. Optional: remove '-1' from cell names if present
+
+# Prefix sample ID (e.g., "sampleA1")
+cell_names <- paste0(sample_name[i], ":", cell_names)
+
+# Assign new cell names to the Seurat object
+colnames(seurat_obj_raw) <- cell_names
+
+metadata <- as_data_frame_seurat(seurat_obj_raw, metadata = TRUE)
+write_tsv(metadata, file = paste0(results_dir, "/", "metadata_raw", ".tsv")) # Save metadata
+  
+message("Create Seurat object done, saving...", sample_name[i], "\n")
+saveRDS(seurat_obj_raw, file = paste0(results_dir, "/", "seurat_obj_raw.rds")) # Save Seurat object
+```
+
+# Filtering low quality cells
+
+We will remove cells that are outliers for these QC metrics. The exact QC thresholds used will need to be adjusted according to the dataset.
+
+```{r filtering-low-quality-cells, echo=TRUE}
+cat("Filtering low quality data for sample", sample_name[i], "\n")
+seurat_obj <- run_QC(seurat_obj = seurat_obj)
+
+cat("Number of cells after filtering for sample", sample_name[i], ":", "\n")
+cells_so_after_filter_num <- print(ncol(seurat_obj)) # Number of cells after filter
+```
+
+# Plotting QC metrics after filtering
+
+```{r vln-plot-after-filtering-1, fig.width = 15, fig.height = 6, fig.fullwidth = TRUE, echo=TRUE}
+name <- paste0(plots_dir, "/", glue::glue("05-vln-plot-after-filtering-1.png"))
+p <- print(VlnPlot(object = seurat_obj, 
+              features = c("nCount_peaks", "nFeature_peaks", "TSS.enrichment", "nucleosome_signal", "blacklist_ratio"),
+              pt.size = 0.1, ncol = 5) + 
+             plot_annotation(title = glue::glue("After-filtering: {sample_name[i]}")))
+ggsave(file = name, width = 15, height = 6, device = "png")
+```
+
+```{r vln-plot-after-filtering-2, fig.width = 15, fig.height = 6, fig.fullwidth = TRUE, echo=TRUE}
+name <- paste0(plots_dir, "/", glue::glue("06-vln-plot-after-filtering-2.png"))
+p <- print(VlnPlot(object = seurat_obj,
+        features = c("pct_reads_in_peaks", "peak_region_fragments", "mitochondrial", "duplicate"
+                     #"pct_reads_in_peaks_promoters", "pct_reads_in_peaks_enhancers", 
+                     ),
+        pt.size = 0.1, ncol = 4) + 
+             plot_annotation(title = glue::glue("After-filtering: {sample_name[i]}")))
+ggsave(file = name, width = 15, height = 6, device = "png")
+```
+
+# Processing Seurat object after filtering
+
+## Normalization and linear dimensional reduction
+
+- Normalization: Signac performs term frequency-inverse document frequency (TF-IDF) normalization. This is a two-step normalization procedure, that both normalizes across cells to correct for differences in cellular sequencing depth, and across peaks to give higher values to more rare peaks.
+
+- Feature selection: The low dynamic range of scATAC-seq data makes it challenging to perform variable feature selection, as we do for scRNA-seq. Instead, we can choose to use only the top n% of features (peaks) for dimensional reduction, or remove features present in less than n cells with the [FindTopFeatures()](https://stuartlab.org/signac/reference/findtopfeatures) function. Here we will use all features, though we have seen very similar results when using only a subset of features (try setting min.cutoff to ‘q75’ to use the top 25% all peaks), with faster runtimes. Features used for dimensional reduction are automatically set as VariableFeatures() for the Seurat object by this function.
+
+- Dimension reduction: We next run singular value decomposition (SVD) on the TD-IDF matrix, using the features (peaks) selected above. This returns a reduced dimension representation of the object (for users who are more familiar with scRNA-seq, you can think of this as analogous to the output of PCA).
+
+The combined steps of TF-IDF followed by SVD are known as latent semantic indexing (LSI), and were first introduced for the analysis of scATAC-seq data by [Cusanovich et al. 2015](https://www.science.org/doi/10.1126/science.aab1601). The first LSI component often captures sequencing depth (technical variation) rather than biological variation. If this is the case, the component should be removed from downstream analysis. We can assess the correlation between each LSI component and sequencing depth using the DepthCor() function. This plot can indicate correlation between the first LSI component and the total number of counts for the cell. If there is a very strong correlation between the first LSI component and the total number of counts for the cell, then we will perform downstream steps without this component as we don’t want to group cells together based on their total sequencing depth, but rather by their patterns of accessibility at cell-type-specific peaks.
+
+## Non-linear dimension reduction and clustering
+
+Now that the cells are embedded in a low-dimensional space we can use methods commonly applied for the analysis of scRNA-seq data to perform graph-based clustering and non-linear dimension reduction for visualization. The functions RunUMAP(), FindNeighbors(), and FindClusters() all come from the Seurat package.
+
+```{r process-object, fig.width = 6, fig.height = 5, fig.fullwidth = TRUE, echo=TRUE}
+# Now we will rename the cell names as we did before for the final object
+cell_names <- gsub("-1$", "", colnames(seurat_obj)) # We will remove the -1 suffix from cell barcodes. Optional: remove '-1' from cell names if present
+
+# Prefix sample ID (e.g., "sampleA1")
+cell_names <- paste0(sample_name[i], ":", cell_names)
+
+# Assign new cell names to the Seurat object
+colnames(seurat_obj) <- cell_names
+
+if (cells_so_after_filter_num >= 500) {
+  # Only libraries with more than 500 cells will be kept for merging and integration purposes. 
+  # This value is a commonly used threshold for many single-cell RNA-seq studies as a minimum for obtaining reliable and meaningful analysis. 
+  message("We will proceed with processing of the seurat object and include the sample in the merged and integrated cohort for downstream analyses.")
+  cat("Create and process seurat for sample", sample_name[i], "\n")
+  seurat_obj <- process_signac(seurat_obj = seurat_obj, min.cutoff_value = min.cutoff_value, assay = assay, results_dir = results_dir, 
+                             plots_output = plots_dir, use_condition_split = use_condition_split, condition1 = condition_value1, condition2 = condition_value2, 
+                             condition3 = condition_value3, print_pdf = print_pdf, grouping = grouping)
+  message("Create Seurat object done, saving...", sample_name[i], "\n")
+  } else {
+    message("We will skip processing of the seurat object due to low number of cells (less than 500) and exclude the sample in the merged and integrated cohort for downstream analyses.")
+}
+```
+
+```{r echo=FALSE}
+detach(params)
+```
+
+\pagebreak
+
+# Session Info
+
+```{r}
+sessionInfo()
+```
