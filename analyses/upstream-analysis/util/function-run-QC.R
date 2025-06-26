@@ -49,8 +49,6 @@ create_qc_metrics <- function(seurat_obj) {
 run_QC <- function(seurat_obj) {
   if (use_threshold_filtering == "YES"){
     
-    # Message to appear in Rmd output
-    #print_message_filtering <- "we will subset based on threshold values defined in yaml"
     message("🔍 We will subset based on threshold values defined in the YAML.")
     
     seurat_obj <- subset(x = seurat_obj,
@@ -66,19 +64,17 @@ run_QC <- function(seurat_obj) {
                            #mitochondrial < mitochondrial_value &
                            nucleosome_signal < nucleosome_signal_value &
                            TSS.enrichment > TSS.enrichment_value)
-    message("Filtering done...")
+    message("✅ Filtering based on fixed thresholds complete.")
     
   } else {
     
-    # Message to appear in Rmd output
-    # print_message_filtering <- "we will subset based on percentile for filtering. That means that we will set thresholds via the quantile function that differentiates between bottom 2% and everything else."
     message("🔍 We will subset based on percentile for filtering. That means that we will set thresholds via the quantile function that differentiates between bottom 2% and everything else.")
     
+    # Calculate thresholds using quantiles (without print)
     low_prf <- print(quantile(seurat_obj[["peak_region_fragments"]]$peak_region_fragments, probs = 0.02))
     hig_prf <- print(quantile(seurat_obj[["peak_region_fragments"]]$peak_region_fragments, probs = 0.98))
     low_prp <- print(quantile(seurat_obj[["pct_reads_in_peaks"]]$pct_reads_in_peaks, probs = 0.02))
     high_blr <- print(quantile(seurat_obj[["blacklist_ratio"]]$blacklist_ratio, probs = 0.98))
-    
     hig_ns <- print(quantile(seurat_obj[["nucleosome_signal"]]$nucleosome_signal, probs = 0.98))
     low_ts <- print(quantile(seurat_obj[["TSS.enrichment"]]$TSS.enrichment, probs = 0.02))
     
@@ -89,6 +85,8 @@ run_QC <- function(seurat_obj) {
                            blacklist_ratio < high_blr &
                            nucleosome_signal < hig_ns &
                            TSS.enrichment > low_ts)
+    message("✅ Filtering based on percentiles complete.")
+    
   } 
   
   return(seurat_obj)
