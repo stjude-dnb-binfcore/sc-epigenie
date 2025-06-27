@@ -8,6 +8,11 @@ Parameters according to the project and analysis strategy will need to be specif
 - `project_parameters.Config.yaml` located at the `root_dir`.
 - `future.globals.maxSize` is hardwired coded in the `run-upstream-analysis.R`. If necessary, user can increase/decrease resources.
 
+## 🚧 Container Update Needed
+
+Note: The `01A_run_signac_qc.Rmd` script currently runs outside the container because the required packages `GenomeInfoDb` and `biovizBase` are not yet included in the Docker image. All other components of the module execute within the container as expected.
+
+This will be resolved in a future update when the container is rebuilt with the missing dependencies.
 
 ### Run module on an interactive session on HPC within the container
 
@@ -141,8 +146,7 @@ The structure of this folder is as follows:
 ├── run-upstream-analysis.R
 ├── run-upstream-analysis.sh
 └── util
-|   ├── function-calculate-qc-metrics.R
 |   ├── function-create-UMAP.R
-|   ├── function-process-Seurat.R
+|   ├── function-process-signac.R
 |___└── function-run-QC.R
 ```
