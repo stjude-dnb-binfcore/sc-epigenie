@@ -52,8 +52,9 @@ run_QC <- function(seurat_obj) {
     message("🔍 We will subset based on threshold values defined in the YAML.")
     
     seurat_obj <- subset(x = seurat_obj,
-                         subset = nCount_peaks > nCount_peaks_min &
-                           nCount_peaks < nCount_peaks_max &
+                         subset = 
+                           #nCount_peaks > nCount_peaks_min &
+                           #nCount_peaks < nCount_peaks_max &
                            #nFeature_peaks > nFeature_peaks_min &
                            #nFeature_peaks < nFeature_peaks_max &
                            #peak_region_fragments > peak_region_fragments_min &
@@ -71,6 +72,7 @@ run_QC <- function(seurat_obj) {
     message("🔍 We will subset based on percentile for filtering. That means that we will set thresholds via the quantile function that differentiates between bottom 2% and everything else.")
     
     # Calculate thresholds using quantiles (without print)
+    # https://github.com/mousepixels/sanbomics_scripts/blob/main/scATAC_intro_R.Rmd
     low_prf <- print(quantile(seurat_obj[["peak_region_fragments"]]$peak_region_fragments, probs = 0.02))
     hig_prf <- print(quantile(seurat_obj[["peak_region_fragments"]]$peak_region_fragments, probs = 0.98))
     low_prp <- print(quantile(seurat_obj[["pct_reads_in_peaks"]]$pct_reads_in_peaks, probs = 0.02))
