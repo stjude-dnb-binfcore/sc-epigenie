@@ -1,0 +1,476 @@
+---
+title: "Final QC summary report for sc-ATAC-Seq Analysis in 10X Genomics data"
+author: "Antonia Chroni for SJCRH DNB_BINF_Core"
+papersize: a4
+fontsize: 11pt
+links-as-notes: true
+output:
+  html_document:
+    toc: TRUE
+    toc_float: TRUE
+    df_print: paged
+    code_folding: hide
+    toc_depth: 2
+    highlight: tango
+    number_sections: TRUE
+    #keep_md: yes
+  pdf_document:
+    toc: TRUE
+    highlight: tango
+    number_sections: TRUE
+    latex_engine: lualatex
+    keep_tex: FALSE
+    fig_caption: yes
+    fig_crop: no
+    fig_height: 2
+    fig_width: 3
+    toc_depth: 2
+always_allow_html: TRUE
+urlcolor: blue
+linkcolor: black
+citecolor: blue
+geometry: margin=1in
+header-includes: 
+  - \usepackage{titling}
+  - \usepackage{fancyhdr}
+  - \usepackage{graphicx}
+  - \usepackage{float}
+params:
+  use_scDblFinder_filtering: "."
+  cellranger_parameters: "."
+  filename_summary_report: "."
+  filename_filter_object: "."
+  root_dir: './'
+  metadata_dir: './'
+  metadata_file: '.'
+  PROJECT_NAME: './'
+  PI_NAME: './'
+  TASK_ID: './'
+  PROJECT_LEAD_NAME: './'
+  DEPARTMENT: './'
+  LEAD_ANALYSTS: './'
+  GROUP_LEAD: './'
+  CONTACT_EMAIL: './'
+  PIPELINE: './'
+  START_DATE: './'
+  COMPLETION_DATE: './'
+---
+
+```{r logo-file, echo=FALSE}
+attach(params)
+# Insert logo on the top of the html report 
+logo_file <- file.path(root_dir, "figures", "img", "DNB-BINF-Core-logo.png")
+htmltools::img(src = knitr::image_uri(logo_file), alt = "logo", style = "position:absolute; top:0; left:0; padding:0px; height:120px;")
+detach(params)
+```
+
+\addtolength{\headheight}{2.0cm} 
+\fancypagestyle{plain}{} 
+\thispagestyle{fancy}
+\fancyhead[L]{\includegraphics[height=120px]{`r logo_file`}}
+\renewcommand{\headrulewidth}{0pt}
+
+
+<style type="text/css">
+:root {--DNB_BINF_Core_color: #00427B;}
+
+h1.title {margin-top: 130px;
+          margin-bottom: 25px;
+          font-size: 36px;}
+
+.nobullet li {list-style-type: none;}
+
+.reporthead {font-size: 20px;}
+
+body { /* Normal */
+  font-size: 16px;
+  font-style: Arial, Helvetica, sans-serif;}
+
+h1 {color: var(--DNB_BINF_Core_color);
+    font-size: 28px;
+    margin-top: 50px;}
+
+h2 {color: var(--DNB_BINF_Core_color);
+    font-size: 20px;}
+
+.list-group-item.active, .list-group-item.active:focus, .list-group-item.active:hover {
+  background-color: var(--DNB_BINF_Core_color);}
+</style>
+
+<a href="https://wiki.stjude.org/display/CAB">
+
+</a>
+
+\pagebreak
+
+<div class="reporthead"><br/>
+**PI: `r params$PI_NAME`**  
+**Project: `r params$PROJECT_NAME`**  
+Task: `r params$TASK_ID`  
+Project Lead(s): `r params$PROJECT_LEAD_NAME`  
+Department: `r params$DEPARTMENT`  
+
+<br />  
+
+DNB Bioinformatics Core Analysis Team: 
+<br />  
+
+>**Lead Analyst(s): `r params$LEAD_ANALYSTS`**  
+>Group Lead: `r params$GROUP_LEAD`  
+<br />
+>**Contact E-mail:** `r params$CONTACT_EMAIL`  
+>**DNB Bioinformatics Core Pipeline:** `r params$PIPELINE`  
+
+Date started: `r params$START_DATE`  
+Date completed:  `r params$COMPLETION_DATE`  
+Report generated: `r format(Sys.time(), '%H:%M:%S %Z %m/%d/%Y')` \
+
+Reviewed by: _____________________   Date: ____________ \
+</div>
+\pagebreak
+
+# Information about this notebook
+
+This notebook provides the final QC summary report for sc-ATAC-Seq Analysis in 10X Genomics data for all the libraries included in the project.
+
+# Set up
+
+```{r load-library, echo = FALSE}
+suppressPackageStartupMessages({
+  library(tidyverse)  
+  library(knitr)
+  library(patchwork)
+  library(DT)
+})
+```
+
+```{r echo=FALSE,warning=FALSE}
+opts_chunk$set(fig.align='center',
+               external=TRUE,
+               echo=FALSE,
+               warning=FALSE,
+               fig.pos='H')
+a4width <- 8.3
+a4height <- 11.7
+```
+
+# Directories and paths to file Inputs/Outputs
+
+```{r set-dir-and-file-names, echo = FALSE}
+attach(params)
+analysis_dir <- file.path(root_dir, "analyses", "upstream-analysis") 
+module_plots_dir <- file.path(analysis_dir, "plots") 
+module_results_dir <- file.path(analysis_dir, "results") 
+fastqc_module_results_dir <- file.path(root_dir, "analyses", "fastqc-analysis", "results") 
+cellranger_module_results_dir <- file.path(root_dir, "analyses", "cellranger-analysis", "results") 
+
+fastqc_results_dir <- file.path(fastqc_module_results_dir, "02-multiqc-reports") 
+cellranger_results_dir <- file.path(cellranger_module_results_dir, "03_cellranger_count_summary", cellranger_parameters) 
+seurat_plots_dir <- file.path(module_plots_dir, "01_Signac_qc") 
+scDblFinder_results_dir <- file.path(module_results_dir, "02_scDblFinder") 
+scDblFinder_plots_dir <- file.path(module_plots_dir, "02_scDblFinder") 
+
+# Get the suffix or empty string if NULL
+suffix <- if (!is.null(filename_filter_object)) {
+  glue::glue("_{filename_filter_object}")
+} else {
+  ""
+}
+
+Filter_object_results_dir <- file.path(module_results_dir, glue::glue('03_Filter_object{suffix}')) 
+Filter_object_plots_dir <- file.path(module_plots_dir, glue::glue('03_Filter_object{suffix}')) 
+
+# Input files
+multiqc_general_stats_results_file <- file.path(fastqc_results_dir, "multiqc_general_stats.txt")
+multiqc_fastqc_results_file <- file.path(fastqc_results_dir, "multiqc_fastqc.txt")
+cellranger_results_file <- file.path(cellranger_results_dir, "QC_Summary_CellRanger_Report.tsv")
+scDblFinder_results_file <- file.path(scDblFinder_results_dir, "doublets_metrics.tsv")
+cells_table_file <- file.path(Filter_object_results_dir, "number_of_cells_per_sample.tsv")
+
+project_metadata_file <- file.path(metadata_dir, metadata_file) # metadata input file
+
+# Create plots directory
+plots_dir <- file.path(module_plots_dir, glue::glue('04_Final_summary_report{suffix}')) 
+if (!dir.exists(plots_dir)) {
+  dir.create(plots_dir)}
+```
+
+# Overview
+
+Thank you for using the Bioinformatics Core of the Department of Developmental Neurobiology at SJCRH for your sc-ATAC-Seq Analysis in 10X Genomics data. 
+
+We have provided the QC and Seurat pipeline results of our standardized pipeline below for your review. After reviewing these results, please feel free to contact us at cody.ramirez@stjude.org with any questions or concerns. We are also available to discuss continuing and customized analysis options. You are also welcomed to submit an [issue](https://github.com/stjude-dnb-binfcore/sc-epigenie/issues) for questions or analysis module request.
+
+# Methods
+
+## Input files
+The analysis of sc-ATAC-Se Analysis from 10x Genomics platform include the following parts: (1) QC metrics as generated by FastQC, (2) QC metrics as generated by CellRanger count, (3) Signac QC metrics, (4) Estimating and filtering out doublets and (5) Merging filtered data.
+
+### Signac QC metrics
+Inputs are web_summary.html, filtered_peak_bc_matrix.h5, singlecell.csv and fragments.tsv.gz which are generated by the Cell Ranger software. 
+
+We can compute some QC metrics for the scATAC-seq experiment. We currently suggest the following metrics below to assess data quality. As with scRNA-seq, the expected range of values for these parameters will vary depending on your biological system, cell viability, and other factors.
+
+- **Nucleosome banding pattern/Nucleosome Signal**: The histogram of DNA fragment sizes (determined from the paired-end sequencing reads) should exhibit a strong nucleosome banding pattern corresponding to the length of DNA wrapped around a single nucleosome. We calculate this per single cell, and **quantify the approximate ratio of mononucleosomal to nucleosome-free fragments (stored as nucleosome_signal)**.
+
+- **Transcriptional start site (TSS) enrichment score**: The [ENCODE project](https://www.encodeproject.org/data-standards/terms/) has defined an ATAC-seq targeting score based on the ratio of fragments centered at the TSS to fragments in TSS-flanking regions. Poor ATAC-seq experiments typically will have a low TSS enrichment score. We can compute this metric for each cell with the TSSEnrichment() function, and the results are stored in metadata under the column name TSS.enrichment.
+
+- **Total number of fragments in peaks**: A measure of cellular sequencing depth / complexity. Cells with very few reads may need to be excluded due to low sequencing depth. Cells with extremely high levels may represent doublets, nuclei clumps, or other artefacts.
+
+- **Fraction of fragments in peaks**: Represents the fraction of all fragments that fall within ATAC-seq peaks. Cells with low values (i.e. <15-20%) often represent low-quality cells or technical artifacts that should be removed. Note that this value can be sensitive to the set of peaks used.
+
+- **Ratio reads in genomic blacklist regions**: The ENCODE project has provided a list of blacklist regions, representing reads which are often associated with artefactual signal. Cells with a high proportion of reads mapping to these areas (compared to reads mapping to peaks) often represent technical artifacts and should be removed. ENCODE blacklist regions for human (hg19 and hg38), mouse (mm9 and mm10), Drosophila (dm3 and dm6), and C. elegans (ce10 and ce11) are included in the Signac package. The FractionCountsInRegion() function can be used to calculate the fraction of all counts within a given set of regions per cell. We can use this function and the blacklist regions to find the fraction of blacklist counts per cell.
+
+Note that the last three metrics can be obtained from the output of CellRanger (which is stored in the object metadata), but can also be calculated for non-10x datasets using Signac.
+
+### ScDblFinder
+This script used the [ScDblFinder](https://bioconductor.org/packages/devel/bioc/vignettes/scDblFinder/inst/doc/scDblFinder.html) method for identifying doublets/multiplets in single-cell data. 
+
+The scDblFinder method combines the strengths of various doublet detection approaches, training an iterative classifier on the neighborhood of real cells and artificial doublets.
+
+scDblFinder() has two main modes of operation: cluster-based or not. Both perform quite well (see [Germain et al., 2021](https://f1000research.com/articles/10-979)). In general, it is recommended the cluster-based approach in datasets with a very clear cluster structure, and the random approach in more complex datasets.
+
+The input data for scDblFinder can be either i) a count matrix (full or sparse), with genes/features as rows and cells/droplets as columns; or ii) an object of class SingleCellExperiment. In either case, the object should not contain empty drops, but should not otherwise have undergone very stringent filtering (which would bias the estimate of the doublet rate). 
+
+### Final filter
+We merge count matrices from previous QC steps after filtering out low quality cells and doublets (optional as defined in the `params`). Seurat object and metadata for the library along with UMAP embeddings are saved to be used for downstream analyses.
+
+## Seurat Workflow
+
+## Normalization and linear dimensional reduction
+
+- Normalization: Signac performs term frequency-inverse document frequency (TF-IDF) normalization. This is a two-step normalization procedure, that both normalizes across cells to correct for differences in cellular sequencing depth, and across peaks to give higher values to more rare peaks.
+
+- Feature selection: The low dynamic range of scATAC-seq data makes it challenging to perform variable feature selection, as we do for scRNA-seq. Instead, we can choose to use only the top n% of features (peaks) for dimensional reduction, or remove features present in less than n cells with the [FindTopFeatures()](https://stuartlab.org/signac/reference/findtopfeatures) function. Here we will use all features, though we have seen very similar results when using only a subset of features (try setting min.cutoff to ‘q75’ to use the top 25% all peaks), with faster runtimes. Features used for dimensional reduction are automatically set as VariableFeatures() for the Seurat object by this function.
+
+- Dimension reduction: We next run singular value decomposition (SVD) on the TD-IDF matrix, using the features (peaks) selected above. This returns a reduced dimension representation of the object (for users who are more familiar with scRNA-seq, you can think of this as analogous to the output of PCA).
+
+The combined steps of TF-IDF followed by SVD are known as latent semantic indexing (LSI), and were first introduced for the analysis of scATAC-seq data by [Cusanovich et al. 2015](https://www.science.org/doi/10.1126/science.aab1601). The first LSI component often captures sequencing depth (technical variation) rather than biological variation. If this is the case, the component should be removed from downstream analysis. We can assess the correlation between each LSI component and sequencing depth using the DepthCor() function. This plot can indicate correlation between the first LSI component and the total number of counts for the cell. If there is a very strong correlation between the first LSI component and the total number of counts for the cell, then we will perform downstream steps without this component as we don’t want to group cells together based on their total sequencing depth, but rather by their patterns of accessibility at cell-type-specific peaks.
+
+## Non-linear dimension reduction and clustering
+
+Now that the cells are embedded in a low-dimensional space we can use methods commonly applied for the analysis of scRNA-seq data to perform graph-based clustering and non-linear dimension reduction for visualization. The functions RunUMAP(), FindNeighbors(), and FindClusters() all come from the Seurat package.
+
+# Results
+Code, summary reports, plots and results per each QC step have been deposited to\
+
+\footnotesize
+
+HPCF: <font size="3"><span style="color:blue">``r root_dir``</span></font>\
+Results from FastQC method: <font size="3"><span style="color:blue">``r fastqc_module_results_dir``</span></font>\
+Results from CellRanger method: <font size="3"><span style="color:blue">``r cellranger_module_results_dir``</span></font>\
+Plots per QC method: <font size="3"><span style="color:blue">``r module_plots_dir``</span></font>\
+Results per QC method: <font size="3"><span style="color:blue">``r module_results_dir``</span></font>\
+
+\normalsize
+
+## QC Summary
+
+## Samples
+
+```{r read-metadata-define-sample-name, echo = FALSE}
+# Read metadata file and define `sample_name`
+project.metadata <- read.csv(project_metadata_file, sep = '\t', header = TRUE)
+sample_name <- unique(as.character(project.metadata$ID))
+sample_name <- sort(sample_name, decreasing = FALSE)
+print(sample_name)
+```
+
+## Read fastqc-analysis results
+
+We will summarize the QC results as generated by FastQC, a quality control tool for high throughput sequence data. 
+
+```{r read-fastqc-analysis, echo = FALSE}
+multiqc_general_stats_df <- read.table(multiqc_general_stats_results_file, header = TRUE, sep = "\t") %>%
+  arrange(Sample)
+
+multiqc_fastqc_df <- read.table(multiqc_fastqc_results_file, header = TRUE, sep = "\t") %>% 
+  mutate_if(is.numeric, ~ scales::comma(.)) %>%
+  arrange(Sample)
+```
+
+### General Statistics per sample
+
+The results from the FastQC method can be found here: <font size="3"><span style="color:blue">``r fastqc_module_results_dir``</span></font>\
+
+```{r , echo=TRUE}
+# Interactive Table
+datatable(multiqc_general_stats_df, 
+          options = list(pageLength = 5, 
+                         autoWidth = TRUE, 
+                         server = TRUE), 
+          filter = "top")
+```
+
+### Summary FastQC per sample
+
+```{r , echo=TRUE}
+# Interactive Table
+datatable(multiqc_fastqc_df, 
+          options = list(pageLength = 5, 
+                         autoWidth = TRUE, 
+                         server = TRUE), 
+          filter = "top")
+```
+
+## Read cellranger-analysis results
+
+We will summarize the QC results as generated by CellRanger. 
+
+```{r read-cellranger-analysis, echo = FALSE}
+cellranger_results_df <- readr::read_tsv(cellranger_results_file, guess_max = 100000, show_col_types = FALSE) %>%
+  rename_with(~ gsub(" ", "_", .)) %>%
+  mutate_if(is.numeric, ~ scales::comma(.)) %>%
+  relocate(Sample_ID) %>%
+  arrange(Sample_ID) 
+```
+
+### Summary of CellRanger QC per sample
+
+The results from the CellRanger method can be found here: <font size="3"><span style="color:blue">``r cellranger_module_results_dir``</span></font>\
+
+```{r , echo=TRUE}
+# Interactive Table
+datatable(cellranger_results_df, 
+          options = list(pageLength = 5, 
+                         autoWidth = TRUE, 
+                         server = TRUE), 
+          filter = "top")
+```
+
+## Read seurat_qc plots 
+
+Results are shown by sample (as ordered in the `Samples` section) and before/after filtering low quality cells (unfiltered and filtered).
+
+```{r read-seurat-qc-plots-file, echo = FALSE}
+seurat_plots_file <- c(dir(path = seurat_plots_dir,  pattern = ".png", full.names = TRUE, recursive = TRUE))
+p <- file.path(seurat_plots_file)
+```
+
+### Plots per sample
+
+```{r read-seurat-qc-plots-file-plot, echo=FALSE, fig.align='center', out.width='100%', fig.cap=''}
+knitr::include_graphics(p)
+```
+
+## Read scDblFinder plots and results
+
+We will summarize the estimated and removed doublets per sample. Results are shown by sample (as ordered in the `Samples` section). This is an optional step, so it will be skipped or not as defined in `params`. 
+
+```{r read-scDblFinder, echo = FALSE}
+if (use_scDblFinder_filtering == "YES"){
+  print_message <- "we will use scDblFinder to remove doublets"
+  doublets_metrics <- readr::read_tsv(scDblFinder_results_file, guess_max = 100000, show_col_types = FALSE) 
+  scDblFinder_plots_file <- c(dir(path = scDblFinder_plots_dir,  pattern = ".png", full.names = TRUE, recursive = TRUE))
+  } else {
+    print_message <- "we will skip usage of the scDblFinder to remove doublets"
+}
+```
+
+Here, `r print_message`.
+
+### Summary table per sample
+
+```{r, fig.align = "left", results = "asis", message = FALSE, warning = FALSE, echo = FALSE}
+if (use_scDblFinder_filtering == "YES"){
+  tables1 <- doublets_metrics
+  cat("  \n<div align=\"center\" style=\"font-size:80%\">  \n")
+  print(knitr::kable(tables1, align = "lcccc", caption = "Summary of doublets detection per sample"))
+  cat("  \n</div>  \n")
+  cat("  \n\\pagebreak  \n")
+  } else {
+}
+```
+
+### Plots per sample
+
+```{r read-scDblFinder-plots-file, echo = FALSE}
+if (use_scDblFinder_filtering == "YES"){
+  p <- list()
+  p <- knitr::include_graphics(scDblFinder_plots_file)
+
+  fig.cap_list <- list()
+  for (i in seq_along(sample_name)) {
+    fig.cap_list = glue::glue('\n\n\n')}
+  } else {
+}
+```
+
+```{r read-scDblFinder-plots-file-plot, echo = FALSE, fig.align = 'center', out.width = '100%', fig.cap = fig.cap_list}
+if (use_scDblFinder_filtering == "YES"){
+  knitr::include_graphics(p)
+  } else {
+    fig.cap_list <- list()
+    for (i in seq_along(sample_name)) {
+      fig.cap_list = glue::glue('\n\n\n')}
+}
+```
+
+## Number of cells per sample at each QC step
+
+We will summarize the number of cells per sample at each QC step.
+
+### Summary table per sample
+
+```{r read-Filter-object, echo = FALSE}
+cells_table <- readr::read_tsv(cells_table_file, guess_max = 100000, show_col_types = FALSE) 
+Filter_object_plots_file <- c(dir(path = Filter_object_plots_dir,  pattern = ".png", full.names = TRUE, recursive = TRUE))
+```
+
+```{r, fig.align = "left", results = "asis", message = FALSE, warning = FALSE, echo = FALSE}
+tables1 <- cells_table
+cat("  \n<div align=\"center\" style=\"font-size:80%\">  \n")
+print(knitr::kable(tables1, align = "lcccc", caption = "Summary of number of cells per sample at each QC step"))
+cat("  \n</div>  \n")
+cat("  \n\\pagebreak  \n")
+```
+
+### UMAP embeddings of all samples after final filtering
+
+```{r read-final-plots-file, echo = FALSE}
+p <- list()
+p <- knitr::include_graphics(Filter_object_plots_file)
+```
+
+```{r read-final-plots-file-plot, echo=FALSE, fig.align='center', out.width='100%', fig.cap=''}
+knitr::include_graphics(p)
+```
+
+\pagebreak
+
+# Additional Resources 
+
+**CellRanger count**\
+[CellRanger count](https://www.10xgenomics.com/support/software/cell-ranger/latest/analysis/running-pipelines/cr-gex-count) is an alignment pipeline for sc-/sn-RNA-Seq Analysis in 10X Genomics data.
+
+**FastQC**\
+[FastQC](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/) is a quality control tool for high throughput sequence data.
+
+**Signac Vignette**\
+[Signac_1.14.0](https://stuartlab.org/signac/articles/pbmc_vignette) is an R package designed for QC, analysis, and exploration of single-cell ATAC-seq data.
+
+**ScDblFinder Vignette**\
+[ScDblFinder](https://bioconductor.org/packages/devel/bioc/vignettes/scDblFinder/inst/doc/scDblFinder.html) is an R package designed for identifying doublets in single-cell RNA-seq data.
+
+**Single Cell Gene Expression › Software**
+[10X genomics Support](https://support.10xgenomics.com/single-cell-gene-expression/software/overview/welcome)
+
+**FAQ**\
+If you have question about the analysis procedure or results, or you wish to discuss follow-up analyses, please contact us at cody.ramirez@stjude.org or submit an [issue](https://github.com/stjude-dnb-binfcore/sc-rna-seq-snap/issues) .
+
+# Acknowledgements
+
+All manuscripts used from this report must acknowledge **the Bioinformatics Core**. We would also appreciate the title and journal name of the resulting manuscript to be forwarded to cody.ramirez@stjude.org to help both non-and competitive renewals of the SJCRH Cancer Center grant.
+
+```{r echo=FALSE}
+detach(params)
+```
+
+\pagebreak
+
+# Session Info
+
+```{r echo=FALSE}
+sessionInfo()
+```
+
