@@ -265,7 +265,7 @@ gradient_palette_df <- readr::read_tsv(gradient_palette_file, guess_max = 100000
 
 When pre-processing chromatin data, Signac uses information from two related input files, both of which can be created using CellRanger:
 
-- **Peak/Cell matrix.** This is analogous to the gene expression count matrix used to analyze single-cell RNA-seq. **However, instead of genes, each row of the matrix represents a region of the genome (a peak), that is predicted to represent a region of open chromatin.** Each value in the matrix represents the number of Tn5 integration sites for each single barcode (i.e. a cell) that map within each peak. You can find more detail on the 10X Website.
+- **Peak/Cell matrix.** This is analogous to the gene expression count matrix used to analyze single-cell RNA-seq. **However, instead of genes, each row of the matrix represents a region of the genome (a peak), that is predicted to represent a region of open chromatin.** Each value in the matrix represents the number of Tn5 integration sites for each single barcode (i.e. a cell) that map within each peak. You can find more detail on the [10X Website](https://support.10xgenomics.com/single-cell-atac/software/pipelines/latest/output/matrices).
 
 - **Fragment file.** **This represents a full list of all unique fragments captured by the assay and their number of reads across all single cells.** It is a substantially larger file, is slower to work with, and is stored on-disk (instead of in memory). However, the advantage of retaining this file is that it contains all fragments associated with each single cell, as opposed to only fragments that map to peaks. More information about the fragment file can be found on the [10x Genomics website](https://www.10xgenomics.com/support/jp/software/cell-ranger-atac/latest/analysis/outputs/fragments-file).
 
@@ -368,14 +368,14 @@ p <- print(p + ggtitle(sample_name[i])) # Add a dynamic title using sample_name[
 ggsave(file = name, width = 6, height = 5, device = "png")
 ```
 
-Next, we can look at the fragment length periodicity for all the cells, and group by cells with high or low nucleosomal signal strength. That is known as nucleosome signal and it is a measure of how well nucleosome positioning is preserved in the ATAC-seq data. It is calculated based on the periodicity of fragment lengths (mononucleosome, dinucleosome, etc.). Example:
+Next, we examine the fragment length periodicity across all cells, grouping them by high or low nucleosome signal strength. The nucleosome signal measures how well nucleosome positioning is preserved in the ATAC-seq data, based on the periodicity of fragment lengths (e.g., mononucleosome, dinucleosome). Ideally, we expect few cells with a high nucleosome signal, as this typically indicates better data quality. For example:
 
 | Group     | Meaning                                   | Count  |
 | --------- | ----------------------------------------- | ------ |
 | `Low NS`  | Nucleosome signal < 4 → likely good cells | 19,972 |
 | `High NS` | Nucleosome signal > 4 → potentially noisy | 34     |
 
-You can see that cells that are outliers for the mononucleosomal / nucleosome-free ratio (based on the plots below) have different nucleosomal banding patterns. The remaining cells exhibit a pattern that is typical for a successful ATAC-seq experiment.
+Cells with high nucleosome signal often show atypical banding patterns, while the rest display the expected structure of a high-quality ATAC-seq experiment.
 
 ```{r FragmentHistogram-before-filtering, fig.width = 10, fig.height = 5, fig.fullwidth = TRUE, echo=TRUE}
 # The following code fails - maybe it does when values are very low for one of the categories - not sure.
@@ -479,7 +479,7 @@ The combined steps of TF-IDF followed by SVD are known as latent semantic indexi
 
 ## Non-linear dimension reduction and clustering
 
-Now that the cells are embedded in a low-dimensional space we can use methods commonly applied for the analysis of scRNA-seq data to perform graph-based clustering and non-linear dimension reduction for visualization. The functions RunUMAP(), FindNeighbors(), and FindClusters() all come from the Seurat package.
+Now that the cells are embedded in a low-dimensional space we can use methods commonly applied for the analysis of scRNA-seq data to perform non-linear dimension reduction for visualization. The function RunUMAP() will be used from the Seurat package.
 
 ```{r process-object, fig.width = 6, fig.height = 5, fig.fullwidth = TRUE, echo=TRUE}
 # Now we will rename the cell names as we did before for the final object
@@ -496,9 +496,9 @@ if (cells_so_after_filter_num >= 500) {
   # This value is a commonly used threshold for many single-cell RNA-seq studies as a minimum for obtaining reliable and meaningful analysis. 
   message("We will proceed with processing of the seurat object and include the sample in the merged and integrated cohort for downstream analyses.")
   cat("Create and process seurat for sample", sample_name[i], "\n")
-  seurat_obj <- process_signac(seurat_obj = seurat_obj, min.cutoff_value = min.cutoff_value, assay = assay, results_dir = results_dir, 
-                             plots_output = plots_dir, use_condition_split = use_condition_split, condition1 = condition_value1, condition2 = condition_value2, 
-                             condition3 = condition_value3, print_pdf = print_pdf, grouping = grouping)
+  seurat_obj <- process_signac(seurat_obj = seurat_obj, min.cutoff_value = min.cutoff_value, assay = assay, results_dir = results_dir,
+                               plots_output = plots_dir, use_condition_split = use_condition_split, condition1 = condition_value1, condition2 = condition_value2,
+                               condition3 = condition_value3, print_pdf = print_pdf, grouping = grouping)
   message("Create Seurat object done, saving...", sample_name[i], "\n")
   } else {
     message("We will skip processing of the seurat object due to low number of cells (less than 500) and exclude the sample in the merged and integrated cohort for downstream analyses.")
