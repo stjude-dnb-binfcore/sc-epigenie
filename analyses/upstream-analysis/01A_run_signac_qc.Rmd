@@ -313,10 +313,6 @@ seurat_obj <- seurat_obj[as.vector(peaks.keep), ]
 ```
 
 ```{r add-gene-annotation, echo=TRUE}
-# Code to comment it if we want to exclude non-standard chromosomes (like mitochondrial DNA or unplaced contigs) can introduce noise and are usually removed.
-#peaks.keep <- seqnames(granges(seurat_obj)) %in% standardChromosomes(granges(seurat_obj))
-#seurat_obj <- seurat_obj[as.vector(peaks.keep), ]
-
 ah <- AnnotationHub()
 query(ah, annotation_Ensembl)
 
