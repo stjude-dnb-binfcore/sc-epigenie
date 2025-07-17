@@ -305,7 +305,18 @@ We need to add gene annotations to the seurat object for the genome reference. T
 
 Multiple patches are released for each genome assembly. When dealing with mapped data (such as the 10x Genomics files we will be using), it is advisable to use the annotations from the same assembly patch that was used to perform the mapping.
 
+```{r peaks-keep, echo=TRUE, include=FALSE}
+# Code if we want to exclude non-standard chromosomes (like mitochondrial DNA or unplaced contigs) can introduce noise and are usually removed.
+# This doesn't seem relevant for brain data that sometimes includes additional genomic features (e.g., mitochondrial reads are often biologically relevant due to energy metabolism).
+peaks.keep <- seqnames(granges(seurat_obj)) %in% standardChromosomes(granges(seurat_obj))
+seurat_obj <- seurat_obj[as.vector(peaks.keep), ]
+```
+
 ```{r add-gene-annotation, echo=TRUE}
+# Code to comment it if we want to exclude non-standard chromosomes (like mitochondrial DNA or unplaced contigs) can introduce noise and are usually removed.
+#peaks.keep <- seqnames(granges(seurat_obj)) %in% standardChromosomes(granges(seurat_obj))
+#seurat_obj <- seurat_obj[as.vector(peaks.keep), ]
+
 ah <- AnnotationHub()
 query(ah, annotation_Ensembl)
 
