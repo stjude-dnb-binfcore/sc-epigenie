@@ -477,7 +477,7 @@ ggsave(file = name, width = 15, height = 6, device = "png")
 
 The combined steps of TF-IDF followed by SVD are known as latent semantic indexing (LSI), and were first introduced for the analysis of scATAC-seq data by [Cusanovich et al. 2015](https://www.science.org/doi/10.1126/science.aab1601). The first LSI component often captures sequencing depth (technical variation) rather than biological variation. If this is the case, the component should be removed from downstream analysis. We can assess the correlation between each LSI component and sequencing depth using the DepthCor() function. This plot can indicate correlation between the first LSI component and the total number of counts for the cell. If there is a very strong correlation between the first LSI component and the total number of counts for the cell, then we will perform downstream steps without this component as we don’t want to group cells together based on their total sequencing depth, but rather by their patterns of accessibility at cell-type-specific peaks.
 
-## Non-linear dimension reduction and clustering
+## Non-linear dimension reduction
 
 Now that the cells are embedded in a low-dimensional space we can use methods commonly applied for the analysis of scRNA-seq data to perform non-linear dimension reduction for visualization. The function RunUMAP() will be used from the Seurat package.
 
