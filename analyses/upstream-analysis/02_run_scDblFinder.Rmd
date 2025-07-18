@@ -1,0 +1,391 @@
+---
+title: "Doublet detection for sc-ATAC-Seq Analysis in 10X Genomics data"
+author: "Antonia Chroni for SJCRH DNB_BINF_Core"
+papersize: a4
+fontsize: 11pt
+links-as-notes: true
+output:
+  html_document:
+    toc: TRUE
+    toc_float: TRUE
+    df_print: paged
+    code_folding: hide
+    toc_depth: 2
+    highlight: tango
+    number_sections: TRUE
+  pdf_document:
+    toc: TRUE
+    highlight: tango
+    number_sections: TRUE
+    latex_engine: lualatex
+    keep_tex: FALSE
+    fig_caption: yes
+    fig_crop: no
+    fig_height: 2
+    fig_width: 3
+    toc_depth: 2
+always_allow_html: TRUE
+urlcolor: blue
+linkcolor: black
+citecolor: blue
+geometry: margin=1in
+header-includes: 
+  - \usepackage{titling}
+  - \usepackage{fancyhdr}
+  - \usepackage{graphicx}
+  - \usepackage{float}
+params:
+  assay: '.'
+  min.cutoff_value: '.'
+  root_dir: './'
+  metadata_dir: './'
+  metadata_file: './'
+  PROJECT_NAME: '.'
+  PI_NAME: '.'
+  TASK_ID: '.'
+  PROJECT_LEAD_NAME: '.'
+  DEPARTMENT: '.'
+  LEAD_ANALYSTS: '.'
+  GROUP_LEAD: '.'
+  CONTACT_EMAIL: '.'
+  PIPELINE: '.'
+  START_DATE: '.'
+  COMPLETION_DATE: '.'
+---
+
+```{r logo-file, echo=FALSE}
+attach(params)
+# Insert logo on the top of the html report 
+logo_file <- file.path(root_dir, "figures", "img", "DNB-BINF-Core-logo.png")
+htmltools::img(src = knitr::image_uri(logo_file), alt = "logo", style = "position:absolute; top:0; left:0; padding:0px; height:120px;")
+detach(params)
+```
+
+\addtolength{\headheight}{2.0cm} 
+\fancypagestyle{plain}{} 
+\thispagestyle{fancy}
+\fancyhead[L]{\includegraphics[height=120px]{`r logo_file`}}
+\renewcommand{\headrulewidth}{0pt}
+
+<style type="text/css">
+:root {--DNB_BINF_Core_color: #00427B;}
+
+h1.title {margin-top: 130px;
+          margin-bottom: 25px;
+          font-size: 36px;}
+
+.nobullet li {list-style-type: none;}
+
+.reporthead {font-size: 20px;}
+
+body { /* Normal */
+  font-size: 16px;
+  font-style: Arial, Helvetica, sans-serif;}
+
+h1 {color: var(--DNB_BINF_Core_color);
+    font-size: 28px;
+    margin-top: 50px;}
+
+h2 {color: var(--DNB_BINF_Core_color);
+    font-size: 20px;}
+
+.list-group-item.active, .list-group-item.active:focus, .list-group-item.active:hover {
+  background-color: var(--DNB_BINF_Core_color);}
+</style>
+
+<a href="https://wiki.stjude.org/display/CAB">
+
+</a>
+
+\pagebreak
+
+<div class="reporthead"><br/>
+**PI: `r params$PI_NAME`**  
+**Project: `r params$PROJECT_NAME`**  
+Task: `r params$TASK_ID`  
+Project Lead(s): `r params$PROJECT_LEAD_NAME`  
+Department: `r params$DEPARTMENT`  
+
+<br />  
+
+DNB Bioinformatics Core Analysis Team: 
+<br />  
+
+>**Lead Analyst(s): `r params$LEAD_ANALYSTS`**  
+>Group Lead: `r params$GROUP_LEAD`  
+<br />
+>**Contact E-mail:** `r params$CONTACT_EMAIL`  
+>**DNB Bioinformatics Core Pipeline:** `r params$PIPELINE`  
+
+Date started: `r params$START_DATE`  
+Date completed:  `r params$COMPLETION_DATE`  
+Report generated: `r format(Sys.time(), '%H:%M:%S %Z %m/%d/%Y')` \
+
+Reviewed by: _____________________   Date: ____________ \
+</div>
+\pagebreak
+  
+# Information about this notebook
+
+This script used the [ScDblFinder](https://bioconductor.org/packages/devel/bioc/vignettes/scDblFinder/inst/doc/scDblFinder.html) method for identifying doublets/multiplets in single-cell data. The scDblFinder method combines the strengths of various doublet detection approaches, training an iterative classifier on the neighborhood of real cells and artificial doublets.
+
+scDblFinder() has two main modes of operation: cluster-based or not. Both perform quite well (see [Germain et al., 2021](https://f1000research.com/articles/10-979)). In general, it is recommended the cluster-based approach in datasets with a very clear cluster structure, and the random approach in more complex datasets.
+
+The input data for scDblFinder can be either i) a count matrix (full or sparse), with genes/features as rows and cells/droplets as columns; or ii) an object of class SingleCellExperiment. In either case, the object should not contain empty drops, but should not otherwise have undergone very stringent filtering (which would bias the estimate of the doublet rate). 
+
+# Set up
+```{r load-library, echo=TRUE}
+suppressPackageStartupMessages({
+  library(scDblFinder)
+  library(Seurat)
+  library(scater)
+  library(future)
+  library(tidyverse)
+  library(grid)
+  library(knitr)
+
+  # Evaluate ggrepel
+  options(ggrepel.max.overlaps = Inf, repr.plot.width=12, repr.plot.height=8)
+  
+  # Evaluate Seurat R expressions asynchronously when possible using future package
+  options(future.globals.maxSize = future_globals_value) 
+  #plan(multisession, workers = parallelly::availableCores())
+  # If future is defaulting to multisession, override it to run in the main process. You can revert later using plan("multisession").
+  plan("sequential") # Forces everything to run in main R session. 
+})
+```
+
+```{r echo=FALSE,warning=FALSE}
+opts_chunk$set(fig.align='center',
+               external=TRUE,
+               echo=FALSE,
+               warning=FALSE,
+               fig.pos='H')
+a4width <- 8.3
+a4height <- 11.7
+```
+
+# Directories and paths to file Inputs/Outputs
+```{r set-dir-and-file-names, echo=TRUE}
+attach(params)
+analysis_dir <- file.path(root_dir, "analyses", "upstream-analysis") 
+results_dir <- file.path(analysis_dir, "results") 
+seurat_results_dir <- file.path(analysis_dir, "results", "01_Signac_qc") 
+
+# Input files
+seurat_results_file <- c(dir(path = seurat_results_dir,  pattern = "seurat_obj_raw.rds", full.names = TRUE, recursive = TRUE))
+project_metadata_file <- file.path(metadata_dir, metadata_file) # metadata input file
+
+# Create results_dir
+ScDblFinder_results_dir <- file.path(paste0(results_dir, "/", "02_scDblFinder", "/"))
+if (!dir.exists(ScDblFinder_results_dir)) {
+  dir.create(ScDblFinder_results_dir)}
+
+# Create to plots directory
+plots_dir <- file.path(analysis_dir, "plots") 
+if (!dir.exists(plots_dir)) {
+  dir.create(plots_dir)}
+
+# Create plots_dir
+scDblFinder_plots_dir <- file.path(plots_dir, paste0("02_scDblFinder"))
+if (!dir.exists(scDblFinder_plots_dir)) {
+  dir.create(scDblFinder_plots_dir)}
+
+source(paste0(root_dir, "/figures/scripts/theme_plot.R"))
+```
+
+# Read metadata file and define `sample_name`
+
+```{r read-metadata-define-sample-name, echo=TRUE}
+# Read metadata
+project.metadata <- read.csv(project_metadata_file, sep = '\t', header = TRUE)
+sample_name <- unique(as.character(project.metadata$ID))
+sample_name <- sort(sample_name, decreasing = FALSE)
+print(sample_name)
+```
+
+# Read raw seurat_objs 
+
+We will load the raw seurat object as generated in the `01A_run_signac_qc.Rmd` step of the pipeline. We will run dimensionality reductions and convert to single cell experiments.
+
+# Run scDblFinder 
+
+Next, the `scDblFinder function` is used to identify cells that are doublets based on cluster-based generation of artificial doublets. We will save the cells that need to be filtered based on scDblFinder analysis in a separate table.
+
+```{r run-recoverDoublets-plot-predictions, fig.width = 15, fig.height = 4, fig.fullwidth = TRUE, echo=TRUE}
+# Create metrics per sample
+doublets_metrics <- data.frame(matrix(ncol = 4, nrow = 1))
+colnames(doublets_metrics) <- c("sample_name", "singlet", "doublet", "doublets_pct_library") # provide column names
+
+# Create list for seurat and sce
+sce_obj_list <- list()
+seurat_obj_with_doublets_list <- list()
+
+for (i in seq_along(sample_name)) {
+  print(sample_name[i])
+  
+  ###############################################################
+  cat("Reading in data for sample", sample_name[i], "\n")
+  
+  sce_obj_list[i] <- readRDS(seurat_results_file[i])
+  print(sce_obj_list)
+  
+  set.seed(1234) # Make this reproducible as UMAP algorithm is not deterministic
+  
+  # Normalize, find variable features and scale data
+  sce_obj_list[[i]] <- sce_obj_list[[i]] %>%
+    RunTFIDF() %>%
+    FindTopFeatures(min.cutoff = min.cutoff_value) %>%
+    RunSVD %>%
+    RunUMAP(reduction = "lsi", dims = 2:30)
+
+  sce_obj_list[[i]] <- as.SingleCellExperiment(sce_obj_list[[i]])
+  ###############################################################
+  cat("Beginning to run scDblFinder for sample", sample_name[i], "\n")
+  
+  # Run scDblFinder
+  bp <- BiocParallel::MulticoreParam(4, RNGseed=1234)
+  BiocParallel::bpstart(bp)
+  
+  set.seed(1234) # Make this reproducible 
+  sce_obj_list[[i]] <- scDblFinder(sce_obj_list[[i]], clusters = TRUE, BPPARAM = bp)
+  BiocParallel::bpstop(bp)
+  
+  # Estimate singlets and doublets in the library
+  singlets_doublets_number <- print(table(sce_obj_list[[i]]$scDblFinder.class)) %>%
+    as.data.frame() %>% 
+    mutate(prediction = Var1,
+           count = Freq) %>% 
+    dplyr::select(-Var1, -Freq)
+
+  # Estimate pct of doublets
+  doublets_pct_library <- print(table(sce_obj_list[[i]]$scDblFinder.class)[2]/
+                                  (table(sce_obj_list[[i]]$scDblFinder.class)[1] + 
+                                     table(sce_obj_list[[i]]$scDblFinder.class)[2])*100)
+  
+  # Format decimal places to keep two digits
+  doublets_pct_library <- format(round(doublets_pct_library, 2), nsmall = 2)
+  ########################################################################################################
+  cat("Creating metrics for sample", sample_name[i], "\n")  
+  singlet <- as.numeric(singlets_doublets_number %>% 
+                          dplyr::filter(prediction == "singlet") %>% 
+                          dplyr::select(-prediction) %>% 
+                          dplyr::mutate(singlet = count) %>% 
+                          dplyr::select(-count))
+
+  doublet <- as.numeric(singlets_doublets_number %>% 
+                          dplyr::filter(prediction == "doublet") %>%
+                          dplyr::select(-prediction) %>%
+                          dplyr::mutate(doublet = count) %>%
+                          dplyr::select(-count))
+
+  doublets_metrics[i,] <- c(sample_name[i], singlet, doublet, doublets_pct_library)
+  ########################################################################################################
+  doublets <- sce_obj_list[[i]]@colData[,str_detect(colnames(sce_obj_list[[i]]@colData),"scDblFinder")] %>%
+    as.data.frame() %>% 
+    tibble::rownames_to_column("cell")
+  
+  # Cells that we need to filter from the final object
+  doublets_to_filter <- subset(doublets, doublets$scDblFinder.class == "doublet") 
+  
+  # Convert sce list into seurat list
+  seurat_obj_with_doublets_list[[i]] <- as.Seurat(sce_obj_list[[i]], 
+                                        counts = "counts", 
+                                        data = "logcounts") 
+  
+  ########################################################################################################
+  # Plot the Doublets predictions on the UMAP
+  cat("Plotting doublets predictions on the UMAP for sample:", sample_name[i], "\n")
+  # merge all three plots within one grid (and visualize this)
+  fname_png <- paste0(scDblFinder_plots_dir, "/", sample_name[i], "_Doublets_prediction.png")
+  print(fname_png)
+  gridExtra::grid.arrange(plot1 <- plotUMAP(sce_obj_list[[i]], colour_by = "scDblFinder.cluster", point_size = 0.1) + ggtitle("scDblFinder clusters"),
+                          plot2 <- plotUMAP(sce_obj_list[[i]], colour_by = "scDblFinder.score", point_size = 0.1) + ggtitle("Doublets score"),
+                          plot3 <- plotUMAP(sce_obj_list[[i]], colour_by = "scDblFinder.class", point_size = 0.1) + ggtitle("Doublets prediction"),
+                          ncol = 3, nrow = 1, top = paste0(sample_name[i], "_Doublets_prediction"), padding = unit(1.5, "line"))
+   
+  g <- gridExtra::arrangeGrob(plot1, plot2, plot3, ncol = 3, nrow = 1,
+                              top = paste0(sample_name[i], "_Doublets_prediction"),
+                              padding = unit(1.5, "line")) #generates g
+  ggsave(file = fname_png, g, width = 15, height = 4, device = "png")
+  #######################################################################################
+  # Save results for all libraries for cells to be filtered out
+  if(i == 1){
+    doublets_to_filter_all <- doublets_to_filter
+    } else {
+      doublets_to_filter_all <- rbind(doublets_to_filter_all, doublets_to_filter)}
+  }
+
+# Save table with doublets_metrics
+write_tsv(doublets_metrics, paste0(ScDblFinder_results_dir, "/", "doublets_metrics.tsv")) 
+```
+
+# Doublets detection per sample
+
+We will summarize the estimated and removed doublets per sample.
+
+```{r, fig.align = "left", results = "asis", message = FALSE, warning = FALSE, echo = FALSE}
+tables1 <- doublets_metrics
+cat("  \n<div align=\"center\" style=\"font-size:80%\">  \n")
+caption_value = "Summary of doublets detection per sample"
+print(knitr::kable(tables1, align = "lcccc", caption = caption_value))
+cat("  \n</div>  \n")
+cat("  \n\\pagebreak  \n")
+```
+
+# Create seurat object with all samples
+
+We will create seurat objects and merge them into one. This will be used for filtering out the doublets.
+
+```{r create-object, echo=TRUE}
+# Merge all seurat objects in the list into one 
+# The first parameter of merge should be a Seurat object, the second (y) can be one Seurat object or a list of several.
+merged_seurat_obj <- merge(x = seurat_obj_with_doublets_list[[1]], y = seurat_obj_with_doublets_list[-1],
+                           project = PROJECT_NAME)
+
+# Remove any columns with NAs
+merged_seurat_obj@meta.data <- merged_seurat_obj@meta.data %>%
+  select_if(~ !any(is.na(.)))
+#print(DefaultAssay(merged_seurat_obj) <- assay) #
+
+# Add metadata
+cat("Adding metadata to merged_seurat_obj\n")
+sample.metadata <- rbind(project.metadata[i, ], project.metadata[i, ][rep(1, length(merged_seurat_obj$nCount_peaks)-1), ])
+merged_seurat_obj@meta.data <- cbind(merged_seurat_obj@meta.data, sample.metadata)
+
+# Cells_number_before_filter per sample_id
+print(table(merged_seurat_obj@meta.data$orig.ident))
+print(table(merged_seurat_obj@meta.data$ID))
+
+saveRDS(merged_seurat_obj, file = paste0(ScDblFinder_results_dir, "/", "merged_seurat_obj_with_doublets.rds")) # save object
+```
+
+```{r filter-object, echo=TRUE}
+# Filter and save filtered seurat object
+# Number of singlet vs doublet in seurat object
+#print(table(merged_seurat_obj@meta.data$scDblFinder.class))
+
+#split_obj <- SplitObject(merged_seurat_obj, split.by = "scDblFinder.class") # Split object based on scDblFinder prediction
+#filter_obj <- subset(split_obj$singlet) # Keep cells with singlet
+#Idents(filter_obj) <- "orig.ident" # Set cell identity classes
+
+# Cells_number_after_filter per `sample_name`
+#print(table(filter_obj@meta.data$orig.ident))
+
+#saveRDS(filter_obj, file = paste0(ScDblFinder_results_dir, "/", "merged_seurat_obj_without_doublets.rds")) # save object
+
+# Next steps
+#We removed doublets from the libraries. The `merged_seurat_obj_without_doublets.rds` can be used for downstream analysis.
+```
+
+```{r echo=FALSE}
+detach(params)
+```
+
+\pagebreak
+
+# Session Info
+
+```{r}
+sessionInfo()
+```
