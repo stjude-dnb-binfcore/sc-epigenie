@@ -243,17 +243,17 @@ for (i in seq_along(sample_name)) {
   
   ###############################################################
   cat("Beginning to run scDblFinder for sample", sample_name[i], "\n")
-  # ------------------------------------------------------------------------------
-  # Step 1: Run scDblFinder
+  # -------------------------------------------------------------------------------------------
+  # Run scDblFinder
+  # https://plger.github.io/scDblFinder/articles/scATAC.html
+  # https://www.bioconductor.org/packages/devel/bioc/vignettes/scDblFinder/inst/doc/scATAC.html
+  # https://f1000research.com/articles/10-979/v2
+  # -------------------------------------------------------------------------------------------
+
   bp <- BiocParallel::MulticoreParam(4, RNGseed=1234)
   BiocParallel::bpstart(bp)
   
   set.seed(1234) # Make this reproducible 
-  
-  # Step 1: Applying the scDblFinder method
-  # https://plger.github.io/scDblFinder/articles/scATAC.html
-  # https://www.bioconductor.org/packages/devel/bioc/vignettes/scDblFinder/inst/doc/scATAC.html
-  # https://f1000research.com/articles/10-979/v2
   sce_obj_list[[i]] <- scDblFinder(sce_obj_list[[i]], artificialDoublets=1, aggregateFeatures=TRUE, nfeatures=25, processing="normFeatures", BPPARAM = bp)
   BiocParallel::bpstop(bp)
   
