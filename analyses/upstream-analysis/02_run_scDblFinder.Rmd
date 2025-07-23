@@ -254,7 +254,31 @@ for (i in seq_along(sample_name)) {
   BiocParallel::bpstart(bp)
   
   set.seed(1234) # Make this reproducible 
-  sce_obj_list[[i]] <- scDblFinder(sce_obj_list[[i]], artificialDoublets=1, aggregateFeatures=TRUE, nfeatures=25, processing="normFeatures", BPPARAM = bp)
+  sce_obj_list[[i]] <- scDblFinder(sce_obj_list[[i]],
+                                   # Number of artificial doublets generated per real cell.
+                                   # These synthetic doublets are used to train the classifier.
+                                   # A value of 5–10 is typical; higher values may improve detection in sparse scATAC-seq data.
+                                   artificialDoublets = 5,
+                                   
+                                   # Whether to aggregate features (e.g., peak accessibility) when creating synthetic doublets.
+                                   # When TRUE, the doublet profile is the average of the two real profiles.
+                                   # This is generally recommended and is the default behavior.
+                                   aggregateFeatures = TRUE,
+
+                                   # Number of top features (peaks or bins) used to create the feature space for doublet classification.
+                                   # In scATAC-seq, 25 may be low — values like 500–2000 are more common for meaningful resolution.
+                                   nfeatures = 500,
+
+                                   # Method for preprocessing the data before training the classifier:
+                                   # "normFeatures" normalizes features across cells before PCA.
+                                   # Alternatives include "rawCounts" (raw accessibility) or "PCA" (if PCA is precomputed).
+                                   processing = "normFeatures",
+
+                                   # Parallelization settings — BPPARAM is a BiocParallel backend object.
+                                   # For example, bp <- MulticoreParam(4) would use 4 CPU cores.
+                                   # This speeds up computation for large datasets.
+                                   BPPARAM = bp)
+
   BiocParallel::bpstop(bp)
   
   # Estimate singlets and doublets in the library
