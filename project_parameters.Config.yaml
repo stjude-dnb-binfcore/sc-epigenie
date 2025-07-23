@@ -34,3 +34,44 @@ sample_prefix:
   - XYZ_
 
 # `./analyses/upstream-analysis`
+genome_name_upstream: "GRCm39" # Options: (1) human: "GRCh38" and "hg19"; and (2) mouse: "GRCm39", "mm10", and "mm9".
+assay_signac_qc: "peaks" # Options: "peaks" (default ALWAYS)
+# Genome-to-Ensembl Mapping Options: (1) human: "GRCh38" -> "EnsDb.Hsapiens.v86"(older); "EnsDb.Hsapiens.v98" | "hg19" -> "EnsDb.Hsapiens.v75"
+#                                    (2) mouse: "GRCm39" -> "EnsDb.Mmusculus.v104" (or "EnsDb.Mmusculus.v105"), | "mm10" -> "EnsDb.Mmusculus.v79" and  | "mm9" -> No official `EnsDb` package — use "TxDb.Mmusculus.UCSC.mm9.knownGene" or similar
+annotation_Ensembl_upstream: "EnsDb.Mmusculus.v104" 
+species_upstream: "Mus musculus" # Options: "Hsapiens"; "Mus musculus"
+object_species_upstream: "AH95775" # Options: "AH75011"; "AH14502"; For GRCm39: "AH95775"
+min.cutoff_value_upstream: "q0" # Options: e.g., "q0" to use all peaks; "q75" to use the top 25% all peaks; "q95" to use the top 5% all peaks and so on.
+#nCount_peaks_min_upstream: "100" # Total counts across all peaks	Optional; can correlate with fragments
+#nCount_peaks_max_upstream: "20000" # Total counts across all peaks	Optional; can correlate with fragments
+#nFeature_peaks_min_upstream: "500" # Number of peaks with non-zero counts	Optional
+#nFeature_peaks_max_upstream: "6000" # Number of peaks with non-zero counts	Optional
+#peak_region_fragments_min_upstream: "100" # Total fragments in called peak regions	> 3000
+#peak_region_fragments_max_upstream: "20000" #"20000"
+pct_reads_in_peaks_value_upstream: "20" # % of reads in peaks (signal-to-noise)	> 15 or > 20
+blacklist_ratio_value_upstream: "0.05" # Fraction of reads in ENCODE blacklist regions (noise metric)	< 0.05
+#duplicate_value_upstream: "8000" # Duplication rate	Use only if computed
+#mitochondrial_value_upstream: "5" # % of mitochondrial reads	< 5
+TSS.enrichment_value_upstream: "4" # Transcription start site enrichment score	> 2
+nucleosome_signal_value_upstream: "3" # Nucleosome periodicity signal	< 4
+use_threshold_filtering_upstream: "YES" # Options: "YES" (default)  or "NO" (if user prefers to use percentile filtering)
+condition_value1: "condition" # Use discrete values. Min #conditions per project: 1 and Max #conditions per project: 3. To use for visualization purposes and split UMAPs. Value to be extracted from column name in `project_metadata.tsv` file. 
+condition_value2: NULL # Use discrete values. Min #conditions per project: 1 and Max #conditions per project: 3. To use for visualization purposes and split UMAPs. Value to be extracted from column name in `project_metadata.tsv` file. 
+condition_value3: NULL # Use discrete values. Min #conditions per project: 1 and Max #conditions per project: 3. To use for visualization purposes and split UMAPs. Value to be extracted from column name in `project_metadata.tsv` file. 
+print_pdf_seurat_multiple_samples: "YES" # Options: "YES" (default ALWAYS), for `01B_run_signac_qc_multiple_samples.R`
+use_condition_split_seurat_multiple_samples: "NO" # Options: "NO" (default ALWAYS), for  `01B_run_signac_qc_multiple_samples.R`
+grouping: "orig.ident" # define grouping to use 
+use_condition_split_filter_object: "YES" # Options: "YES" (default) or "NO", for `03_run_filter_object.Rmd`
+print_pdf_filter_object: "NO" # # Options: "NO" (default ALWAYS), for `03_run_filter_object.Rmd`
+use_scDblFinder_filtering_filter_object: "NO" # Options: "YES" or "NO" (default) , for `03_run_filter_object.Rmd`.
+filename_filter_object_value: NULL # Options: NULL (default) or name if multiple methods are integrated and explored: "-without-scDblFinder" or "-with-scDblFinder"
+#PCA_Feature_List_value: transcription.factor.gene.list # set for 04_run_filter_object.Rmd if necessary
+filename_summary_report_value: NULL # Options: NULL (default) or name if multiple methods are integrated and explored: "-without-scDblFinder" or "-with-scDblFinder"
+use_scDblFinder_filtering_summary_report: "NO" # Options: "YES" or "NO" (default) , for `05_run_summary_report.Rmd`.
+
+# `./analyses/integrative-analysis`
+use_harmony_integration: "YES" # Options: "YES" or "NO"
+integration_method: "harmony" # Options: "harmony"
+num_dim_harmony: 30
+variable_value: "ID"
+
