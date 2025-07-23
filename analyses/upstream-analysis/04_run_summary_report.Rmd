@@ -450,7 +450,7 @@ knitr::include_graphics(p)
 [Signac_1.14.0](https://stuartlab.org/signac/articles/pbmc_vignette) is an R package designed for QC, analysis, and exploration of single-cell ATAC-seq data.
 
 **ScDblFinder Vignette**\
-[ScDblFinder](https://bioconductor.org/packages/devel/bioc/vignettes/scDblFinder/inst/doc/scDblFinder.html) is an R package designed for identifying doublets in single-cell RNA-seq data.
+[ScDblFinder](https://bioconductor.org/packages/devel/bioc/vignettes/scDblFinder/inst/doc/scATAC.html) is an R package designed for identifying doublets in single-cell RNA-seq data.
 
 **Single Cell Gene Expression › Software**
 [10X genomics Support](https://support.10xgenomics.com/single-cell-gene-expression/software/overview/welcome)
