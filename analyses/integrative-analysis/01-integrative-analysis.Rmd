@@ -1,0 +1,290 @@
+---
+title: "Integrative analysis for sc-ATAC-Seq Analysis in 10X Genomics data"
+author: "Antonia Chroni for SJCRH DNB_BINF_Core"
+papersize: a4
+fontsize: 11pt
+links-as-notes: true
+output:
+  html_document:
+    toc: TRUE
+    toc_float: TRUE
+    df_print: paged
+    code_folding: hide
+    toc_depth: 2
+    highlight: tango
+    number_sections: TRUE
+  pdf_document:
+    toc: TRUE
+    highlight: tango
+    number_sections: TRUE
+    latex_engine: lualatex
+    keep_tex: FALSE
+    fig_caption: yes
+    fig_crop: no
+    fig_height: 2
+    fig_width: 3
+    toc_depth: 2
+always_allow_html: TRUE
+urlcolor: blue
+linkcolor: black
+citecolor: blue
+geometry: margin=1in
+header-includes: 
+  - \usepackage{titling}
+  - \usepackage{fancyhdr}
+  - \usepackage{graphicx}
+  - \usepackage{float}
+params:
+  use_harmony_integration: '.'
+  integration_method: '.'
+  num_dim_harmony: '.'
+  variable_value: '.'
+  future_globals_value: '.'
+  assay: '.'
+  root_dir: './'
+  PROJECT_NAME: '.'
+  PI_NAME: '.'
+  TASK_ID: '.'
+  PROJECT_LEAD_NAME: '.'
+  DEPARTMENT: '.'
+  LEAD_ANALYSTS: '.'
+  GROUP_LEAD: '.'
+  CONTACT_EMAIL: '.'
+  PIPELINE: '.'
+  START_DATE: '.'
+  COMPLETION_DATE: '.'
+---
+
+```{r logo-file, echo=FALSE}
+attach(params)
+# Insert logo on the top of the html report 
+logo_file <- file.path(root_dir, "figures", "img", "DNB-BINF-Core-logo.png")
+htmltools::img(src = knitr::image_uri(logo_file), alt = "logo", style = "position:absolute; top:0; left:0; padding:0px; height:120px;")
+detach(params)
+```
+
+\addtolength{\headheight}{2.0cm} 
+\fancypagestyle{plain}{} 
+\thispagestyle{fancy}
+\fancyhead[L]{\includegraphics[height=120px]{`r logo_file`}}
+\renewcommand{\headrulewidth}{0pt}
+
+<style type="text/css">
+:root {--DNB_BINF_Core_color: #00427B;}
+
+h1.title {margin-top: 130px;
+          margin-bottom: 25px;
+          font-size: 36px;}
+
+.nobullet li {list-style-type: none;}
+
+.reporthead {font-size: 20px;}
+
+body { /* Normal */
+  font-size: 16px;
+  font-style: Arial, Helvetica, sans-serif;}
+
+h1 {color: var(--DNB_BINF_Core_color);
+    font-size: 28px;
+    margin-top: 50px;}
+
+h2 {color: var(--DNB_BINF_Core_color);
+    font-size: 20px;}
+
+.list-group-item.active, .list-group-item.active:focus, .list-group-item.active:hover {
+  background-color: var(--DNB_BINF_Core_color);}
+</style>
+
+<a href="https://wiki.stjude.org/display/CAB">
+
+</a>
+
+\pagebreak
+
+<div class="reporthead"><br/>
+**PI: `r params$PI_NAME`**  
+**Project: `r params$PROJECT_NAME`**  
+Task: `r params$TASK_ID`  
+Project Lead(s): `r params$PROJECT_LEAD_NAME`  
+Department: `r params$DEPARTMENT`  
+
+<br />  
+
+DNB Bioinformatics Core Analysis Team: 
+<br />  
+
+>**Lead Analyst(s): `r params$LEAD_ANALYSTS`**  
+>Group Lead: `r params$GROUP_LEAD`  
+<br />
+>**Contact E-mail:** `r params$CONTACT_EMAIL`  
+>**DNB Bioinformatics Core Pipeline:** `r params$PIPELINE`  
+
+Date started: `r params$START_DATE`  
+Date completed:  `r params$COMPLETION_DATE`  
+Report generated: `r format(Sys.time(), '%H:%M:%S %Z %m/%d/%Y')` \
+
+Reviewed by: _____________________   Date: ____________ \
+</div>
+\pagebreak
+  
+# Information about this notebook
+
+Biological heterogeneity in single-cell ATAC-seq data is frequently confounded by technical variability, such as differences in sequencing depth. The number of detected molecules per cell can vary substantially, even among cells of the same type. As a result, integrating single-cell datasets—across experimental batches, donors, or conditions—is often a critical step in scATAC-seq analysis. Effective integration aligns shared cell types and states across datasets, enhancing statistical power and, most importantly, enabling accurate and meaningful comparative analyses.
+
+In this workflow, we include the following integration methods:
+
+  - [Harmony](https://portals.broadinstitute.org/harmony/) integration workflow by [Korsunsky et al., 2019](https://www.nature.com/articles/s41592-019-0619-0).
+
+
+# Set up
+```{r load-library, echo=TRUE}
+attach(params)
+suppressPackageStartupMessages({
+  library(future)
+  library(tidyverse)
+  library(patchwork)
+  library(Seurat)
+  library(SeuratObject)
+  library(harmony)
+  library(SeuratWrappers)
+  library(scooter)
+  library(reshape2)
+  library(RColorBrewer)
+  library(knitr)
+
+  # Evaluate Seurat R expressions asynchronously when possible using future package
+  options(future.globals.maxSize = future_globals_value) 
+  plan(multisession, workers = parallelly::availableCores())
+})
+```
+
+# Directories and paths to file Inputs/Outputs
+```{r set-dir-and-file-names, echo=TRUE}
+analysis_dir <- file.path(root_dir, "analyses", "integrative-analysis") 
+data_dir <- file.path(root_dir, "analyses", "upstream-analysis", "results", glue::glue('03_Filter_object{suffix}'))
+upstream_analysis_dir <- file.path(root_dir, "analyses", "upstream-analysis")
+
+# Input files
+data_file <- file.path(data_dir, "seurat_obj_merged_filtered.rds")
+
+# Create results_dir
+results_dir <- file.path(analysis_dir, "results")
+if (!dir.exists(results_dir)) {
+  dir.create(results_dir)}
+
+# Create plots directory
+report_dir <- file.path(analysis_dir, "plots") 
+if (!dir.exists(report_dir)) {
+  dir.create(report_dir)}
+
+plots_dir <- file.path(report_dir, glue::glue("plots_{integration_method}")) 
+if (!dir.exists(plots_dir)) {
+  dir.create(plots_dir)}
+
+source(paste0(root_dir, "/figures/scripts/theme_plot.R"))
+source(paste0(analysis_dir, "/util/function-samples-integrate.R"))
+source(paste0(analysis_dir, "/util/custom-seurat-functions.R"))
+source(paste0(upstream_analysis_dir, "/util/function-process-signac.R"))
+```
+
+
+```{r echo=FALSE, warning=FALSE}
+opts_chunk$set(fig.align='center',
+               external=TRUE,
+               echo=FALSE,
+               warning=FALSE,
+               fig.pos='H')
+a4width <- 8.3
+a4height <- 11.7
+```
+
+# Read seurat object
+
+First, we will use the object as generated from the pipeline in the `upstream-analysis` module. This object contains all samples of the project merged.
+
+```{r read-object, echo=TRUE}
+merged_obj <- readRDS(data_file)
+```
+
+# Harmony integration workflow
+
+Harmony is a powerful, general-purpose R package designed to integrate multiple single-cell datasets—it's particularly effective for large scATAC-seq datasets. Harmony aligns your data so that similar cell types cluster together, irrespective of batch or experimental differences.
+
+```{r use-harmony-integration, fig.width = 12, fig.height = 5, fig.fullwidth = TRUE, echo=TRUE}
+# We will use the Harmony integration workflow, if defined in `params`.
+if (use_harmony_integration == "YES"){
+  print_message <- "we use the Harmony integration workflow"
+  seurat_obj <- harmony_integration(seurat_obj = merged_obj,
+                                    variables_to_integrate = variable_value, 
+                                    num_dim = num_dim_harmony, 
+                                    assay = assay)
+  # Plot
+  name <- paste0(plots_dir, "/", glue::glue("plot_{integration_method}.png"))
+  p1 <- DimPlot(object = seurat_obj, reduction = glue::glue("{integration_method}"), pt.size = .1, group.by = "orig.ident") + NoLegend()
+  p2 <- VlnPlot(object = seurat_obj, features = "harmony_1", group.by = "orig.ident", pt.size = .1) + NoLegend()
+  print(patchwork::wrap_plots(list(p1, p2), nrow = 1))
+  ggsave(file = name, width = 12, height = 5, device = "png")
+
+  } else {
+    print_message <- "we will skip usage of the Harmony integration workflow"}
+```
+
+Here, `r print_message`.
+
+# Before vs After integration plot
+
+```{r plot-unitegrated-vs-integrated, fig.width = 12, fig.height = 5, fig.fullwidth = TRUE, echo = TRUE}
+# Plot
+name <- paste0(plots_dir, "/", glue::glue("plot_unitegrated_vs_{integration_method}.png"))
+p1 <- DimPlot(merged_obj, group.by = c("orig.ident")) + ggtitle("Before integration")
+p2 <- DimPlot(seurat_obj, reduction = "umap", group.by = c("orig.ident")) + ggtitle(glue::glue("After {integration_method} integration"))  
+patchwork::wrap_plots(list(p1, p2), nrow = 1) 
+ggsave(file = name, width = 12, height = 5, device = "png")
+```
+
+```{r plot-clusters, fig.width = 6, fig.height = 5, fig.fullwidth = TRUE, echo = TRUE}
+seurat_obj <- SetIdent(seurat_obj, value = "seurat_clusters")
+  
+# Plot
+name <- paste0(plots_dir, "/", glue::glue("plot_clusters_{integration_method}.png"))
+DimPlot(seurat_obj, reduction = "umap", label = TRUE) + NoLegend()
+ggsave(file = name, width = 6, height = 5, device = "png")
+```
+
+```{r plot-fraction-of-cells, fig.width = 10, fig.height = 5, fig.fullwidth = TRUE, echo = TRUE}
+# Plot
+name <- paste0(plots_dir, "/", glue::glue("plot_fraction_of_cells_{integration_method}.png"))
+plot_integrated_clusters(seurat_obj)
+ggsave(file = name, width = 10, height = 6, device = "png")
+```
+
+# Save output files
+
+```{r save-obj, echo=TRUE}
+# Identify columns with a '.1' suffix
+cols_to_remove <- grep("\\.1$", colnames(seurat_obj@meta.data), value = TRUE)
+  
+# Exclude columns that match the specific patterns (e.g., {assay}_snn_res.0.1, {assay}_snn_res.1, {assay}_snn_res.10)
+cols_to_remove <- cols_to_remove[!grepl(glue::glue("^{assay}_snn_res\\.0\\.1$"), cols_to_remove) & 
+                                     !grepl(glue::glue("^{assay}_snn_res\\.1$"), cols_to_remove) &
+                                     !grepl(glue::glue("^{assay}_snn_res\\.10$"), cols_to_remove)]
+  
+# Remove the columns
+seurat_obj@meta.data <- seurat_obj@meta.data[, !colnames(seurat_obj@meta.data) %in% cols_to_remove]
+head(seurat_obj@meta.data)
+
+saveRDS(seurat_obj, file = paste0(results_dir, "/", glue::glue("seurat_obj_integrated_{integration_method}.rds")))
+```
+
+```{r echo=FALSE}
+detach(params)
+```
+
+\pagebreak
+
+# Session Info
+
+```{r echo=FALSE}
+sessionInfo()
+```
+
