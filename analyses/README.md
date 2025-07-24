@@ -8,13 +8,15 @@ Each module is self-contained and can be executed independently or as part of a 
 
 1. `fastqc-analysis` module (description="Pipeline for FastQC quality control tool for high throughput sequence data analysis.", required=True)
 2. `cellranger-analysis` module (description="Pipeline for running and summarizing Cell Ranger count for single or multiple libraries.", required=True)
+3. `upstream-analysis` module (description="Pipeline for estimating QC metrics and filtering low quality cells.", required=True)
 
 ________________________________________________________________________________________ 
 🚧🚧🚧 Analysis Modules Under Development 🚧🚧🚧
 
 The following analysis modules are currently under development. Please check back soon for updates and stay tuned for what's coming next!
 
-3. `upstream-analysis` module (description="Pipeline for estimating QC metrics and filtering low quality cells.", required=True)
+4. `integrative-analysis` module (description="Pipeline for Integrative analysis.", required=False)
+5. `cluster-cell-calling` module (description="Pipeline for cluster cell calling and gene marker analysis.", required=True)
 ________________________________________________________________________________________
 
 
