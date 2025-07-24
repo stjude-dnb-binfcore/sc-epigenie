@@ -7,6 +7,7 @@
 # Load library
 suppressPackageStartupMessages({
   library(yaml)
+  library(tidyverse)
 })
 
 
