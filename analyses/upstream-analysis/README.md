@@ -49,7 +49,7 @@ By default, the pipeline runs all methods from steps (1-2). Step (1) is mandator
 [Signac](https://stuartlab.org/signac/articles/pbmc_vignette) workflow is implemented to pre-process, filter and plot the ATAC-sequencing data. For more tutorials, see [Introduction to single cell ATAC data analysis in R](https://www.youtube.com/watch?v=e2396GKFMRY&ab_channel=Sanbomics) and [How to analyze single-cell ATAC-Seq data in R | Detailed Signac Workflow Tutorial](https://www.youtube.com/watch?v=yEKZJVjc5DY&ab_channel=Bioinformagician).
 
 The CellRanger output from the `cellranger-analysis` module will be used for this step. User will have to define `params` as needed for their experiment. 
-  - Calculate QC metrics: Nucleosome banding pattern, Transcriptional start site (TSS) enrichment score, Total number of fragments in peaks, Fraction of fragments in peaks, Ratio reads in genomic blacklist regions etc
+  - Calculate QC metrics: Nucleosome banding pattern, Transcriptional start site (TSS) enrichment score, Total number of fragments in peaks, Fraction of fragments in peaks, Ratio reads in genomic blacklist regions, etc.
   - Before and after filter: Plot "pct_reads_in_peaks", "peak_region_fragments", "TSS.enrichment", "blacklist_ratio", "nucleosome_signal", "nCount_peaks", "nFeature_peaks", "pct_reads_in_peaks_promoters", "pct_reads_in_peaks_enhancers", "duplicate", "mitochondrial".
   - Data are normalized by using term frequency-inverse document frequency (TF-IDF) normalization. Then, we select the top n% of features (peaks) for dimensional reduction, or remove features present in less than n cells with the [FindTopFeatures()](https://stuartlab.org/signac/reference/findtopfeatures) function. We next run singular value decomposition (SVD) on the TD-IDF matrix, using the features (peaks) selected above. This returns a reduced dimension representation of the object (for users who are more familiar with scRNA-seq, you can think of this as analogous to the output of PCA). The combined steps of TF-IDF followed by SVD are known as latent semantic indexing (LSI). After that the cells are embedded in a low-dimensional space we can run UMAP from the Seurat package.
 
@@ -101,13 +101,18 @@ For more information on QC and other sc-ATAC-Seq related methods, see [Lei Xiong
 
 
 #### Post alignment/cell quality filtering parameters
-We recommend that the user use the following parameters for initial QC, and then adjust accordingly if necessary:
-- `scATAC`: peak_region_fragments_min_upstream: "100" # Total fragments in called peak regions	> 3000
-            pct_reads_in_peaks_value_upstream: "15" # % of reads in peaks (signal-to-noise)	> 15 or > 20
-            blacklist_ratio_value_upstream: "0.05" # Fraction of reads in ENCODE blacklist regions (noise metric)	< 0.05
-            mitochondrial_value_upstream: "5" # % of mitochondrial reads	< 5
-            TSS.enrichment_value_upstream: "10" # Transcription start site enrichment score	> 2
-            nucleosome_signal_value_upstream: "4" # Nucleosome periodicity signal	< 4
+
+We recommend that the user use the following parameters for initial `scATAC` QC, and then adjust accordingly if necessary:
+
+| Parameter                            | Suggested Value | Corrected Comment                                |
+| ------------------------------------ | --------------- | ------------------------------------------------ |
+| `peak_region_fragments_min_upstream` | `"100"`        | Cells with very few fragments in peaks likely represent background noise, empty droplets, or low-quality nuclei.           |
+| `pct_reads_in_peaks_value_upstream`  | `"15"`          | % reads in peaks — **> 15%** (or > 20%)     |
+| `blacklist_ratio_value_upstream`     | `"0.05"`        | % reads in ENCODE blacklist — **< 0.05**         |
+| `mitochondrial_value_upstream`       | `"5"`           | % mitochondrial reads — **< 5%**                 |
+| `TSS.enrichment_value_upstream`      | `"10"`          | TSS enrichment score — **> 2** |
+| `nucleosome_signal_value_upstream`   | `"4"`           | Nucleosome signal — **< 4**                      |
+
            
 ### (2) Estimating and filtering out doublets
 
