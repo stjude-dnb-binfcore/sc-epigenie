@@ -1,0 +1,398 @@
+---
+title: "Find differentially accessible peaks analysis for sc-ATAC-Seq Analysis in 10X Genomics data"
+author: "Antonia Chroni for SJCRH DNB_BINF_Core"
+papersize: a4
+fontsize: 11pt
+links-as-notes: true
+output:
+  html_document:
+    toc: TRUE
+    toc_float: TRUE
+    df_print: paged
+    code_folding: hide
+    toc_depth: 2
+    highlight: tango
+    number_sections: TRUE
+  pdf_document:
+    toc: TRUE
+    highlight: tango
+    number_sections: TRUE
+    latex_engine: lualatex
+    keep_tex: FALSE
+    fig_caption: yes
+    fig_crop: no
+    fig_height: 2
+    fig_width: 3
+    toc_depth: 2
+always_allow_html: TRUE
+urlcolor: blue
+linkcolor: black
+citecolor: blue
+geometry: margin=1in
+header-includes: 
+  - \usepackage{titling}
+  - \usepackage{fancyhdr}
+  - \usepackage{graphicx}
+  - \usepackage{float}
+params:
+  integration_method: '.'
+  assay: '.'
+  resolution_list: '.'
+  future_globals_value: '.'
+  n_value: '.'
+  genome_name: '.'
+  ident.1_value: '.'
+  condition: '.'
+  min.cutoff_value: '.'
+  OrgDb_value: '.'
+  top_n_value_peaks: '.'
+  root_dir: './'
+  PROJECT_NAME: '.'
+  PI_NAME: '.'
+  TASK_ID: '.'
+  PROJECT_LEAD_NAME: '.'
+  DEPARTMENT: '.'
+  LEAD_ANALYSTS: '.'
+  GROUP_LEAD: '.'
+  CONTACT_EMAIL: '.'
+  PIPELINE: '.'
+  START_DATE: '.'
+  COMPLETION_DATE: '.'
+---
+
+```{r logo-file, echo=FALSE}
+attach(params)
+# Insert logo on the top of the html report 
+logo_file <- file.path(root_dir, "figures", "img", "DNB-BINF-Core-logo.png")
+htmltools::img(src = knitr::image_uri(logo_file), alt = "logo", style = "position:absolute; top:0; left:0; padding:0px; height:120px;")
+detach(params)
+```
+
+\addtolength{\headheight}{2.0cm} 
+\fancypagestyle{plain}{} 
+\thispagestyle{fancy}
+\fancyhead[L]{\includegraphics[height=120px]{`r logo_file`}}
+\renewcommand{\headrulewidth}{0pt}
+
+<style type="text/css">
+:root {--DNB_BINF_Core_color: #00427B;}
+
+h1.title {margin-top: 130px;
+          margin-bottom: 25px;
+          font-size: 36px;}
+
+.nobullet li {list-style-type: none;}
+
+.reporthead {font-size: 20px;}
+
+body { /* Normal */
+  font-size: 16px;
+  font-style: Arial, Helvetica, sans-serif;}
+
+h1 {color: var(--DNB_BINF_Core_color);
+    font-size: 28px;
+    margin-top: 50px;}
+
+h2 {color: var(--DNB_BINF_Core_color);
+    font-size: 20px;}
+
+.list-group-item.active, .list-group-item.active:focus, .list-group-item.active:hover {
+  background-color: var(--DNB_BINF_Core_color);}
+</style>
+
+<a href="https://wiki.stjude.org/display/CAB">
+
+</a>
+
+\pagebreak
+
+<div class="reporthead"><br/>
+**PI: `r params$PI_NAME`**  
+**Project: `r params$PROJECT_NAME`**  
+Task: `r params$TASK_ID`  
+Project Lead(s): `r params$PROJECT_LEAD_NAME`  
+Department: `r params$DEPARTMENT`  
+
+<br />  
+
+DNB Bioinformatics Core Analysis Team: 
+<br />  
+
+>**Lead Analyst(s): `r params$LEAD_ANALYSTS`**  
+>Group Lead: `r params$GROUP_LEAD`  
+<br />
+>**Contact E-mail:** `r params$CONTACT_EMAIL`  
+>**DNB Bioinformatics Core Pipeline:** `r params$PIPELINE`  
+
+Date started: `r params$START_DATE`  
+Date completed:  `r params$COMPLETION_DATE`  
+Report generated: `r format(Sys.time(), '%H:%M:%S %Z %m/%d/%Y')` \
+
+Reviewed by: _____________________   Date: ____________ \
+</div>
+\pagebreak
+  
+# Information about this notebook
+
+For more information, please see the [Find differentially accessible peaks analysis for sc-ATAC-Seq Analysis](https://stuartlab.org/signac/articles/mouse_brain_vignette#find-differentially-accessible-peaks-between-clusters) vignette.
+
+# Set up
+
+```{r load-library, echo=TRUE}
+attach(params)
+suppressPackageStartupMessages({
+  library(future)
+  library(tidyverse)
+  library(Seurat)
+  library(Signac)
+  library(knitr)
+  library(DT)
+  library(glue)
+
+  library(htmlwidgets)
+  #BiocManager::install("clusterProfiler")
+  library(clusterProfiler)
+
+  #BiocManager::install("enrichplot")
+  library(enrichplot)
+
+  #BiocManager::install("org.Mm.eg.db")
+  library(org.Hs.eg.db)
+  library(org.Mm.eg.db) # Mouse gene annotation (use org.Hs.eg.db for human)
+  
+  # Evaluate Seurat R expressions asynchronously when possible using future package
+  options(future.globals.maxSize = future_globals_value, future.rng.onMisuse = "ignore") 
+  plan(multisession, workers = parallelly::availableCores())
+}) 
+```
+
+# Directories and paths to file Inputs/Outputs
+
+```{r set-dir-and-file-names, echo=TRUE}
+analysis_dir <- file.path(root_dir, "analyses", "cluster-cell-calling") 
+data_dir <- file.path(root_dir, "analyses", "cluster-cell-calling", "results", "02_create_gene_activity_matrix")
+module_results_dir <- file.path(analysis_dir, "results")
+module_plots_dir <- file.path(analysis_dir, "plots")
+
+# Input files
+data_file <- file.path(data_dir, "seurat_obj_gene_activity_matrix.rds")
+
+# Create results_dir
+results_dir <- file.path(module_results_dir, "03_find_peaks")
+if (!dir.exists(results_dir)) {
+  dir.create(results_dir)}
+
+coverage_results_dir <- file.path(results_dir, "coverage_results") 
+if (!dir.exists(coverage_results_dir)) {
+  dir.create(coverage_results_dir)}
+
+# Create plots directory
+plots_dir <- file.path(module_plots_dir, "03_find_peaks") 
+if (!dir.exists(plots_dir)) {
+  dir.create(plots_dir)}
+
+coverage_plots_dir <- file.path(plots_dir, "coverage_plots") 
+if (!dir.exists(coverage_plots_dir)) {
+  dir.create(coverage_plots_dir)}
+
+go_plots_dir <- file.path(plots_dir, "go_plots") 
+if (!dir.exists(go_plots_dir)) {
+  dir.create(go_plots_dir)}
+
+# Source functions
+source(paste0(analysis_dir, "/util/calculate-fold-change.R"))
+source(paste0(analysis_dir, "/util/run-clusterwise-GO-enrichment.R"))
+source(paste0(analysis_dir, "/util/export-cluster-peaks.R"))
+```
+
+```{r echo=FALSE, warning=FALSE}
+opts_chunk$set(fig.align='center',
+               external=TRUE,
+               echo=FALSE,
+               warning=FALSE,
+               fig.pos='H')
+a4width <- 8.3
+a4height <- 11.7
+```
+
+# Read seurat object
+
+First, we will use the seurat object as generated from the pipeline in the `r data_dir_module` module. 
+
+```{r read-object, echo=TRUE}
+seurat_obj <- readRDS(data_file)
+DefaultAssay(seurat_obj) <- assay
+
+# Set the identity of your cells to the column with the desired resolution
+use_res_col <- glue::glue("{assay}_snn_res.{resolution_list}")
+
+# Set identity classes to an existing column in meta data
+Idents(object = seurat_obj) <- use_res_col
+
+# View cell identities, get summary table
+#Idents(seurat_obj)
+table(Idents(seurat_obj))
+```
+
+# Find differentially accessible peaks
+
+To find differentially accessible regions between clusters of cells, we can perform a differential accessibility (DA) test. A simple approach is to perform a Wilcoxon rank sum test, and the [presto](https://github.com/immunogenomics/presto) package has implemented an extremely fast Wilcoxon test that can be run on a Seurat object.
+
+In this section, we compare each cluster vs. all other cells using a statistical test (e.g. Wilcoxon) to identify peaks that are differentially accessible in a specific cluster. This will return a data frame with statistical significance (p-values, adjusted p-values), avg_log2FC, pct.1 / pct.2, etc.
+
+We save the table with all markers for each cluster at: <font size="3"><span style="color:blue">./results/03_find_peaks/Res_``r {resolution_list}``_Markers_all.tsv.</span></font>\
+
+```{r find-peaks, echo=TRUE}
+# For testing purposes only
+#seurat_obj_subset <- subset(seurat_obj, idents = c(1, 2))
+#da_peaks <- FindAllMarkers(seurat_obj_subset, assay = assay, only.pos = FALSE, logfc.threshold = 0.25, test.use = "wilcox", min.pct = 0.1, return.thresh = 0.01)
+da_peaks <- FindAllMarkers(seurat_obj, assay = assay, 
+                        #ident.1 = ident.1_value, 
+                        #ident.1 = rownames(seurat_obj[[]][seurat_obj$condition_value1 == "wt",]),
+                        #ident.2 = rownames(seurat_obj[[]][seurat_obj$condition_value1 == "knock-out",]),
+                        only.pos = FALSE,         # include both up and down peaks
+                        logfc.threshold = 0.25, test.use = "wilcox", min.pct = 0.1, return.thresh = 0.01)
+
+write.table(da_peaks, file = paste(results_dir, "/", "Res_", resolution_list, "_Markers_all.tsv", sep = ""), sep = "\t", quote = FALSE, row.names = FALSE)
+```
+
+## Interactive Table of Cluster-Specific Accessible Regions ("Find Peaks")
+
+```{r find-peaks-interactive-table, echo=TRUE}
+# Interactive Table
+datatable(da_peaks, 
+          options = list(pageLength = 5, 
+                         autoWidth = TRUE, 
+                         server = TRUE), 
+          filter = "top")
+```
+
+## Number of differentially accessible peaks per cluster
+
+```{r, fig.align = "left", results = "asis", message = FALSE, warning = FALSE, echo = FALSE}
+tables1 <- count(da_peaks, cluster)
+cat("  \n<div align=\"center\" style=\"font-size:80%\">  \n")
+caption_value = "Number of differentially accessible peaks per cluster"
+print(knitr::kable(tables1, align = "lcccc", caption = caption_value))
+cat("  \n</div>  \n")
+cat("  \n\\pagebreak  \n")
+```
+
+## Visualizing Differentially Accessible Peaks for the `r assay` assay
+In this section, we group peaks by cluster and select the top `r n_value` peaks with the highest accessibility (as measured by avg_log2FC). These markers are then saved to a .tsv file for downstream analysis or inspection.
+
+```{r find-markers-top-n_value, echo=TRUE}
+top_n_value <- da_peaks %>% 
+  group_by(cluster) %>% 
+  top_n(n = n_value, wt = avg_log2FC)
+
+write.table(top_n_value, file = paste(results_dir, "/", "Res_", resolution_list, glue::glue("_Markers_top_{n_value}.tsv"), sep = ""), sep = "\t", quote = FALSE, row.names = FALSE)
+```
+
+Next, we scale the accessibility data for the selected features and generate a heatmap showing the accessibility profiles across all cells. These peaks are the most enriched in accessibility per cluster and can highlight regulatory elements associated with specific cell states.
+
+``` {r plot-markers-top-n_value, fig.width = 25, fig.height = 15, fig.fullwidth = TRUE, echo=TRUE, include=FALSE}
+DefaultAssay(seurat_obj) <- assay
+seurat_obj <- ScaleData(seurat_obj, features = top_n_value$gene)
+
+name <- paste0(plots_dir, "/", "Res_", resolution_list, glue::glue("_Markers_top_{n_value}_Heatmap_peaks.png"), sep = "")
+DoHeatmap(seurat_obj, features = top_n_value$gene)
+ggsave(file = name, width = 25, height = 15, device = "png")
+```
+
+``` {r plot-markers-top-n_value-subset, fig.width = 25, fig.height = 15, fig.fullwidth = TRUE, echo=TRUE}
+name <- paste0(plots_dir, "/", "Res_", resolution_list, glue::glue("_Markers_top_{n_value}_Heatmap_peaks_subset.png"), sep = "")
+print(DoHeatmap(subset(seurat_obj, downsample = 100), features = top_n_value$gene))
+ggsave(file = name, width = 25, height = 15, device = "png")
+```
+
+# Identify Cluster-Specific Accessible Regions via Fold Change
+
+To explore differentially accessible chromatin regions across clusters, we calculate `log2 fold change` between groups of cells (Pairwise or multi-cluster mean differences). This step does not involve p-values or statistical testing — it's effect size only. We can use this to get a quick ranking of peaks by accessibility difference and sort by log2FC and plot top N peaks. This helps prioritize peaks that are specifically accessible in certain clusters, aiding downstream functional interpretation.
+
+``` {r fold-change-calculate, echo=TRUE}
+# Calculate fold change between clusters for scATAC-seq peaks
+fc_df_combined <- compute_fold_change_peaks(seurat_obj = seurat_obj, da_peaks = da_peaks, results_dir = results_dir, assay = assay)
+```
+
+## Explore Fold Change Results: Interactive Table
+
+```{r fold-change-interactive-table, echo=TRUE}
+# Interactive Table
+datatable(fc_df_combined, 
+          options = list(pageLength = 5, 
+                         autoWidth = TRUE, 
+                         server = TRUE), 
+          filter = "top")
+```
+
+# Plotting genomic regions
+
+We can plot the frequency of Tn5 integration across regions of the genome for cells grouped by cluster, cell type, or any other metadata stored in the object for any genomic region using the [CoveragePlot()](https://stuartlab.org/signac/reference/coverageplot) function. These represent pseudo-bulk accessibility tracks, where signal from all cells within a group have been averaged together to visualize the DNA accessibility in a region (thanks to Andrew Hill for giving the inspiration for this function in his excellent [blog post](https://andrewjohnhill.com/blog/2019/04/12/streamlining-scatac-seq-visualization-and-analysis/)). Alongside these accessibility tracks we can visualize other important information including gene annotation, peak coordinates, and genomic links (if they’re stored in the object).
+
+For more information, see [Plotting genomic regions](https://stuartlab.org/signac/articles/pbmc_vignette#plotting-genomic-regions) and [Visualization vignette](https://stuartlab.org/signac/articles/visualization).
+
+```{r coverage-plot, fig.width = 15, fig.height = 8, fig.fullwidth = TRUE, echo=TRUE}
+# Loop over clusters
+Idents(seurat_obj) <- use_res_col
+clusters <- levels(seurat_obj)
+
+# Clean feature names before loop
+fc_df_combined$feature <- sub("\\.\\.\\..*$", "", fc_df_combined$feature)
+
+export_cluster_peak_plots(seurat_obj = seurat_obj, fc_df_combined = fc_df_combined, top_n = top_n_value_peaks, min.cutoff_value = min.cutoff_value, plots_dir = coverage_plots_dir, results_dir = coverage_results_dir, clustering_column = use_res_col)
+``` 
+
+# Peak coordinates
+
+Peak coordinates can be difficult to interpret alone. We can find the closest gene to each of these peaks using the [ClosestFeature()](https://stuartlab.org/signac/reference/closestfeature) function.
+
+```{r find-closest-gene-peaks, echo=TRUE}
+closest_genes_list <- list()
+
+for (clust in unique(da_peaks$cluster)) {
+  message("Processing cluster: ", clust)
+  
+  # Filter strong upregulated peaks for this cluster
+ open_peaks <- da_peaks %>%
+  filter(cluster == clust, avg_log2FC > 1) %>%
+  pull(gene)  # This should be your peak identifier, e.g., "chr1-1000-2000"
+
+  # Keep only peaks found in Seurat object
+  open_peaks <- open_peaks[open_peaks %in% rownames(seurat_obj[["peaks"]])]
+  
+  # Find nearest gene for each peak
+  if (length(open_peaks) > 0) {
+    closest <- ClosestFeature(seurat_obj, regions = open_peaks)
+    closest <- closest %>% mutate(cluster = clust)
+    closest_genes_list[[as.character(clust)]] <- closest
+  }
+}
+
+# Combine all clusters into a single data frame and save to file
+closest_genes_all <- do.call(rbind, closest_genes_list)
+write.table(closest_genes_all, file = file.path(results_dir, "clusterwise_closest_genes.tsv"), sep = "\t", quote = FALSE, row.names = FALSE)
+```
+
+We could follow up with this result by doing gene ontology enrichment analysis on the gene sets returned by [ClosestFeature()](https://stuartlab.org/signac/reference/closestfeature), and there are many R packages that can do this (see theGOstats or clusterProfiler packages for example).
+
+# GO enrichment analysis using clusterProfiler
+
+In this step, we perform Gene Ontology (GO) enrichment analysis to identify biological processes associated with cluster-specific accessible regions (e.g., differentially accessible peaks near genes). We use the [clusterProfiler](https://bioconductor.org/packages/devel/bioc/html/clusterProfiler.html) package to determine if any GO terms are significantly enriched among genes near open chromatin in each cluster. This can help interpret the functional relevance of differential accessibility patterns across clusters.
+
+```{r go-clusterProfiler, fig.width = 15, fig.height = 8, fig.fullwidth = TRUE, echo=TRUE}
+ego_results <- run_clusterwise_GO_enrichment(closest_genes_all = closest_genes_all, OrgDb_value = OrgDb_value, plots_dir = go_plots_dir)
+```
+
+```{r echo=FALSE}
+detach(params)
+```
+
+\pagebreak
+
+# Session Info
+
+```{r echo=FALSE}
+sessionInfo()
+```
+
