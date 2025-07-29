@@ -75,8 +75,8 @@ export_cluster_peak_plots <- function(seurat_obj,
       # Set identity to desired clustering column
       Idents(seurat_obj) <- seurat_obj@meta.data[[clustering_column]]
       
-      # Static CoveragePlot
-      p <- print(CoveragePlot(seurat_obj,
+      # === Static CoveragePlot ===
+      p <- CoveragePlot(seurat_obj,
                         region = peak_name,
                         #ranges = peaks,
                         #sep = "-",
@@ -84,27 +84,27 @@ export_cluster_peak_plots <- function(seurat_obj,
                         extend.upstream = 40000,
                         extend.downstream = 20000,
                         group.by = clustering_column) +
-        ggtitle(glue::glue("CoveragePlot - Cluster {clust}, Peak: {peak_name}")))
+        ggtitle(glue::glue("CoveragePlot - Cluster {clust}, Peak: {peak_name}"))
+      print(p)
       plot_file <- file.path(plots_dir, paste0("CoveragePlot-cluster", clust, "_peak", i, ".png"))
       ggsave(plot_file, plot = p, width = 15, height = 8)
       
-      # Violin + FeaturePlot
+      # === Violin + FeaturePlot ===
       plot1 <- VlnPlot(seurat_obj, features = peak_name, group.by =  clustering_column) +
         ggtitle(glue::glue("Violin Plot - Cluster {clust}, Peak: {peak_name}"))
       plot2 <- FeaturePlot(seurat_obj, features = peak_name, max.cutoff = min.cutoff_value) +
         ggtitle(glue::glue("Feature Plot - Peak: {peak_name}"))
-      combined_plot <- print(plot1 | plot2)
+      combined_plot <- plot1 | plot2
+      print(combined_plot) 
 
       vln_feature_file <- file.path(plots_dir, paste0("VlnPlot-FeaturePlot-cluster", clust, "-peak", i, ".png"))
       ggsave(vln_feature_file, plot = combined_plot, width = 15, height = 8)
       
-      # Interactive CoverageBrowser
+      # === Interactive CoverageBrowser ===
       #cb <- suppressMessages(suppressWarnings(CoverageBrowser(seurat_obj, region = peak_name, assay = "peaks")))
       #browser_file <- file.path(results_dir, paste0("coverage_browser_cluster", clust, "_peak", i, ".html"))
       #htmlwidgets::saveWidget(cb, file = browser_file, selfcontained = TRUE)
     }
-    
-    # Logging
     message("✔ Done Processing cluster: ", clust)
   }
 }
