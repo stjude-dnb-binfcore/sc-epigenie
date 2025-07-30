@@ -94,11 +94,11 @@ These folders cache history and user info. Then, kill the interactive session, s
 
 ### 5. Building the Container (If Needed)
 
-If the user does not have access to the `rstudio_4.4.0_seurat_4.4.0_latest.sif`, they can build their own. 
+If the user does not have access to the `rstudio_4.4.0_seurat_4.4.0_signac_0.2.5_latest.sif`, they can build their own. 
 User can rename the `.sif` file, if they want to (not needed). Run the following from the `./run-container` dir:
 
 ```
-singularity build rstudio_4.4.0_seurat_4.4.0_latest.sif rstudio_r_4.4.0_seurat_4.4.0.def
+singularity build rstudio_4.4.0_seurat_4.4.0_signac_0.2.5_latest.sif rstudio_r_4.4.0_seurat_4.4.0.def
 ```
 
 Then, the user can start the container as explained in the step (4).
@@ -109,13 +109,13 @@ Then, the user can start the container as explained in the step (4).
 1. Pull the Docker Container from the `sc-epigenie` root_dir:
 
 ```
-docker pull docker://achroni/rstudio_4.4.0_seurat_4.4.0:latest
+docker pull docker://achroni/rstudio_4.4.0_seurat_4.4.0_signac_0.2.5:latest
 ```
 
 2. Start and Run the Docker Container from the terminal:
 
 ```
-docker run --platform linux/amd64 --name review -d -e PASSWORD=ANYTHING -p 8787:8787 -v $PWD:/home/rstudio/sc-epigenie docker://achroni/rstudio_4.4.0_seurat_4.4.0:latest
+docker run --platform linux/amd64 --name review -d -e PASSWORD=ANYTHING -p 8787:8787 -v $PWD:/home/rstudio/sc-epigenie docker://achroni/rstudio_4.4.0_seurat_4.4.0_signac_0.2.5:latest
 ```
 
 Start the container and open a terminal:
