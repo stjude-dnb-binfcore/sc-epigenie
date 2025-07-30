@@ -92,18 +92,6 @@ rm -r rstudio-container-tmp/
 These folders cache history and user info. Then, kill the interactive session, start a new one, and hopefully, it works! 🎉
 
 
-### 5. Building the Container (If Needed)
-
-If the user does not have access to the `rstudio_4.4.0_seurat_4.4.0_signac_1.14.9_latest.sif`, they can build their own. 
-User can rename the `.sif` file, if they want to (not needed). Run the following from the `./run-container` dir:
-
-```
-singularity build rstudio_4.4.0_seurat_4.4.0_signac_1.14.9_latest.sif rstudio_r_4.4.0_seurat_4.4.0.def
-```
-
-Then, the user can start the container as explained in the step (4).
-
-
 ## Running the Container Outside HPC (Docker)
 
 1. Pull the Docker Container from the `sc-epigenie` root_dir:
