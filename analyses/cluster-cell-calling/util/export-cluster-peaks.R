@@ -23,7 +23,6 @@ format_peak <- function(peak_name) {
 #' @param top_n Number of top peaks per cluster to plot
 #' @param min.cutoff_value Numeric cutoff for FeaturePlot max.cutoff
 #' @param plots_dir Directory to save static plots (CoveragePlot, VlnPlot+FeaturePlot)
-#' @param results_dir Directory to save interactive CoverageBrowser HTML widgets
 #' @param clustering_column description
 #'
 #' @return NULL (saves files to disk)
@@ -37,7 +36,6 @@ export_cluster_peak_plots <- function(seurat_obj,
                                       top_n,
                                       min.cutoff_value,
                                       plots_dir,
-                                      results_dir,
                                       clustering_column) {
   
   # Use cluster levels from Seurat object if not provided
@@ -102,10 +100,11 @@ export_cluster_peak_plots <- function(seurat_obj,
       
       # === Interactive CoverageBrowser ===
       #cb <- suppressMessages(suppressWarnings(CoverageBrowser(seurat_obj, region = peak_name, assay = "peaks")))
-      #browser_file <- file.path(results_dir, paste0("coverage_browser_cluster", clust, "_peak", i, ".html"))
+      #browser_file <- file.path(plots_dir, paste0("coverage_browser_cluster", clust, "_peak", i, ".html"))
       #htmlwidgets::saveWidget(cb, file = browser_file, selfcontained = TRUE)
     }
-    message("✔ Done Processing cluster: ", clust)
   }
+  message("✔ Done Processing cluster: ", clust)
+  
 }
 ############################################################################################################
