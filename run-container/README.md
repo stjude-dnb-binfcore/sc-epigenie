@@ -1,6 +1,6 @@
 # Running the Container for scEpiGenie: A Workflow for Single-cell ATAC-seq (scATAC-seq)
 
-We provide a Dockerfile and Definition file that include all tools, packages, and dependencies necessary for running the **scEpiGenie** analysis modules. These are customized for `Rstudio/R v4.4.0`, `Seurat v4.4.0` and `Signac v0.2.5`.
+We provide a Dockerfile and Definition file that include all tools, packages, and dependencies necessary for running the **scEpiGenie** analysis modules. These are customized for `Rstudio/R v4.4.0`, `Seurat v4.4.0` and `Signac v1.14.9`.
 
 ## Table of Contents
 
@@ -41,7 +41,7 @@ module load singularity/4.1.1
 1. Pull the singularity container from the `sc-epigenie` root_dir
 
 ```
-singularity pull docker://achronistjude/rstudio_4.4.0_seurat_4.4.0_signac_0.2.5:latest
+singularity pull docker://achronistjude/rstudio_4.4.0_seurat_4.4.0_signac_1.14.9:latest
 ```
 
 
@@ -94,11 +94,11 @@ These folders cache history and user info. Then, kill the interactive session, s
 
 ### 5. Building the Container (If Needed)
 
-If the user does not have access to the `rstudio_4.4.0_seurat_4.4.0_signac_0.2.5_latest.sif`, they can build their own. 
+If the user does not have access to the `rstudio_4.4.0_seurat_4.4.0_signac_1.14.9_latest.sif`, they can build their own. 
 User can rename the `.sif` file, if they want to (not needed). Run the following from the `./run-container` dir:
 
 ```
-singularity build rstudio_4.4.0_seurat_4.4.0_signac_0.2.5_latest.sif rstudio_r_4.4.0_seurat_4.4.0.def
+singularity build rstudio_4.4.0_seurat_4.4.0_signac_1.14.9_latest.sif rstudio_r_4.4.0_seurat_4.4.0.def
 ```
 
 Then, the user can start the container as explained in the step (4).
@@ -109,13 +109,13 @@ Then, the user can start the container as explained in the step (4).
 1. Pull the Docker Container from the `sc-epigenie` root_dir:
 
 ```
-docker pull docker://achroni/rstudio_4.4.0_seurat_4.4.0_signac_0.2.5:latest
+docker pull docker://achroni/rstudio_4.4.0_seurat_4.4.0_signac_1.14.9:latest
 ```
 
 2. Start and Run the Docker Container from the terminal:
 
 ```
-docker run --platform linux/amd64 --name review -d -e PASSWORD=ANYTHING -p 8787:8787 -v $PWD:/home/rstudio/sc-epigenie docker://achroni/rstudio_4.4.0_seurat_4.4.0_signac_0.2.5:latest
+docker run --platform linux/amd64 --name review -d -e PASSWORD=ANYTHING -p 8787:8787 -v $PWD:/home/rstudio/sc-epigenie docker://achroni/rstudio_4.4.0_seurat_4.4.0_signac_1.14.9:latest
 ```
 
 Start the container and open a terminal:
