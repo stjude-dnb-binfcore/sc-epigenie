@@ -4,6 +4,7 @@
 #' @param variables_to_integrate
 #' @param num_dim
 #' @param assay
+#' @param algorithm_value description
 #'
 #' @return
 #' @export
@@ -11,7 +12,7 @@
 #' @examples
 #' 
 #'
-harmony_integration <- function(seurat_obj, variables_to_integrate, num_dim, assay){
+harmony_integration <- function(seurat_obj, variables_to_integrate, num_dim, assay, algorithm_value){
   
   set.seed(1234) # Make code reproducible
   
@@ -32,7 +33,9 @@ harmony_integration <- function(seurat_obj, variables_to_integrate, num_dim, ass
   
   cat("Computing the k.param nearest neighbors for a given dataset and clusters\n")
   seurat_obj <- FindNeighbors(seurat_obj, reduction = "harmony", dims = 2:num_dim) %>%
-    FindClusters(algorithm = 3) %>% 
+    
+    # https://stuartlab.org/signac/articles/mouse_brain_vignette#non-linear-dimension-reduction-and-clustering
+    FindClusters(algorithm = algorithm_value) %>% 
     identity()
   
   cat("Returned Seurat object")
