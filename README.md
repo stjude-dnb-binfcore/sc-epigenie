@@ -6,7 +6,7 @@
     <img src="https://www.repostatus.org/badges/latest/active.svg?style=for-the-badge" alt="The project has reached a stable, usable state and is being actively developed." />
   </a>
   <a href="https://github.com/stjude-dnb-binfcore/sc-epigenie">
-    <img src="https://img.shields.io/badge/version-1.0.0.beta-brightgreen" alt="Version" />
+    <img src="https://img.shields.io/badge/version-1.0.0.beta.1-brightgreen" alt="Version" />
   </a>
 </p>
 
@@ -142,7 +142,9 @@ Important Considerations:
 ├── analyses
 |  ├── cellranger-analysis
 |  ├── fastqc-analysis
+|  ├── upstream-analysis
 |  └── README.md
+├── data
 ├── figures
 ├── LICENSE
 ├── project_parameters.Config.yaml
