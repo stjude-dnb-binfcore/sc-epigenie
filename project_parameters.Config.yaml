@@ -75,4 +75,4 @@ use_harmony_integration: "YES" # Options: "YES" or "NO"
 integration_method: "harmony" # Options: "harmony"
 num_dim_harmony: 30
 variable_value: "ID"
-algorithm_value_integration: 4 # Options: 1, 2, 3, or 4. Default is 4. Algorithm for modularity optimization (1 = original Louvain algorithm; 2 = Louvain algorithm with multilevel refinement; 3 = SLM algorithm; 4 = Leiden algorithm). See https://satijalab.org/seurat/reference/findclusters.
+algorithm_value_integration_yaml: 4 # Options: 1, 2, 3, or 4. Default is 4. Algorithm for modularity optimization (1 = original Louvain algorithm; 2 = Louvain algorithm with multilevel refinement; 3 = SLM algorithm; 4 = Leiden algorithm). See https://satijalab.org/seurat/reference/findclusters.
