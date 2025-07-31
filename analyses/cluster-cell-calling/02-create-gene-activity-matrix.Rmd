@@ -1,0 +1,325 @@
+---
+title: "Create a gene activity matrix for sc-ATAC-Seq Analysis in 10X Genomics data"
+author: "Antonia Chroni for SJCRH DNB_BINF_Core"
+papersize: a4
+fontsize: 11pt
+links-as-notes: true
+output:
+  html_document:
+    toc: TRUE
+    toc_float: TRUE
+    df_print: paged
+    code_folding: hide
+    toc_depth: 2
+    highlight: tango
+    number_sections: TRUE
+  pdf_document:
+    toc: TRUE
+    highlight: tango
+    number_sections: TRUE
+    latex_engine: lualatex
+    keep_tex: FALSE
+    fig_caption: yes
+    fig_crop: no
+    fig_height: 2
+    fig_width: 3
+    toc_depth: 2
+always_allow_html: TRUE
+urlcolor: blue
+linkcolor: black
+citecolor: blue
+geometry: margin=1in
+header-includes: 
+  - \usepackage{titling}
+  - \usepackage{fancyhdr}
+  - \usepackage{graphicx}
+  - \usepackage{float}
+params:
+  resolution: '.'
+  assay: '.'
+  min.cutoff_value: '.'
+  root_dir: './'
+  PROJECT_NAME: '.'
+  PI_NAME: '.'
+  TASK_ID: '.'
+  PROJECT_LEAD_NAME: '.'
+  DEPARTMENT: '.'
+  LEAD_ANALYSTS: '.'
+  GROUP_LEAD: '.'
+  CONTACT_EMAIL: '.'
+  PIPELINE: '.'
+  START_DATE: '.'
+  COMPLETION_DATE: '.'
+---
+
+```{r logo-file, echo=FALSE}
+attach(params)
+# Insert logo on the top of the html report 
+logo_file <- file.path(root_dir, "figures", "img", "DNB-BINF-Core-logo.png")
+htmltools::img(src = knitr::image_uri(logo_file), alt = "logo", style = "position:absolute; top:0; left:0; padding:0px; height:120px;")
+detach(params)
+```
+
+\addtolength{\headheight}{2.0cm} 
+\fancypagestyle{plain}{} 
+\thispagestyle{fancy}
+\fancyhead[L]{\includegraphics[height=120px]{`r logo_file`}}
+\renewcommand{\headrulewidth}{0pt}
+
+<style type="text/css">
+:root {--DNB_BINF_Core_color: #00427B;}
+
+h1.title {margin-top: 130px;
+          margin-bottom: 25px;
+          font-size: 36px;}
+
+.nobullet li {list-style-type: none;}
+
+.reporthead {font-size: 20px;}
+
+body { /* Normal */
+  font-size: 16px;
+  font-style: Arial, Helvetica, sans-serif;}
+
+h1 {color: var(--DNB_BINF_Core_color);
+    font-size: 28px;
+    margin-top: 50px;}
+
+h2 {color: var(--DNB_BINF_Core_color);
+    font-size: 20px;}
+
+.list-group-item.active, .list-group-item.active:focus, .list-group-item.active:hover {
+  background-color: var(--DNB_BINF_Core_color);}
+</style>
+
+<a href="https://wiki.stjude.org/display/CAB">
+
+</a>
+
+\pagebreak
+
+<div class="reporthead"><br/>
+**PI: `r params$PI_NAME`**  
+**Project: `r params$PROJECT_NAME`**  
+Task: `r params$TASK_ID`  
+Project Lead(s): `r params$PROJECT_LEAD_NAME`  
+Department: `r params$DEPARTMENT`  
+
+<br />  
+
+DNB Bioinformatics Core Analysis Team: 
+<br />  
+
+>**Lead Analyst(s): `r params$LEAD_ANALYSTS`**  
+>Group Lead: `r params$GROUP_LEAD`  
+<br />
+>**Contact E-mail:** `r params$CONTACT_EMAIL`  
+>**DNB Bioinformatics Core Pipeline:** `r params$PIPELINE`  
+
+Date started: `r params$START_DATE`  
+Date completed:  `r params$COMPLETION_DATE`  
+Report generated: `r format(Sys.time(), '%H:%M:%S %Z %m/%d/%Y')` \
+
+Reviewed by: _____________________   Date: ____________ \
+</div>
+\pagebreak
+  
+# Information about this notebook
+
+For more information, please see the [Create a gene activity matrix](https://stuartlab.org/signac/articles/mouse_brain_vignette#create-a-gene-activity-matrix) vignette.
+
+# Set up
+```{r load-library, echo=TRUE}
+attach(params)
+suppressPackageStartupMessages({
+  library(future)
+  library(tidyverse)
+  library(Seurat)
+  library(Signac)
+  library(knitr)
+  library(GenomicRanges)
+  library(GenomeInfoDb)
+  library(Matrix)
+  library(DT)
+
+  # Evaluate Seurat R expressions asynchronously when possible using future package
+  options(future.globals.maxSize = future_globals_value, future.rng.onMisuse = "ignore") 
+  plan(multisession, workers = parallelly::availableCores())
+}) 
+```
+
+# Directories and paths to file Inputs/Outputs
+
+```{r set-dir-and-file-names, echo=TRUE}
+analysis_dir <- file.path(root_dir, "analyses", "cluster-cell-calling") 
+data_dir <- file.path(root_dir, "analyses", "cluster-cell-calling", "results", glue::glue("01_cluster_cell_calling_{resolution}"))
+module_results_dir <- file.path(analysis_dir, "results")
+module_plots_dir <- file.path(analysis_dir, "plots")
+
+# Input files
+data_file <- file.path(data_dir, "seurat_obj_clusters_all.rds")
+
+# Create results_dir
+results_dir <- file.path(module_results_dir, "02_create_gene_activity_matrix")
+if (!dir.exists(results_dir)) {
+  dir.create(results_dir)}
+
+# Create plots directory
+#plots_dir <- file.path(module_plots_dir, "02_create_gene_activity_matrix") 
+#if (!dir.exists(plots_dir)) {
+#  dir.create(plots_dir)}
+```
+
+
+```{r echo=FALSE, warning=FALSE}
+opts_chunk$set(fig.align='center',
+               external=TRUE,
+               echo=FALSE,
+               warning=FALSE,
+               fig.pos='H')
+a4width <- 8.3
+a4height <- 11.7
+```
+
+# Read seurat object
+
+First, we will use the seurat object as generated from the pipeline in the `r data_dir_module` module. 
+
+```{r read-object, echo=TRUE}
+seurat_obj <- readRDS(data_file)
+DefaultAssay(seurat_obj) <- assay
+```
+
+# Create a gene activity matrix
+
+In single-cell ATAC-seq (scATAC-seq), we measure chromatin accessibility at regulatory regions across the genome. However, the raw output is a peak-by-cell matrix, which is sparse and not directly interpretable at the gene level.
+
+To enable integration with other data types (like scRNA-seq) and improve interpretability, we summarize chromatin accessibility at the level of genes. This is done by:
+
+   - Associating accessible peaks near or within gene loci to the corresponding genes
+   - Summing accessibility signals across those peaks
+   - Producing a gene-by-cell activity matrix analogous to a gene expression matrix
+
+This gene activity matrix can then be:
+
+   - Used for clustering, label transfer, or trajectory inference
+   - Integrated with scRNA-seq data (multi-omics workflows)
+   - Visualized to infer regulatory activity
+
+
+```{r process-object, echo=TRUE}
+###----------- let's debug ---------------------------------
+# Step 1: Use peaks from the count matrix (ensures matching order)
+peak_names <- rownames(seurat_obj[["peaks"]])
+peaks_gr <- StringToGRanges(peak_names, sep = c("-", "-"))
+
+# Step 2: Get the gene annotations
+anno <- Annotation(seurat_obj)
+
+# Step 3: Harmonize chromosomes (seqlevels) between peaks and annotations
+common_seqlevels <- intersect(seqlevels(peaks_gr), seqlevels(anno))
+peaks_gr <- keepSeqlevels(peaks_gr, common_seqlevels, pruning.mode = "coarse")
+anno <- keepSeqlevels(anno, common_seqlevels, pruning.mode = "coarse")
+
+# Step 4: Subset peak count matrix to peaks in filtered peaks_gr
+# Convert back GRanges to strings
+filtered_peak_names <- paste0(seqnames(peaks_gr), "-", start(peaks_gr), "-", end(peaks_gr))
+
+# Subset counts matrix to matching rows
+counts <- GetAssayData(seurat_obj, assay = "peaks", layer = "counts")
+counts <- counts[filtered_peak_names, ]
+
+# Confirm match
+stopifnot(nrow(counts) == length(peaks_gr))
+
+# Step 5: Find overlaps
+overlaps <- findOverlaps(peaks_gr, anno)
+
+# Step 6: Peak-to-gene mapping
+peak2gene <- sparseMatrix(
+  i = queryHits(overlaps),
+  j = subjectHits(overlaps),
+  dims = c(length(peaks_gr), length(anno))
+)
+
+# Step 7: Multiply to get gene-by-cell activity matrix
+gene_activity_counts <- t(peak2gene) %*% counts
+
+# Step 8: Clean and assign gene names
+gene_names <- as.character(anno$gene_name)
+gene_names[is.na(gene_names) | gene_names == ""] <- paste0("Gene_", seq_len(sum(is.na(gene_names) | gene_names == "")))
+gene_names <- make.unique(gene_names)
+rownames(gene_activity_counts) <- gene_names
+###--------------------------------------------
+```
+
+Now we can visualize the activities of canonical marker genes to help interpret our ATAC-seq clusters. Note that the activities will be much noisier than scRNA-seq measurements. This is because they represent measurements from sparse chromatin data, and because they assume a general correspondence between gene body/promoter accessibility and gene expression which may not always be the case. Nonetheless, we can begin to discern cell populations based on these gene activity profiles. 
+
+```{r compute-add-gene-activities, echo=TRUE}
+# compute gene.activities
+# gene.activities <- GeneActivity(seurat_obj)
+
+# Optionally: add gene activity matrix as a new assay to your Seurat object
+#seurat_obj[["GeneActivity"]] <- CreateAssayObject(counts = gene.activities)
+seurat_obj[["GeneActivity"]] <- CreateAssayObject(counts = gene_activity_counts)
+
+# Normalize the gene activity data (optional but common)
+seurat_obj <- NormalizeData(seurat_obj, 
+                            assay = "GeneActivity",
+                            normalization.method = 'LogNormalize',
+                            scale.factor = median(seurat_obj$nCount_GeneActivity))
+
+seurat_obj <- FindVariableFeatures(seurat_obj, assay = "GeneActivity")
+
+# View features
+# VariableFeatures(seurat_obj[["GeneActivity"]])[1:10]
+```
+
+```{r feature-plot, echo=TRUE, eval=FALSE}
+DefaultAssay(seurat_obj) <- 'GeneActivity'
+
+print(FeaturePlot(
+  object = seurat_obj,
+  
+  # Add genes specific to your cohort
+  features = c('MS4A1', 'CD3D', 'LEF1', 'NKG7', 'TREM1', 'LYZ'),
+  pt.size = 0.1,
+  max.cutoff = min.cutoff_value,
+  ncol = 3))
+```
+
+Now we have:
+
+  - A new assay "GeneActivity" in the Seurat object that contains a gene-by-cell matrix of inferred regulatory activity.
+  - A foundation for label transfer, dimensionality reduction, or integration with scRNA-seq.
+  
+```{r gene-activities-interactive-table, echo=TRUE, eval=FALSE}
+# Get expression data (e.g., normalized counts)
+rna_matrix <- as.data.frame(as.matrix(seurat_obj[["RNA"]]@data))
+
+# Interactive Table
+DT::datatable(rna_matrix, 
+          options = list(pageLength = 5, 
+                         autoWidth = TRUE, 
+                         server = TRUE), 
+          filter = "top")
+```
+
+# Save output files
+
+```{r save-obj, echo=TRUE}
+saveRDS(seurat_obj, file = paste0(results_dir, "/", "seurat_obj_gene_activity_matrix.rds"))
+```
+
+```{r echo=FALSE}
+detach(params)
+```
+
+\pagebreak
+
+# Session Info
+
+```{r echo=FALSE}
+sessionInfo()
+```
+
