@@ -41,6 +41,7 @@ params:
   variable_value: '.'
   future_globals_value: '.'
   assay: '.'
+  algorithm_value_integration: '.'
   root_dir: './'
   PROJECT_NAME: '.'
   PI_NAME: '.'
@@ -217,7 +218,8 @@ if (use_harmony_integration == "YES"){
   seurat_obj <- harmony_integration(seurat_obj = merged_obj,
                                     variables_to_integrate = variable_value, 
                                     num_dim = num_dim_harmony, 
-                                    assay = assay)
+                                    assay = assay,
+                                    algorithm_value = algorithm_value_integration)
   # Plot
   name <- paste0(plots_dir, "/", glue::glue("plot_{integration_method}.png"))
   p1 <- DimPlot(object = seurat_obj, reduction = glue::glue("{integration_method}"), pt.size = .1, group.by = "orig.ident") + NoLegend()
