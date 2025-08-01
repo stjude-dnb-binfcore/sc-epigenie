@@ -283,11 +283,11 @@ RUN Rscript -e 'if (!requireNamespace(c("ggbio", "TxDb.Hsapiens.UCSC.hg19.knownG
 
 # This is for the sc-epigenie/library(clusterProfiler)
 RUN Rscript -e 'BiocManager::install("clusterProfiler")'
-RUN Rscript -e 'if (!requireNamespace("clusterProfiler"), quietly = TRUE)) stop("clusterProfiler not installed!")'
+RUN Rscript -e 'if (!requireNamespace("clusterProfiler", quietly = TRUE)) stop("clusterProfiler not installed!")'
 
 # This is for the sc-epigenie/library(enrichplot)
 RUN Rscript -e 'BiocManager::install("enrichplot")'
-RUN Rscript -e 'if (!requireNamespace("enrichplot"), quietly = TRUE)) stop("enrichplot not installed!")'
+RUN Rscript -e 'if (!requireNamespace("enrichplot", quietly = TRUE)) stop("enrichplot not installed!")'
 
 
 # This is for the sc-epigenie/library(org.Hs.eg.db) and library(org.Mm.eg.db)
