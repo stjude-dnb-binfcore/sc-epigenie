@@ -142,9 +142,9 @@ Important Considerations:
 ├── analyses
 |  ├── cellranger-analysis
 |  ├── fastqc-analysis
-|  ├── upstream-analysis
-|  └── README.md
-├── data
+|  ├── integrative-analysis
+|  ├── README.md
+|  └── upstream-analysis
 ├── figures
 ├── LICENSE
 ├── project_parameters.Config.yaml
