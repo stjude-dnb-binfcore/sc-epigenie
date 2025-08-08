@@ -99,33 +99,58 @@ RUN pip3 install --no-cache-dir --upgrade pip && \
 # I do not know why it breaks, but there must be some issue from Cloudflare that interferes with permissions and proper installation.
 #
 ENV TEXLIVE_INSTALL_NO_CONTEXT_CACHE=1 \
-    NOPERLDOC=1
+    NOPERLDOC=1 \
+    PATH="/usr/local/texlive/2024/bin/x86_64-linux:${PATH}"
 
-# Install TexLive prerequisites
-RUN apt-get update && \
-    apt-get install -y wget unzip tar \
-    make fontconfig perl openjdk-8-jre libgetopt-long-descriptive-perl \
-    libdigest-perl-md5-perl libncurses5 \
+# Install TeX Live prerequisites
+#RUN apt-get update && \
+#    apt-get install -y wget unzip tar \
+#    make fontconfig perl openjdk-8-jre libgetopt-long-descriptive-perl \
+#    libdigest-perl-md5-perl libncurses5 \
+#    python3-pygments && \
+#    rm -rf /var/lib/apt/lists/*
+
+# Install prerequisites
+RUN apt-get update && apt-get install -y \
+    wget unzip tar make fontconfig perl openjdk-8-jre \
+    libgetopt-long-descriptive-perl libdigest-perl-md5-perl libncurses5 \
     python3-pygments && \
     rm -rf /var/lib/apt/lists/*
-
     
-# Install TexLive to the container
-RUN wget http://mirror.ctan.org/systems/texlive/tlnet/install-tl-unx.tar.gz -v && \
-    tar xzf install-tl-unx.tar.gz -v && \
-    #rm install-tl-unx.tar.gz && \
-    cd install-tl* && \
-    echo "selected_scheme scheme-full" > install.profile && \
-    echo "tlpdbopt_install_docfiles 0" >> install.profile && \
-    echo "tlpdbopt_install_srcfiles 0" >> install.profile && \
-    echo "tlpdbopt_autobackup 0" >> install.profile && \
-    echo "tlpdbopt_sys_bin /usr/bin" >> install.profile && \
-    ./install-tl -profile install.profile && \
-    cd .. && rm -rf install-tl*
+# Step 1: Download TeX Live installer (cached if URL unchanged)
+RUN wget http://mirror.ctan.org/systems/texlive/tlnet/install-tl-unx.tar.gz -O /tmp/install-tl-unx.tar.gz
 
-# Symlink TexLive binaries to PATH
-RUN /usr/local/texlive/2024/bin/x86_64-linux/tlmgr path add
+# Step 2: Extract installer (cached if download unchanged)
+RUN tar xzf /tmp/install-tl-unx.tar.gz -C /tmp
+
+# Step 3: Create install profile file
+RUN echo "selected_scheme scheme-full" > /tmp/install.profile && \
+    echo "tlpdbopt_install_docfiles 0" >> /tmp/install.profile && \
+    echo "tlpdbopt_install_srcfiles 0" >> /tmp/install.profile && \
+    echo "tlpdbopt_autobackup 0" >> /tmp/install.profile && \
+    echo "tlpdbopt_sys_bin /usr/bin" >> /tmp/install.profile
+
+# Step 4: Run the installer (cached if profile or extracted installer unchanged)
+RUN cd /tmp/install-tl-* && ./install-tl -profile /tmp/install.profile
+
+# Step 5: Clean up installation files (optional)
+RUN rm -rf /tmp/install-tl-* /tmp/install-tl-unx.tar.gz /tmp/install.profile
+
+# Download and install TeX Live 2024
+#RUN wget http://mirror.ctan.org/systems/texlive/tlnet/install-tl-unx.tar.gz -v && \
+#    tar xzf install-tl-unx.tar.gz -v && \
+#    cd install-tl-* && \
+#    echo "selected_scheme scheme-full" > install.profile && \
+#    echo "tlpdbopt_install_docfiles 0" >> install.profile && \
+#    echo "tlpdbopt_install_srcfiles 0" >> install.profile && \
+#    echo "tlpdbopt_autobackup 0" >> install.profile && \
+#    echo "tlpdbopt_sys_bin /usr/bin" >> install.profile && \
+#    echo "TEXDIR /usr/local/texlive/2024" >> install.profile && \
+#    ./install-tl -profile install.profile && \
+#    cd .. && rm -rf install-tl* install-tl-unx.tar.gz
 #
+#
+
 
 
 #
@@ -291,15 +316,29 @@ RUN Rscript -e 'if (!requireNamespace("enrichplot", quietly = TRUE)) stop("enric
 
 
 # This is for the sc-epigenie/library(org.Hs.eg.db) and library(org.Mm.eg.db)
-RUN Rscript -e 'BiocManager::install(c("org.Hs.eg.db", "org.Mm.eg.db"))'
-RUN Rscript -e 'if (!requireNamespace(c("org.Hs.eg.db", "org.Mm.eg.db")), quietly = TRUE)) stop("org.Hs.eg.db and org.Mm.eg.db not installed!")'
+#RUN Rscript -e 'BiocManager::install(c("org.Hs.eg.db", "org.Mm.eg.db"))'
+RUN Rscript -e 'BiocManager::install("org.Hs.eg.db", ask = FALSE, verbose = TRUE)'
+RUN Rscript -e 'BiocManager::install("org.Mm.eg.db", ask = FALSE, verbose = TRUE)'
+
+RUN Rscript -e 'if (!requireNamespace("org.Hs.eg.db", quietly = TRUE)) stop("org.Hs.eg.db not installed!")'
+RUN Rscript -e 'if (!requireNamespace("org.Mm.eg.db", quietly = TRUE)) stop("org.Mm.eg.db not installed!")'
+
 
 # Motif analysis with Signac/sc-epigenie: library(JASPAR2020) and library(TFBSTools) and  library(BSgenome.Mmusculus.UCSC.mm10)
 # Transcription factor footprinting/sc-epigenie: library(motifmatchr) and library(BSgenome.Hsapiens.UCSC.hg19)
 RUN Rscript -e 'BiocManager::install(c("JASPAR2020", "TFBSTools", "BSgenome.Mmusculus.UCSC.mm10", "motifmatchr", "BSgenome.Hsapiens.UCSC.hg19"))'
-RUN Rscript -e 'if (!requireNamespace(c("JASPAR2020", "TFBSTools", "BSgenome.Mmusculus.UCSC.mm10", "motifmatchr", "BSgenome.Hsapiens.UCSC.hg19")), quietly = TRUE)) stop("JASPAR2020, TFBSTools, BSgenome.Mmusculus.UCSC.mm10, motifmatchr and BSgenome.Hsapiens.UCSC.hg19 not installed!")'
+# Verify all packages are installed
+#RUN Rscript -e '\
+#  pkgs <- c("JASPAR2020", "TFBSTools", "BSgenome.Mmusculus.UCSC.mm10", "motifmatchr", "BSgenome.Hsapiens.UCSC.hg19"); \
+#  missing <- pkgs[!sapply(pkgs, requireNamespace, quietly = TRUE)]; \
+#  if (length(missing)) stop("Missing packages: ", paste(missing, collapse = ", "))'
+#RUN Rscript -e 'if (!requireNamespace("JASPAR2020", quietly = TRUE)) stop("JASPAR2020 not installed!")'
+#RUN Rscript -e 'if (!requireNamespace("TFBSTools", quietly = TRUE)) stop("TFBSTools not installed!")'
+#RUN Rscript -e 'if (!requireNamespace("BSgenome.Mmusculus.UCSC.mm10", quietly = TRUE)) stop("BSgenome.Mmusculus.UCSC.mm10 not installed!")'
+#RUN Rscript -e 'if (!requireNamespace("motifmatchr", quietly = TRUE)) stop("motifmatchr not installed!")'
+#RUN Rscript -e 'if (!requireNamespace("BSgenome.Hsapiens.UCSC.hg19", quietly = TRUE)) stop("BSgenome.Hsapiens.UCSC.hg19 not installed!")'
 
-    
+
 #
 # Some github-based R modules; RcppPlanc needs previously installed cmake
 # and libhdf5-dev
