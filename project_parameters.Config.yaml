@@ -67,7 +67,7 @@ print_pdf_filter_object: "NO" # # Options: "NO" (default ALWAYS), for `03_run_fi
 use_scDblFinder_filtering_filter_object: "NO" # Options: "YES" or "NO" (default) , for `03_run_filter_object.Rmd`.
 filename_filter_object_value: NULL # Options: NULL (default) or name if multiple methods are integrated and explored: "-without-scDblFinder" or "-with-scDblFinder"
 #PCA_Feature_List_value: transcription.factor.gene.list # set for 04_run_filter_object.Rmd if necessary
-use_scDblFinder_filtering_summary_report: "NO" # Options: "YES" or "NO" (default) , for `05_run_summary_report.Rmd`.
+use_scDblFinder_filtering_summary_report: "NO" # Options: "YES" or "NO" (default), for `05_run_summary_report.Rmd`.
 filename_summary_report_value: NULL # Options: NULL (default) or name if multiple methods are integrated and explored: "-without-scDblFinder" or "-with-scDblFinder"
 
 # `./analyses/integrative-analysis`
@@ -102,5 +102,5 @@ n_value_find_markers: 10 # number of top genes to explore
 ident.1_value: 1 # Run differential testing between cluster 1 vs. all others (default)
 OrgDb_value: "org.Mm.eg.db"   # Options for gene annotation: (1) Human: "org.Hs.eg.db"; (2) Mouse: "org.Mm.eg.db"
 top_n_value_peaks: 1 # Number of top peaks per cluster to plot. Start with top_n_value = 1 to quickly generate results and check if the plots look good. If you want deeper analysis and have time/resources, increase to 3 or more. Often 3 is a good balance between thoroughness and efficiency - top_n_value = 3 (or higher) means you plot more peaks per cluster.
-
+compute_gene_activities_manual_value: "YES" # Options: "YES" (default) or "NO". Use of manual generation of gene matrix or not. In the latter case, the GeneActivity() function from Signac will be used.
 
