@@ -1,0 +1,8 @@
+#BSUB -P project
+#BSUB -J run-integrative-analysis
+#BSUB -oo job.out -eo job.err
+#BSUB -n 10
+#BSUB -R "rusage[mem=96GB] span[hosts=1]"
+#BSUB -cwd "."
+
+singularity exec ../../rstudio_4.4.0_seurat_4.4.0_latest.sif bash run-integrative-analysis.sh
