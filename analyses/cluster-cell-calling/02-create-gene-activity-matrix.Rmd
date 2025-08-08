@@ -192,9 +192,7 @@ DefaultAssay(seurat_obj) <- assay
 
 # Create a gene activity matrix
 
-In single-cell ATAC-seq (scATAC-seq), we measure chromatin accessibility at regulatory regions across the genome. However, the raw output is a peak-by-cell matrix, which is sparse and not directly interpretable at the gene level.
-
-To enable integration with other data types (like scRNA-seq) and improve interpretability, we summarize chromatin accessibility at the level of genes. This is done by:
+In single-cell ATAC-seq (scATAC-seq), we measure chromatin accessibility at regulatory regions across the genome. However, the raw output is a peak-by-cell matrix, which is sparse and not directly interpretable at the gene level. To enable integration with other data types (like scRNA-seq) and improve interpretability, we summarize chromatin accessibility at the level of genes. This is done by:
 
    - Associating accessible peaks near or within gene loci to the corresponding genes
    - Summing accessibility signals across those peaks
@@ -206,10 +204,25 @@ This gene activity matrix can then be:
    - Integrated with scRNA-seq data (multi-omics workflows)
    - Visualized to infer regulatory activity
 
+## Manual Generation of Gene Activity Matrix
 
-```{r process-object, echo=TRUE}
+Here, we chose not to use `GeneActivity()` because it makes several assumptions that may not align with our specific analysis requirements. For example, `GeneActivity()`:
+
+- Uses a default promoter window (typically ±2 kb around the TSS) for peak-to-gene mapping
+- Relies on a fixed reference genome and gene annotation, which may not match the custom annotations we're using (e.g., from Ensembl or GENCODE)
+
+While `GeneActivity()` is automated and convenient for quick analyses, it offers limited flexibility. In contrast, our manual approach allows for:
+
+- Fine-grained control over how peaks are mapped to genes (e.g., including full gene bodies, adjusting overlap criteria)
+- Explicit harmonization between the peak matrix and genome annotations, ensuring all data layers are correctly aligned
+- Transparent, reproducible logic, which is especially important in publication-quality workflows or when using custom or multi-species references
+
+By manually building the gene activity matrix, we ensure that every step is fully auditable and tailored to our dataset, which would not be possible with the default behavior of `GeneActivity()`.
+
+```{r compute-gene-activities-manual, echo=TRUE}
 ###----------- let's debug ---------------------------------
 # Step 1: Use peaks from the count matrix (ensures matching order)
+# Here we ensure exact alignment with the Seurat object. GeneActivity() internally recomputes peak mappings, which might not exactly match your filtered or preprocessed peak set.
 peak_names <- rownames(seurat_obj[["peaks"]])
 peaks_gr <- StringToGRanges(peak_names, sep = c("-", "-"))
 
@@ -217,6 +230,9 @@ peaks_gr <- StringToGRanges(peak_names, sep = c("-", "-"))
 anno <- Annotation(seurat_obj)
 
 # Step 3: Harmonize chromosomes (seqlevels) between peaks and annotations
+# Manual quality control and harmonization.
+# We’re manually aligning seqlevels (chromosome naming conventions) between peaks and annotations, which GeneActivity() doesn’t expose directly.
+# This avoids mismatches that can silently reduce our peak-to-gene overlap set.
 common_seqlevels <- intersect(seqlevels(peaks_gr), seqlevels(anno))
 peaks_gr <- keepSeqlevels(peaks_gr, common_seqlevels, pruning.mode = "coarse")
 anno <- keepSeqlevels(anno, common_seqlevels, pruning.mode = "coarse")
@@ -233,6 +249,9 @@ counts <- counts[filtered_peak_names, ]
 stopifnot(nrow(counts) == length(peaks_gr))
 
 # Step 5: Find overlaps
+# You're explicitly overlapping our own GRanges of peaks with our own gene annotations.
+# GeneActivity() uses a fixed logic — usually overlapping peaks with promoters only, defined as ±2kb around the TSS by default.
+# User might be using full gene bodies or custom promoter definitions.
 overlaps <- findOverlaps(peaks_gr, anno)
 
 # Step 6: Peak-to-gene mapping
@@ -253,14 +272,26 @@ rownames(gene_activity_counts) <- gene_names
 ###--------------------------------------------
 ```
 
-Now we can visualize the activities of canonical marker genes to help interpret our ATAC-seq clusters. Note that the activities will be much noisier than scRNA-seq measurements. This is because they represent measurements from sparse chromatin data, and because they assume a general correspondence between gene body/promoter accessibility and gene expression which may not always be the case. Nonetheless, we can begin to discern cell populations based on these gene activity profiles. 
+## Automated Generation of Gene Activity Matrix
 
-```{r compute-add-gene-activities, echo=TRUE}
+While the `GeneActivity()` function is available for this purpose, we are intentionally omitting its use in this section.
+
+```{r compute-add-gene-activities-automated, echo=TRUE}
 # compute gene.activities
+# GeneActivity() assumes:
+# - Default promoter size window
+# - Fixed reference genome and gene annotation
+# If the user is using custom annotations (e.g., from Ensembl or GENCODE) or need to ensure full reproducibility in a publication-quality workflow, the manual approach is safer.
 # gene.activities <- GeneActivity(seurat_obj)
 
 # Optionally: add gene activity matrix as a new assay to your Seurat object
 #seurat_obj[["GeneActivity"]] <- CreateAssayObject(counts = gene.activities)
+```
+
+Now we can visualize the activities of canonical marker genes to help interpret our ATAC-seq clusters. Note that the activities will be much noisier than scRNA-seq measurements. This is because they represent measurements from sparse chromatin data, and because they assume a general correspondence between gene body/promoter accessibility and gene expression which may not always be the case. Nonetheless, we can begin to discern cell populations based on these gene activity profiles. 
+
+```{r add-gene-activities, echo=TRUE}
+# Optionally: add gene activity matrix as a new assay to your Seurat object
 seurat_obj[["GeneActivity"]] <- CreateAssayObject(counts = gene_activity_counts)
 
 # Normalize the gene activity data (optional but common)
