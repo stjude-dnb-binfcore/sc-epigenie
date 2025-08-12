@@ -275,6 +275,7 @@ cat("  \n\\pagebreak  \n")
 ```
 
 ## Visualizing Differentially Accessible Peaks for the `r assay` assay
+
 In this section, we group peaks by cluster and select the top `r n_value` peaks with the highest accessibility (as measured by avg_log2FC). These markers are then saved to a .tsv file for downstream analysis or inspection.
 
 ```{r find-markers-top-n_value, echo=TRUE}

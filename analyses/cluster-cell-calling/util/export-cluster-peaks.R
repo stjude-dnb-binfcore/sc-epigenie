@@ -62,7 +62,7 @@ export_cluster_peak_plots <- function(seurat_obj,
 
       # ⛔ Skip if peak not found
       if (!(peak_name %in% rownames(seurat_obj[["peaks"]]))) {
-        warning("❌ Peak not found in Seurat object: ", ceak_name)
+        warning("❌ Peak not found in Seurat object: ",  peak_name)
         next
       }
       
