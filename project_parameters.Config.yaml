@@ -76,3 +76,31 @@ integration_method: "harmony" # Options: "harmony"
 num_dim_harmony: 30
 variable_value: "ID"
 algorithm_value_integration_yaml: 4 # Options: 1, 2, 3, or 4. Default is 4. Algorithm for modularity optimization (1 = original Louvain algorithm; 2 = Louvain algorithm with multilevel refinement; 3 = SLM algorithm; 4 = Leiden algorithm). See https://satijalab.org/seurat/reference/findclusters.
+
+
+# `./analyses/cluster-cell-calling`
+data_dir_module_name: "integrative-analysis" # Options:: "integrative-analysis" (default), "upstream-analysis" (for cohorts with a single sample)
+umap_value: "umap" # Options: "umap" (default) or "umapndim30nn30" (for cohorts with a single sample or any other name based on the values used for `num_dim_seurat_qc` and `num_neighbors_seurat_qc`
+resolution_clustering_module: "default_multiple" # Options: "custom_multiple", "default_multiple" or define value of resolution, e.g., "0.5"
+integration_method_clustering_module: "harmony" # Options:: "seurat", "harmony", "inmf" and "not_integrated" (for cohorts with a single sample)
+num_dim_clustering_module: 30 
+reduction_value_clustering_module: "harmony" # Options: For harmony: "harmony" or if you want to use not integrated assay: "lsi"
+assay_clustering_module: "peaks" # Options: "peaks" (default ALWAYS)
+resolution_gene_activity: "default_multiple" # "custom_multiple", "default_multiple" or define value of resolution, e.g., 0.5
+
+# Initially, we use a list of multiple resolutions and then we run the module again with the single resolution that fits the data best. 
+# If no list is provided, then it will calculate the clusters by the default list.
+# We recommend to run first default and then explore a customized list of resolutions (if these are not provided in the list already).
+# In the latter case, user needs to comment in/out the `resolution_list_default_clustering_module` accordingly.
+resolution_list_clustering_module: NULL # This can be a single or multiple resolutions or NULL (default), e.g., NULL; [0.5]; [0.1, 0.5, 1]
+resolution_list_default_clustering_module: [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+algorithm_value_clustering_module: 4 # Leiden algorthim (default). Algorithm for modularity optimization (1 = original Louvain algorithm; 2 = Louvain algorithm with multilevel refinement; 3 = SLM algorithm; 4 = Leiden algorithm).
+
+resolution_find_markers: "default_multiple" # "custom_multiple", "default_multiple" or define value of resolution, e.g., 0.5
+resolution_list_find_markers: 0.1 # this will be the single resolution that fits the data the best
+n_value_find_markers: 10 # number of top genes to explore
+ident.1_value: 1 # Run differential testing between cluster 1 vs. all others (default)
+OrgDb_value: "org.Mm.eg.db"   # Options for gene annotation: (1) Human: "org.Hs.eg.db"; (2) Mouse: "org.Mm.eg.db"
+top_n_value_peaks: 1 # Number of top peaks per cluster to plot. Start with top_n_value = 1 to quickly generate results and check if the plots look good. If you want deeper analysis and have time/resources, increase to 3 or more. Often 3 is a good balance between thoroughness and efficiency - top_n_value = 3 (or higher) means you plot more peaks per cluster.
+compute_gene_activities_manual_value: "YES" # Options: "YES" (default) or "NO". Use of manual generation of gene matrix or not. In the latter case, the GeneActivity() function from Signac will be used.
+
