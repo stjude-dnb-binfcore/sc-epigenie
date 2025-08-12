@@ -30,7 +30,7 @@ bsub < lsf-script.txt
 ```
 
 ## Folder content
-This folder contains a script tasked to calculate clusters and find markers for each cluster across the project.
+This folder contains a script tasked to calculate clusters and find differentially accessible peaks for each cluster across the project.
 
 ## Analysis strategy:
 
