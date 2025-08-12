@@ -1,0 +1,392 @@
+---
+title: "Updates: `r PROJECT_NAME`"
+author: "Antonia Chroni for SJCRH DNB_BINF_Core"
+date: "`r Sys.Date()`"
+papersize: a4
+fontsize: 11pt
+links-as-notes: true
+output:
+  html_document:
+    toc: TRUE
+    toc_float: TRUE
+    df_print: paged
+    code_folding: hide
+    toc_depth: 2
+    highlight: tango
+    number_sections: TRUE
+  pdf_document:
+    toc: TRUE
+    highlight: tango
+    number_sections: TRUE
+    latex_engine: lualatex
+    keep_tex: FALSE
+    fig_caption: yes
+    fig_crop: no
+    fig_height: 2
+    fig_width: 3
+    toc_depth: 2
+always_allow_html: TRUE
+urlcolor: blue
+linkcolor: black
+citecolor: blue
+geometry: margin=1in
+header-includes: 
+  - \usepackage{titling}
+  - \usepackage{fancyhdr}
+  - \usepackage{graphicx}
+  - \usepackage{float}
+params:
+  cellranger_parameters: '.'
+  cancer_type: '.'
+  cohort_value: '.'
+  genome_reference: '.'
+  root_dir: './'
+  PROJECT_NAME: '.'
+  PI_NAME: '.'
+  TASK_ID: '.'
+  PROJECT_LEAD_NAME: '.'
+  DEPARTMENT: '.'
+  LEAD_ANALYSTS: '.'
+  GROUP_LEAD: '.'
+  CONTACT_EMAIL: '.'
+  PIPELINE: '.'
+  START_DATE: '.'
+  COMPLETION_DATE: '.'
+---
+
+```{r logo-file, echo=FALSE}
+attach(params)
+# Insert logo on the top of the html report 
+logo_file <- file.path(root_dir, "figures", "img", "DNB-BINF-Core-logo.png")
+htmltools::img(src = knitr::image_uri(logo_file), alt = "logo", style = "position:absolute; top:0; left:0; padding:0px; height:120px;")
+detach(params)
+```
+
+\addtolength{\headheight}{2.0cm} 
+\fancypagestyle{plain}{} 
+\thispagestyle{fancy}
+\fancyhead[L]{\includegraphics[height=120px]{`r logo_file`}}
+\renewcommand{\headrulewidth}{0pt}
+
+<style type="text/css">
+:root {--DNB_BINF_Core_color: #00427B;}
+
+h1.title {margin-top: 130px;
+          margin-bottom: 25px;
+          font-size: 36px;}
+
+.nobullet li {list-style-type: none;}
+
+.reporthead {font-size: 20px;}
+
+body { /* Normal */
+  font-size: 16px;
+  font-style: Arial, Helvetica, sans-serif;}
+
+h1 {color: var(--DNB_BINF_Core_color);
+    font-size: 28px;
+    margin-top: 50px;}
+
+h2 {color: var(--DNB_BINF_Core_color);
+    font-size: 20px;}
+
+.list-group-item.active, .list-group-item.active:focus, .list-group-item.active:hover {
+  background-color: var(--DNB_BINF_Core_color);}
+</style>
+
+<a href="https://wiki.stjude.org/display/CAB">
+
+</a>
+
+\pagebreak
+
+<div class="reporthead"><br/>
+**PI: `r params$PI_NAME`**  
+**Project: `r params$PROJECT_NAME`**  
+Task: `r params$TASK_ID`  
+Project Lead(s): `r params$PROJECT_LEAD_NAME`  
+Department: `r params$DEPARTMENT`  
+
+<br />  
+
+DNB Bioinformatics Core Analysis Team: 
+<br />  
+
+>**Lead Analyst(s): `r params$LEAD_ANALYSTS`**  
+>Group Lead: `r params$GROUP_LEAD`  
+<br />
+>**Contact E-mail:** `r params$CONTACT_EMAIL`  
+>**DNB Bioinformatics Core Pipeline:** `r params$PIPELINE`  
+
+Date started: `r params$START_DATE`  
+Date completed:  `r params$COMPLETION_DATE`  
+Report generated: `r format(Sys.time(), '%H:%M:%S %Z %m/%d/%Y')` \
+
+Reviewed by: _____________________   Date: ____________ \
+</div>
+\pagebreak
+
+# Set up
+
+```{r load-library, echo = FALSE}
+suppressPackageStartupMessages({
+  library(tidyverse)  
+  library(knitr)
+  library(DT)
+})
+```
+
+# Directories and paths to file Inputs/Outputs
+
+```{r set-dir-and-file-names, echo = FALSE}
+attach(params)
+analysis_dir <- file.path(root_dir, "analyses", "upstream-analysis") 
+module_plots_dir <- file.path(analysis_dir, "plots") 
+module_results_dir <- file.path(analysis_dir, "results") 
+fastqc_module_results_dir <- file.path(root_dir, "analyses", "fastqc-analysis", "results") 
+cellranger_module_results_dir <- file.path(root_dir, "analyses", "cellranger-analysis", "results") 
+#metadata_dir <- yaml$metadata_dir
+
+fastqc_results_dir <- file.path(fastqc_module_results_dir, "02-multiqc-reports") 
+cellranger_results_dir <- file.path(cellranger_module_results_dir, "03_cellranger_count_summary", cellranger_parameters) 
+fastqc_overrepresented_results_file <- file.path(fastqc_results_dir, "fastqc_overrepresented_sequences_plot.txt")
+scDblFinder_results_dir <- file.path(module_results_dir, "02_scDblFinder") 
+Filter_object_results_dir <- file.path(module_results_dir, "03_Filter_object") 
+
+if (file.exists(fastqc_overrepresented_results_file)) {
+  # File exists – proceed to read or plot
+  message("📄 Loading overrepresented sequences plot data...")
+  overrep_data <- read.delim(fastqc_overrepresented_results_file, header = TRUE)
+  # (Insert your processing or plotting code here)
+} else {
+  # File does not exist – skip and inform
+  message("⚠️ Skipping overrepresented sequences plot: file not found.")
+}
+
+cellranger_results_file <- file.path(cellranger_results_dir, "QC_Summary_CellRanger_Report.tsv")
+scDblFinder_results_file <- file.path(scDblFinder_results_dir, "doublets_metrics.tsv")
+cells_table_file <- file.path(Filter_object_results_dir, "number_of_cells_per_sample.tsv")
+#metadata_file <- file.path(metadata_dir, "project_metadata.tsv") # metadata input file
+
+summary_samples_table_file <- file.path(metadata_dir, metadata_file) # summary_samples_table file
+```
+
+
+# Methods
+
+## Data
+
+### `r PROJECT_NAME`
+
+```{r read-table, echo = FALSE}
+summary_samples_table <- readr::read_tsv(summary_samples_table_file, guess_max = 100000, show_col_types = FALSE)
+```
+
+```{r, fig.align = "left", results = "asis", message = FALSE, warning = FALSE, echo = FALSE}
+# Create the data frame
+tables1 <- summary_samples_table
+cat("  \n<div align=\"center\" style=\"font-size:80%\">  \n")
+print(knitr::kable(tables1, align = "lcccc", caption = "Summary of samples in the cohort"))
+cat("  \n</div>  \n")
+cat("  \n\\pagebreak  \n")
+```
+
+  
+# Results
+
+All results can be found here:
+
+- Cluster users can access data from: `r root_dir`/analyses/
+- Mac users can access data from: `r mac_results_filepath`/`r cohort_value`/analyses/
+- `r results_filepath`/`r cohort_value`/analyses/
+
+
+We used FastQC (v0.11.9) and multiqc (v1.25) to perform quality control tool for all libraries across the project from the raw sequencing reads. Next, we aligned these reads using CellRanger (v8.0.1) (10x Genomics). 
+
+## fastqc-analysis
+
+FastQC metrics such as per-base sequence quality, GC content, and adapter contamination can indicate the quality of the sequencing data and contribute to determining if the data is suitable for downstream analyses. Further validation steps, such as alignment or feature counting, will also help confirm if the data is suitable for further processing and analysis.
+
+For more information, please see: `r results_filepath`/`r cohort_value`/analyses/fastqc-analysis/results
+
+### Results: `r PROJECT_NAME` cohort
+
+```{r read-fastqc-analysis, echo = TRUE, results = 'asis', error = FALSE}
+#multiqc_general_stats_df <- read.table(multiqc_general_stats_results_file, header = TRUE, sep = "\t") %>%
+#  arrange(Sample)
+
+#multiqc_fastqc_df <- read.table(multiqc_fastqc_results_file, header = TRUE, sep = "\t") %>% 
+#  mutate_if(is.numeric, ~ scales::comma(.)) %>%
+#  arrange(Sample)
+
+# Define the path to the overrepresented sequences results
+fastqc_overrepresented_results_file <- file.path(fastqc_results_dir, "fastqc_overrepresented_sequences_plot.txt")
+
+# Check if the file exists and read it if available
+if (file.exists(fastqc_overrepresented_results_file)) {
+  
+  fastqc_overrepresented_df <- read.table(fastqc_overrepresented_results_file, header = TRUE, sep = "\t", stringsAsFactors = FALSE) %>%
+    dplyr::rename_with(~ gsub(" ", "_", .)) %>%
+    dplyr::mutate(Overrepresented_sequences_by_sample_pct = Top.overrepresented.sequence + Sum.of.remaining.overrepresented.sequences) %>%
+    dplyr::mutate(across(where(is.numeric), ~ round(., 2))) %>%
+    dplyr::arrange(Sample)
+  } else {
+    cat("⚠️ **Overrepresented sequences data not found.** Skipping this section.\n")
+}
+```
+
+#### Sequence Quality Histograms
+- This graph indicates the overall quality scores for the sequences. If a large proportion of sequences have lower scores this can indicated a general quality issue with the sequencing run
+
+#### Per Base Sequence Content
+- Non-greyish bars (i.e. bars with sections of distinct colors) indicates a **Non-Uniform Distribution** with one or more nucleotides dominating at specific positions.
+- Sharp spikes in specific nucleotides can indicate **adapter contamination** or other sources of bias.
+
+#### Per Sequence GC Content
+- If there is **no bell-shaped curve** (normal distribution), which can be caused by:
+    - Bias in GC content.
+    - Contamination.
+    - Poor quality or truncated sequences.
+    - Artifacts in library preparation.
+    - Bias due to specific sequencing methods.
+
+- In an ideal scenario, the **Per Sequence GC Content** plot should show a bell-shaped curve (normal distribution), where:
+    - The majority of sequences will have GC content near the middle range (around 40–60% GC content), as most sequencing technologies tend to produce more even distributions in well-prepared, high-quality samples.
+    - The edges of the plot (where GC content is very low or very high) should have few sequences.
+
+#### Sequence Duplication Levels
+- This visualization helps assess how many of your sequences are duplicates of others in your dataset.
+- High levels of duplicates can be problematic and affect downstream analyses, such as differential expression or variant calling.
+- It is important for evaluating the **quality** and **complexity** of your sequencing library.
+
+#### Overrepresented Sequences by Sample
+- For example, primer dimers of the template switch oligo **`AAGCAGTGGTATCAACGCAGAGTACATGGG`** should not exceed 5-10%.
+
+
+```{r, fig.align = "left", results = "asis", message = FALSE, warning = FALSE, echo = FALSE, error = FALSE}
+if (file.exists(fastqc_overrepresented_results_file)) {
+  tables1 <- fastqc_overrepresented_df
+  cat("  \n<div align=\"center\" style=\"font-size:80%\">  \n")
+  print(knitr::kable(tables1, align = "lcccc", caption = "Overrepresented Sequences by Sample and Duplication Levels for Specific Samples"))
+  cat("  \n</div>  \n")
+  cat("  \n\\pagebreak  \n")
+  } else {
+    cat("⚠️ **Overrepresented sequences data not found.** Skipping this section.\n")
+} 
+```
+
+## cellranger-analysis
+
+### Results: `r PROJECT_NAME` cohort
+
+We aligned these reads to the `r genome_reference` genome.
+
+For more information, please see: `r results_filepath`/`r cohort_value`/analyses/cellranger-analysis/results
+
+```{r read-cellranger-analysis, echo = FALSE}
+cellranger_results_df <- readr::read_tsv(cellranger_results_file, guess_max = 100000, show_col_types = FALSE) %>%
+  rename_with(~ gsub(" ", "_", .)) %>% # Replace spaces with underscores in column names
+  relocate(Sample_ID) %>%
+  arrange(Sample_ID) %>%
+  mutate_if(is.numeric, ~ scales::comma(.)) %>%
+  select(Sample_ID, Estimated_number_of_cells, Fraction_of_all_fragments_in_cells, Confidently_mapped_read_pairs, Warnings, MajorWarnings) %>%
+  mutate(Minor_Flags = Warnings,
+         Major_Flags = MajorWarnings) %>%
+  select(-Warnings, -MajorWarnings)  # Remove original columns to avoid redundancy
+```
+
+```{r, fig.align = "left", results = "asis", message = FALSE, warning = FALSE, echo = FALSE}
+tables1 <- cellranger_results_df
+cat("  \n<div align=\"center\" style=\"font-size:80%\">  \n")
+print(knitr::kable(tables1, align = "lcccc", caption = "Summary of CellRanger QC per sample"))
+cat("  \n</div>  \n")
+cat("  \n\\pagebreak  \n")
+```
+
+## upstream-analysis
+
+In this step, we will filter out low quality cells based on identification of ambient RNA, low quality cells, and/or doublets (some steps may be optional). 
+
+### Step 1: Signac QC metrics
+
+We applied the following filtering parameters, as specified in the `sc-epigenie` pipeline:
+
+- pct_reads_in_peaks_value_upstream = `r pct_reads_in_peaks_value_upstream` (% of reads in peaks (signal-to-noise)	> 15 or > 20)
+- blacklist_ratio_value_upstream = `r blacklist_ratio_value_upstream` (Fraction of reads in ENCODE blacklist regions (noise metric)	< 0.05))
+- TSS.enrichment_value_upstream = `r TSS.enrichment_value_upstream` (Transcription start site enrichment score	> 2)
+- nucleosome_signal_value_upstream = `r nucleosome_signal_value_upstream` (Nucleosome periodicity signal	< 4)
+           
+For more information, please see: `r results_filepath`/`r cohort_value`/analyses/upstream-analysis/plots/01_Signac_qc
+
+For more information per sample, please see `./plots/01_Signac_qc/<SAMPLE>/Report-seurat-qc-<SAMPLE>-Sys.Date().html`.
+
+### Step 2: Estimating and filtering out doublets
+
+We estimated doublets for each library. Currently, we have not accounted for doublets in the filtering process, though this option is available for future use.
+
+It is common in single cell experiments to have 10-20% of doublets, which makes accurate doublet detection critical. Here, the results appear reasonable with proportion of doublets being proportional to the number of cells captured.
+
+For more information, please see: `r results_filepath`/`r cohort_value`/analyses/upstream-analysis/plots/02_scDblFinder
+
+#### Results: `r PROJECT_NAME` cohort
+
+```{r read-scDblFinder, echo = FALSE}
+doublets_metrics <- readr::read_tsv(scDblFinder_results_file, guess_max = 100000, show_col_types = FALSE) 
+```
+
+```{r, fig.align = "left", results = "asis", message = FALSE, warning = FALSE, echo = FALSE}
+tables1 <- doublets_metrics
+cat("  \n<div align=\"center\" style=\"font-size:80%\">  \n")
+print(knitr::kable(tables1, align = "lcccc", caption = "Summary of doublets detection per sample"))
+cat("  \n</div>  \n")
+cat("  \n\\pagebreak  \n")
+```
+
+### Step 3: Merging filtered data
+
+Next, we merge count matrices from `step 1` after filtering out low quality cells via Seurat QC pipeline. Seurat object and metadata for the library along with UMAP embeddings are saved to be used for downstream analyses.
+
+For more information, please see: `r results_filepath`/`r cohort_value`/analyses/upstream-analysis/plots/03_Filter_object
+
+#### Results: `r PROJECT_NAME` cohort
+
+```{r read-Filter-object, echo = FALSE}
+cells_table <- readr::read_tsv(cells_table_file, guess_max = 100000, show_col_types = FALSE) 
+```
+
+```{r, fig.align = "left", results = "asis", message = FALSE, warning = FALSE, echo = FALSE}
+tables1 <- cells_table
+cat("  \n<div align=\"center\" style=\"font-size:80%\">  \n")
+print(knitr::kable(tables1, align = "lcccc", caption = "Summary of number of cells per sample at each QC step"))
+cat("  \n</div>  \n")
+cat("  \n\\pagebreak  \n")
+```
+
+### Step 4: Final QC summary report
+
+Lastly, we provide a final QC summary report containing graphs and summary tables across each QC step: `fastqc-analysis`, `cellranger-analysis` and  `upstream-analysis` modules.
+
+For more information, please see: `r results_filepath`/`r cohort_value`/analyses/upstream-analysis/plots/04_Final_summary_report
+
+
+## integrative-analysis
+
+For more information, please see: `r results_filepath`/`r cohort_value`/analyses/integrative-analysis/plots
+ 
+ - The single-cell sequencing dataset was integrated using the **`r integration_method`** algorithm. 
+
+
+## cluster-cell-calling
+
+For more information, please see: `r results_filepath`/`r cohort_value`/analyses/cluster-cell-calling/plots
+
+   - We used the **`r resolution_clustering_module`** resolution list for calling clusters. That included the following number of resolutions: **`r resolution_values`**.
+   - We used the **`r resolution_list_find_markers`** resolution for finding markers and explored the first **`r n_value_find_markers`** of top genes.
+   
+
+# Future directions
+
+- **QC upstream analyses**: 
+
+- **Downstream analyses**: 
+
