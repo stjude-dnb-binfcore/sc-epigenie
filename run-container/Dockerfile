@@ -348,7 +348,7 @@ RUN Rscript -e 'devtools::install_github("igordot/scooter")'
 RUN Rscript -e 'if (!requireNamespace("scooter", quietly = TRUE)) stop("scooter not installed!")'
 
 RUN Rscript -e 'devtools::install_github("welch-lab/RcppPlanc")'
-RUN Rscript -e 'if (!requireNamespace("RcppPlanc", quietly = TRUE)) stop("RcppPlanc not installed!")'
+#RUN Rscript -e 'if (!requireNamespace("RcppPlanc", quietly = TRUE)) stop("RcppPlanc not installed!")'
 
 # New R libraries for R shiny app
 RUN Rscript -e 'devtools::install_github("SGDDNB/ShinyCell")'

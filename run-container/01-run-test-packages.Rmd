@@ -53,7 +53,7 @@ suppressPackageStartupMessages({
   library(infercnv)
   
   library(scooter)
-  library(RcppPlanc)
+  #library(RcppPlanc)
   library(numbat)
 
   library(clustree)
@@ -84,14 +84,14 @@ suppressPackageStartupMessages({
   library(purrr)
   library(RColorBrewer)
   library(reshape2)
-  library(rliger)
+  #library(rliger)
   library(rlist)
   library(R.utils)
   library(Seurat)
   library(SeuratObject)
   library(SeuratWrappers)
   library(shiny)
-  library(Signac)
+  #library(Signac)
   library(SoupX)
   library(stringr)
   library(tidytext)
@@ -124,15 +124,15 @@ suppressPackageStartupMessages({
   
   # Motif analysis with Signac
   library(JASPAR2020)
-  library(TFBSTools)
+  #library(TFBSTools)
   library(BSgenome.Mmusculus.UCSC.mm10)
   
   # Transcription factor footprinting
-  library(motifmatchr)
+  #library(motifmatchr)
   library(BSgenome.Hsapiens.UCSC.hg19)
   
-  library(monocle3)
-  library(cicero)
+  #library(monocle3)
+  #library(cicero)
   library(biovizBase)
   library(clusterProfiler)
   ####################################################

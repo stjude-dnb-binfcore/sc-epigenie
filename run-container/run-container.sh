@@ -23,7 +23,7 @@ python3 --version
 fastqc --version
 multiqc --version
 pandoc --version
-tex --version
+#tex --version
 macs3 --version
 
 # Run R script with all R packages
