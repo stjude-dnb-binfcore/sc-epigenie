@@ -17,7 +17,7 @@ ________________________________________________________________________________
 The following analysis modules are currently under development. Please check back soon for updates and stay tuned for what's coming next!
 
 6. `project-updates` module (description="Pipeline for summarizing results from all modules and generating project reports.", required=False)
-7. `integrating-with-scrna-seq-data` module (description="Pipeline for integrating scATAC-seq with scRNA-seq data.", required=True)
+7. `integration-with-scrna-seq-data` module (description="Pipeline for integrating scATAC-seq with scRNA-seq data.", required=True)
 
 ________________________________________________________________________________________
 
