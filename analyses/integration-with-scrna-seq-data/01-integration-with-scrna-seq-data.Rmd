@@ -1,0 +1,562 @@
+---
+title: "Integrating with scRNA-seq data for sc-ATAC-Seq Analysis in 10X Genomics data"
+author: "Antonia Chroni for SJCRH DNB_BINF_Core"
+papersize: a4
+fontsize: 11pt
+links-as-notes: true
+output:
+  html_document:
+    toc: TRUE
+    toc_float: TRUE
+    df_print: paged
+    code_folding: hide
+    toc_depth: 2
+    highlight: tango
+    number_sections: TRUE
+  pdf_document:
+    toc: TRUE
+    highlight: tango
+    number_sections: TRUE
+    latex_engine: lualatex
+    keep_tex: FALSE
+    fig_caption: yes
+    fig_crop: no
+    fig_height: 2
+    fig_width: 3
+    toc_depth: 2
+always_allow_html: TRUE
+urlcolor: blue
+linkcolor: black
+citecolor: blue
+geometry: margin=1in
+header-includes: 
+  - \usepackage{titling}
+  - \usepackage{fancyhdr}
+  - \usepackage{graphicx}
+  - \usepackage{float}
+params:
+  data_file: '.'
+  input_data: '.'
+  reduction_value: '.' 
+  condition_value1: '.'
+  condition_value2: '.'
+  condition_value3: '.'
+  assay: '.'
+  nfeatures_value: '.'
+  ct_palette_file: '.'
+  reference_dir: '.'
+  reference_file_name: '.'
+  celltype_reference: '.'
+  root_dir: './'
+  PROJECT_NAME: '.'
+  PI_NAME: '.'
+  TASK_ID: '.'
+  PROJECT_LEAD_NAME: '.'
+  DEPARTMENT: '.'
+  LEAD_ANALYSTS: '.'
+  GROUP_LEAD: '.'
+  CONTACT_EMAIL: '.'
+  PIPELINE: '.'
+  START_DATE: '.'
+  COMPLETION_DATE: '.'
+---
+```{r logo-file, echo=FALSE}
+attach(params)
+# Insert logo on the top of the html report 
+logo_file <- file.path(root_dir, "figures", "img", "DNB-BINF-Core-logo.png")
+htmltools::img(src = knitr::image_uri(logo_file), alt = "logo", style = "position:absolute; top:0; left:0; padding:0px; height:120px;")
+detach(params)
+```
+
+\addtolength{\headheight}{2.0cm} 
+\fancypagestyle{plain}{} 
+\thispagestyle{fancy}
+\fancyhead[L]{\includegraphics[height=120px]{`r logo_file`}}
+\renewcommand{\headrulewidth}{0pt}
+
+<style type="text/css">
+:root {--DNB_BINF_Core_color: #00427B;}
+
+h1.title {margin-top: 130px;
+          margin-bottom: 25px;
+          font-size: 36px;}
+
+.nobullet li {list-style-type: none;}
+
+.reporthead {font-size: 20px;}
+
+body { /* Normal */
+  font-size: 16px;
+  font-style: Arial, Helvetica, sans-serif;}
+
+h1 {color: var(--DNB_BINF_Core_color);
+    font-size: 28px;
+    margin-top: 50px;}
+
+h2 {color: var(--DNB_BINF_Core_color);
+    font-size: 20px;}
+
+.list-group-item.active, .list-group-item.active:focus, .list-group-item.active:hover {
+  background-color: var(--DNB_BINF_Core_color);}
+</style>
+
+<a href="https://wiki.stjude.org/display/CAB">
+
+</a>
+
+\pagebreak
+
+<div class="reporthead"><br/>
+**PI: `r params$PI_NAME`**  
+**Project: `r params$PROJECT_NAME`**  
+Task: `r params$TASK_ID`  
+Project Lead(s): `r params$PROJECT_LEAD_NAME`  
+Department: `r params$DEPARTMENT`  
+
+<br />  
+
+DNB Bioinformatics Core Analysis Team: 
+<br />  
+
+>**Lead Analyst(s): `r params$LEAD_ANALYSTS`**  
+>Group Lead: `r params$GROUP_LEAD`  
+<br />
+>**Contact E-mail:** `r params$CONTACT_EMAIL`  
+>**DNB Bioinformatics Core Pipeline:** `r params$PIPELINE`  
+
+Date started: `r params$START_DATE`  
+Date completed:  `r params$COMPLETION_DATE`  
+Report generated: `r format(Sys.time(), '%H:%M:%S %Z %m/%d/%Y')` \
+
+Reviewed by: _____________________   Date: ____________ \
+</div>
+\pagebreak
+  
+# Information about this notebook
+
+Here, we will use a data transfer method in the context of scATAC-seq to:
+
+- Classify cells measured with scATAC-seq based on clustering results from scRNA-seq
+- Co-embed scATAC-seq and scRNA-seq data
+
+Overall the following integration procedure consists of the following steps:
+
+- Identify ‘anchors’ between the ATAC-seq and RNA-seq datasets
+- Transfer data between datasets (either transfer labels for classification, or impute RNA levels in the ATAC-seq data to enable co-embedding)
+
+For more information, see [Integrating with scRNA-seq data](https://stuartlab.org/signac/articles/mouse_brain_vignette#integrating-with-scrna-seq-data) and [PBMC scATAC-seq Vignette](https://satijalab.org/seurat/archive/v3.0/atacseq_integration_vignette.html).
+
+# Set up
+```{r load-library, echo=TRUE}
+suppressPackageStartupMessages({
+  library(tidyverse)
+  library(Seurat)
+  library(Signac)
+  library(scooter)
+  library(knitr)
+  library(patchwork)
+}) 
+```
+
+# Directories and paths to file Inputs/Outputs
+
+```{r set-dir-and-file-names, echo=TRUE}
+attach(params)
+analysis_dir <- file.path(root_dir, "analyses", "integration-with-scrna-seq-data") 
+
+# Input files
+cell_types_palette_file <- file.path(root_dir, "figures", "palettes", ct_palette_file)
+reference_file <- file.path(reference_dir, reference_file_name)
+
+# Create results_dir
+module_results_dir <- file.path(analysis_dir, "results")
+if (!dir.exists(module_results_dir)) {
+  dir.create(module_results_dir)}
+
+results_dir <- file.path(module_results_dir, "01_integration_with_scrna_seq_data")
+if (!dir.exists(results_dir)) {
+  dir.create(results_dir)}
+
+# Create plots directory
+module_plots_dir <- file.path(analysis_dir, "plots") 
+plots_dir <- file.path(module_plots_dir, "01_integration_with_scrna_seq_data") 
+
+source(paste0(root_dir, "/figures/scripts/theme_plot.R"))
+source(paste0(analysis_dir, "/util/function-cell-type-fractions.R"))
+```
+
+```{r echo=FALSE, warning=FALSE}
+opts_chunk$set(fig.align='center',
+               external=TRUE,
+               echo=FALSE,
+               warning=FALSE,
+               fig.pos='H')
+a4width <- 8.3
+a4height <- 11.7
+```
+
+# Read seurat object
+
+First, we will use the `gene activity matrix` object as generated from the pipeline in the `input_data` module. As a QC step, we will also filter out all cells here with fewer than `r nfeatures_value` total counts in the scATAC-seq data.
+
+```{r read-object, echo=TRUE}
+seurat_obj.query <- readRDS(data_file)
+DefaultAssay(seurat_obj.query) <- 'RNA'
+seurat_obj.query <- FindVariableFeatures(object = seurat_obj.query, nfeatures = nfeatures_value)
+```
+
+# Integrating with scRNA-seq data 
+
+To help interpret the scATAC-seq data, we can classify cells based on an scRNA-seq experiment from the same biological system. We utilize methods for cross-modality integration and label transfer, described [here](https://www.sciencedirect.com/science/article/pii/S0092867419305598?via%3Dihub).
+
+```{r define-parameters-for-plots, echo=TRUE}
+# Read color palette
+palette_df <- readr::read_tsv(cell_types_palette_file, guess_max = 100000, show_col_types = FALSE) %>%
+  mutate(cell_type_names = case_when(cell_type_names == "na_color" ~ "unassigned",
+                                       TRUE ~ cell_type_names))
+
+# Define and order palette
+palette <- palette_df$hex_codes 
+names(palette) <- palette_df$cell_type_names 
+```
+
+```{r read-file-with-reference, fig.width = 18, fig.height = 6, fig.fullwidth = TRUE, echo=TRUE}
+# Load the pre-processed scRNA-seq data
+reference_obj <- readRDS(reference_file)
+
+# Rename column containing cell types in the reference
+reference_obj@meta.data$celltype <- reference_obj@meta.data[[celltype_reference]]
+
+print(table(reference_obj@meta.data$celltype))
+
+# Plot
+name <- paste0(plots_dir, "/", glue::glue("plot-scATAC-vs-scRNA-seq-cells.png"))
+p1.atac <- DimPlot(seurat_obj.query, reduction = "umap") + NoLegend() + ggtitle("scATAC-seq")
+p2.rna <- DimPlot(reference_obj, reduction = reduction_value, group.by = 'celltype', label = TRUE, repel = TRUE, label.size = 2.5, cols = palette) + ggtitle("scRNA-Seq") 
+print(p1.atac + p2.rna)
+ggsave(file = name, width = 18, height = 6, device = "png")
+```
+
+Now, we can identify anchors between the scATAC-seq dataset and the scRNA-seq dataset and use these anchors to transfer the celltype labels we learned from the scRNA-seq data to the scATAC-seq cells.
+
+```{r transfer-anchors, echo=TRUE}
+cat("Find anchors\n")
+transfer.anchors <- FindTransferAnchors(reference = reference_obj,
+                                        query = seurat_obj.query, 
+                                        reduction = "cca",
+                                        dims = 1:30)
+```
+
+To transfer the cluster ids, we provide a vector of previously annotated cell type labels for the RNA to the refdata parameter. The output will contain a matrix with predictions and confidence scores for each ATAC-seq cell.
+
+```{r predicted-labels, echo=TRUE}
+predicted.labels <- TransferData(anchorset = transfer.anchors, 
+                                 refdata = reference_obj$celltype,
+                                 #refdata = seurat_obj.query_rna$subclass,
+                                 weight.reduction = seurat_obj.query[['lsi']],
+                                 dims = 2:30)
+
+cat("Add predicted.labels in the query dataset\n")
+seurat_obj.query <- AddMetaData(seurat_obj.query, metadata = predicted.labels) # Add metadata
+
+# Add metadata
+new.data <- seurat_obj.query@meta.data %>%
+  as.data.frame() %>%
+  add_column(project = "project")
+seurat_obj.query <- AddMetaData(seurat_obj.query, metadata = new.data)
+
+# Create table
+summary_table <- table(predicted.id = seurat_obj.query@meta.data$predicted.id) %>% # all labels
+  as.data.frame() %>% 
+  mutate(cells_number_all = Freq) %>% 
+  dplyr::select(-Freq) 
+```
+
+We can then examine the distribution of prediction scores and optionally filter out those cells with low scores. Here, we find that over 95% of the cells receive a score of 0.5 or greater.
+
+```{r prediction-score-max, fig.width = 8, fig.height = 6, fig.fullwidth = TRUE, echo=TRUE}
+name <- paste0(plots_dir, "/", glue::glue("plot-hist-prediction.score.max.png"))
+print(hist(seurat_obj.query$prediction.score.max))
+plot <- ggplot(seurat_obj.query@meta.data, aes(x = prediction.score.max)) +
+  geom_histogram(binwidth = 0.05, fill = "skyblue", color = "white") +
+  geom_vline(xintercept = 0.5, color = "red", linetype = "dashed", size = 1) +
+  labs(title = "Histogram of Prediction Scores", x = "prediction.score.max", y = "Count") +
+  theme_minimal()
+print(plot)
+ggsave(file = name, plot = plot, width = 8, height = 6, device = "png")
+
+print(table(seurat_obj.query$prediction.score.max > 0.5))
+```
+
+## Number of cells for the scATAC-seq cell predictions
+
+We will check the number of cells by summarizing the identified scATAC-seq cell predictions.
+
+```{r, fig.align = "left", results = "asis", message = FALSE, warning = FALSE, echo = FALSE}
+tables1 <- summary_table
+cat("  \n<div align=\"center\" style=\"font-size:80%\">  \n")
+print(knitr::kable(tables1, align = "lcccc", caption = "scATAC-seq cell predictions"))
+cat("  \n</div>  \n")
+cat("  \n\\pagebreak  \n")
+```
+
+## Number of cells for the scATAC-seq cell predictions per ID
+
+We will check the number of cells by summarizing the identified scATAC-seq cell predictions per ID.
+
+```{r, fig.align = "left", results = "asis", message = FALSE, warning = FALSE, echo = FALSE}
+tables1 <- seurat_obj.query@meta.data %>% 
+  as.data.frame() %>% 
+  dplyr::count(predicted.id, ID) %>%
+  pivot_wider(names_from = ID, values_from = n, values_fill = list(n = 0))
+cat("  \n<div align=\"center\" style=\"font-size:80%\">  \n")
+print(knitr::kable(tables1, align = "lcccc", caption = "scATAC-seq cell predictions per ID"))
+cat("  \n</div>  \n")
+cat("  \n\\pagebreak  \n")
+```
+
+# Identify number of cells with low-quality or no assignments of cell type annotations
+
+```{r echo=TRUE}
+seurat_obj.query@meta.data <- seurat_obj.query@meta.data %>%
+  mutate(predicted.id = if_else(is.na(predicted.id), "unassigned", as.character(predicted.id)),
+         predicted.id = if_else(predicted.id == "", "unassigned", predicted.id))
+
+# unassigned cells 
+cells_unassigned <- length(which(seurat_obj.query@meta.data$predicted.id == "unassigned"))
+```
+
+We will identify and rename the cells with low-quality or no assignments to `unassigned` (instead of NAs or empty strings). There were identified `r cells_unassigned` cells due to low-quality or no assignments of cell type annotations. We will include these cells in the following plots.
+
+# Plotting scATAC-seq cell predictions
+
+## Predicted cell types: scATAC-seq cells vs scRNA-seq cells
+
+We can then view the predicted cell types on a UMAP representation of the scATAC-seq data and find that the transferred labels are highly consistent with the UMAP structure.
+
+```{r plot-comparison, fig.width = 18, fig.height = 6, fig.fullwidth = TRUE, echo=TRUE}
+name <- paste0(plots_dir, "/", glue::glue("plot-scATAC-seq-cells-vs-scRNA-seq-cells.png"))
+#seurat_obj.query.filtered <- subset(seurat_obj.query, subset = prediction.score.max > 0.5)
+#seurat_obj.query.filtered$predicted.id <- factor(seurat_obj.query.filtered$predicted.id, levels = levels(reference_obj))  # to make the colors match
+# head(seurat_obj.query.filtered$predicted.id)
+# You should see cell type names. If it's all NA, label transfer didn't assign identities properly.
+#p1 <- DimPlot(seurat_obj.query.filtered, group.by = 'predicted.id', label = TRUE, repel = TRUE, label.size = 2.5, cols = palette) + ggtitle("scATAC-seq cells")
+p1 <- DimPlot(seurat_obj.query, group.by = 'predicted.id', label = TRUE, repel = TRUE, label.size = 2.5, cols = palette) + ggtitle("scATAC-seq cells")
+print(p1 + p2.rna)
+ggsave(file = name, width = 18, height = 6, device = "png")
+```
+
+```{r plot-cell-types-project-fractions, fig.width = 6, fig.height = 5, fig.fullwidth = TRUE, echo=TRUE}
+name <- paste0(plots_dir, "/", glue::glue("plot-scRNA-seq-project-fractions.png"))
+p.project <- print(cell_type_fractions_cell_type_reference(df = seurat_obj.query@meta.data,
+                                                           condition_plot = "project",
+                                                           color_df = palette,
+                                                           title_value = "scATAC-seq"))
+ggsave(file = name, width = 6, height = 5, device = "png")
+```
+
+## scATAC-seq cells: Predicted cell types and fractions per ID
+
+```{r}
+# Get the number of unique values in the 'ID' column
+unique_ids <- print(length(unique(seurat_obj.query@meta.data$ID)))
+
+# Set the maximum number of plots per row (e.g., 3 plots per row)
+max_plots_per_row <- 3
+
+# Calculate the number of columns needed based on unique IDs
+# Ensure that ncol is at least 1 and limit by max_plots_per_row
+ncol_plots <- max(1, min(max_plots_per_row, unique_ids))
+```
+
+```{r plot-cell-types-ID, fig.width = 25, fig.height = 10, fig.fullwidth = TRUE, echo=TRUE}
+name <- paste0(plots_dir, "/", glue::glue("plot-scATAC-seq-ID.png"))
+p1.after <- print(DimPlot(seurat_obj.query, reduction = reduction_value, split.by = "ID", group.by = 'predicted.id', label = TRUE, repel = TRUE, label.size = 2.5, cols = palette) + 
+                    ggtitle("scATAC-seq cells: Predicted cell types") +
+                    facet_wrap(~ ID, ncol = ncol_plots, scales = "free")) # Limit the number of columns per row
+ggsave(file = name, width = 25, height = 10, device = "png")
+```
+
+```{r plot-cell-types-ID-fractions, fig.width = 6, fig.height = 5, fig.fullwidth = TRUE, echo=TRUE}
+name <- paste0(plots_dir, "/", glue::glue("plot-scATAC-seq-ID-fractions.png"))
+p.ID <- print(cell_type_fractions_cell_type_reference(df = seurat_obj.query@meta.data,
+                                                      condition_plot = "ID",
+                                                      color_df = palette,
+                                                      title_value = "scATAC-seq"))
+ggsave(file = name, width = 6, height = 5, device = "png")
+```
+
+## scATAC-seq cells: Predicted cell types and fractions per `r condition_value1`
+
+```{r}
+# Get the number of unique values in the 'ID' column
+unique_ids <- print(length(unique(seurat_obj.query@meta.data[[condition_value1]])))
+
+# Set the maximum number of plots per row (e.g., 3 plots per row)
+max_plots_per_row <- 3
+
+# Calculate the number of columns needed based on unique IDs
+# Ensure that ncol is at least 1 and limit by max_plots_per_row
+ncol_plots <- max(1, min(max_plots_per_row, unique_ids))
+```
+
+```{r plot-cell-types-condition1, fig.width = 18, fig.height = 6, fig.fullwidth = TRUE, echo=TRUE}
+name <- paste0(plots_dir, "/", glue::glue("plot-scATAC-seq-condition1.png"))
+p1.after <- print(DimPlot(seurat_obj.query, reduction = reduction_value, split.by = condition_value1, group.by = 'predicted.id', label = TRUE, repel = TRUE, label.size = 2.5, cols = palette) + 
+                    ggtitle("scATAC-seq cells: Predicted cell types") +
+                    facet_wrap(as.formula(paste("~", condition_value1)), ncol = ncol_plots, scales = "free")) # Limit the number of columns per row)
+ggsave(file = name, width = 18, height = 6, device = "png")
+```
+
+```{r plot-cell-types-condition-fractions1, fig.width = 8, fig.height = 6, fig.fullwidth = TRUE, echo=TRUE}
+name <- paste0(plots_dir, "/", glue::glue("plot-scATAC-seq-condition-fractions1.png"))
+p.condition <- print(cell_type_fractions_cell_type_reference(df = seurat_obj.query@meta.data,
+                                         condition_plot = condition_value1,
+                                         color_df = palette,
+                                         title_value = "scATAC-seq"))
+ggsave(file = name, width = 8, height = 6, device = "png")
+```
+
+## scATAC-seq cells: Predicted cell types and fractions per `r condition_value2`
+
+```{r plot-cell-types-condition2, fig.width = 18, fig.height = 6, fig.fullwidth = TRUE, echo=TRUE}
+if (!is.null(condition_value2)) {
+  
+  # Get the number of unique values in the 'ID' column
+  unique_ids <- print(length(unique(seurat_obj.query@meta.data[[condition_value2]])))
+
+  # Set the maximum number of plots per row (e.g., 3 plots per row)
+  max_plots_per_row <- 3
+
+  # Calculate the number of columns needed based on unique IDs
+  # Ensure that ncol is at least 1 and limit by max_plots_per_row
+  ncol_plots <- max(1, min(max_plots_per_row, unique_ids))
+  
+  name <- paste0(plots_dir, "/", glue::glue("plot-scATAC-seq-condition2.png"))
+  p1.after <- print(DimPlot(seurat_obj.query, reduction = reduction_value, split.by = condition_value2, group.by = 'predicted.id', label = TRUE, repel = TRUE, label.size = 2.5, cols = palette) + 
+                    ggtitle("scATAC-seq cells: Predicted cell types") +
+                    facet_wrap(as.formula(paste("~", condition_value2)), ncol = ncol_plots, scales = "free")) # Limit the number of columns per row)
+  ggsave(file = name, width = 18, height = 6, device = "png")
+}
+```
+
+```{r plot-cell-types-condition-fractions2, fig.width = 8, fig.height = 6, fig.fullwidth = TRUE, echo=TRUE}
+if (!is.null(condition_value2)) {
+  name <- paste0(plots_dir, "/", glue::glue("plot-scATAC-seq-condition-fractions2.png"))
+  p.condition <- print(cell_type_fractions_cell_type_reference(df = seurat_obj.query@meta.data,
+                                                                  condition_plot = condition_value2,
+                                                                  color_df = palette,
+                                                                  title_value = "scATAC-seq"))
+  ggsave(file = name, width = 8, height = 6, device = "png")
+}
+```
+
+## scATAC-seq cells: Predicted cell types and fractions per `r condition_value3`
+
+```{r plot-cell-types-condition3, fig.width = 18, fig.height = 6, fig.fullwidth = TRUE, echo=TRUE}
+if (!is.null(condition_value3)) {
+
+  # Get the number of unique values in the 'ID' column
+  unique_ids <- print(length(unique(seurat_obj.query@meta.data[[condition_value3]])))
+
+  # Set the maximum number of plots per row (e.g., 3 plots per row)
+  max_plots_per_row <- 3
+
+  # Calculate the number of columns needed based on unique IDs
+  # Ensure that ncol is at least 1 and limit by max_plots_per_row
+  ncol_plots <- max(1, min(max_plots_per_row, unique_ids))
+  
+  name <- paste0(plots_dir, "/", glue::glue("plot-scATAC-seq-condition3.png"))
+  p1.after <- print(DimPlot(seurat_obj.query, reduction = reduction_value, split.by = condition_value3, group.by = 'predicted.id', label = TRUE, repel = TRUE, label.size = 2.5, cols = palette) + 
+                    ggtitle("scATAC-seq cells: Predicted cell types") +
+                    facet_wrap(as.formula(paste("~", condition_value3)), ncol = ncol_plots, scales = "free")) # Limit the number of columns per row)
+  ggsave(file = name, width = 18, height = 6, device = "png")
+}
+```
+
+```{r plot-cell-types-condition-fractions3, fig.width = 8, fig.height = 6, fig.fullwidth = TRUE, echo=TRUE}
+if (!is.null(condition_value3)) {
+  name <- paste0(plots_dir, "/", glue::glue("plot-scATAC-seq-condition-fractions3.png"))
+  p.condition <- print(cell_type_fractions_cell_type_reference(df = seurat_obj.query@meta.data,
+                                         condition_plot = condition_value3,
+                                         color_df = palette,
+                                         title_value = "scATAC-seq"))
+  ggsave(file = name, width = 8, height = 6, device = "png")
+}
+```
+
+# Co-embedding
+
+Finally, to visualize all the cells together, we can co-embed the scRNA-seq and scATAC-seq cells in the same low dimensional space. Here, we use the same anchors used earlier to transfer cell type labels to impute RNA-seq values for the scATAC-seq cells. We then merge the measured and imputed scRNA-seq data and run a standard UMAP analysis to visualize all the cells together. Note that this step is for visualization purposes only and is not a necessary part of the data transfer analysis.
+
+```{r co-embedding, echo=TRUE}
+# note that we restrict the imputation to variable genes from scRNA-seq, but could impute the
+# full transcriptome if we wanted to
+genes.use <- VariableFeatures(reference_obj)
+refdata <- GetAssayData(reference_obj, assay = "RNA", layer = "data")[genes.use, ]
+
+# refdata (input) contains a scRNA-seq expression matrix for the scRNA-seq cells.  imputation
+# (output) will contain an imputed scRNA-seq matrix for each of the ATAC cells
+imputation <- TransferData(anchorset = transfer.anchors, refdata = refdata, weight.reduction = seurat_obj.query[["lsi"]], dims = 1:30)
+
+# this line adds the imputed data matrix to the seurat_obj.query object
+seurat_obj.query[["RNA"]] <- imputation
+coembed <- merge(x = reference_obj, y = seurat_obj.query)
+
+# Finally, we run PCA and UMAP on this combined object, to visualize the co-embedding of both datasets
+coembed <- ScaleData(coembed, features = genes.use, do.scale = FALSE)
+coembed <- RunPCA(coembed, features = genes.use, verbose = FALSE)
+coembed <- RunUMAP(coembed, dims = 1:30)
+coembed$celltype <- ifelse(!is.na(coembed$celltype), coembed$celltype, coembed$predicted.id)
+```
+
+Here we plot all cells colored by either their assigned cell type or their predicted cell type from the data transfer procedure.
+
+```{r co-embedding-plot, fig.width = 18, fig.height = 6, fig.fullwidth = TRUE, echo=TRUE}
+name <- paste0(plots_dir, "/", glue::glue("plot-coembed.png"))
+p1 <- DimPlot(coembed, group.by = "seq_technology_assay")
+p2 <- DimPlot(coembed, group.by = "celltype", label = TRUE, repel = TRUE)
+print(p1 + p2)
+ggsave(file = name, width = 18, height = 6, device = "png")
+```
+
+Upon inspection of the UMAP embeddings, several clusters of cells appeared to be unique to a single modality. For example, certain cell populations might be detected exclusively in the transcriptomic dataset and not in the chromatin accessibility data. This likely reflects biological differences, such as cell types with minimal or absent nuclear material, or those in which chromatin accessibility is decoupled from transcriptional activity. As such, these cells may not align well across modalities and are expected to appear only in one dataset.
+
+```{r co-embedding-plot-dimplot, fig.width = 18, fig.height = 6, fig.fullwidth = TRUE, echo=TRUE}
+name <- paste0(plots_dir, "/", glue::glue("plot-coembed-predictions.png"))
+print(DimPlot(coembed, split.by = "seq_technology_assay", group.by = "celltype", label = TRUE, repel = TRUE) + NoLegend())
+ggsave(file = name, width = 18, height = 6, device = "png")
+```
+
+# Save output files
+
+```{r save-output, echo=TRUE}
+# Identify columns with a '.1' suffix
+cols_to_remove <- grep("\\.1$", colnames(seurat_obj.query@meta.data), value = TRUE)
+  
+# Exclude columns that match the specific patterns (e.g., {assay}_snn_res.0.1, {assay}_snn_res.1, {assay}_snn_res.10)
+cols_to_remove <- cols_to_remove[!grepl(glue::glue("^{assay}_snn_res\\.0\\.1$"), cols_to_remove) & 
+                                     !grepl(glue::glue("^{assay}_snn_res\\.1$"), cols_to_remove) &
+                                     !grepl(glue::glue("^{assay}_snn_res\\.10$"), cols_to_remove)]
+  
+# Remove the columns
+seurat_obj.query@meta.data <- seurat_obj.query@meta.data[, !colnames(seurat_obj.query@meta.data) %in% cols_to_remove]
+head(seurat_obj.query@meta.data)
+
+metadata <- as_data_frame_seurat(seurat_obj.query, metadata = TRUE)
+write_tsv(metadata, file = paste0(results_dir, "/", "metadata", ".tsv")) # Save metadata
+saveRDS(seurat_obj.query, file = paste0(results_dir, "/", "seurat_obj_reference.rds"))
+```
+
+```{r echo=FALSE}
+detach(params)
+```
+
+\pagebreak
+
+# Session Info
+
+```{r echo=FALSE}
+sessionInfo()
+```
+
