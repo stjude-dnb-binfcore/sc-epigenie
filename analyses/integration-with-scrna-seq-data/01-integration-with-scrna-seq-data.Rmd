@@ -226,7 +226,6 @@ reference_obj <- readRDS(reference_file)
 
 # Rename column containing cell types in the reference
 reference_obj@meta.data$celltype <- reference_obj@meta.data[[celltype_reference]]
-
 print(table(reference_obj@meta.data$celltype))
 
 # Plot
