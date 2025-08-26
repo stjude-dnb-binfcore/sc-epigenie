@@ -141,10 +141,13 @@ Important Considerations:
 ```
 ├── analyses
 |  ├── cellranger-analysis
+|  ├── cluster-cell-calling
 |  ├── fastqc-analysis
 |  ├── integrative-analysis
+|  ├── project-updates
 |  ├── README.md
 |  └── upstream-analysis
+├── data
 ├── figures
 ├── LICENSE
 ├── project_parameters.Config.yaml
