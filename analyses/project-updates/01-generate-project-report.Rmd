@@ -155,7 +155,7 @@ Filter_object_results_dir <- file.path(module_results_dir, "03_Filter_object")
 
 if (file.exists(fastqc_overrepresented_results_file)) {
   # File exists – proceed to read or plot
-  message("📄 Loading overrepresented sequences plot data...")
+  message("Loading overrepresented sequences plot data...")
   overrep_data <- read.delim(fastqc_overrepresented_results_file, header = TRUE)
   # (Insert your processing or plotting code here)
 } else {
@@ -381,8 +381,8 @@ For more information, please see: `r results_filepath`/`r cohort_value`/analyses
 For more information, please see: `r results_filepath`/`r cohort_value`/analyses/cluster-cell-calling/plots
 
    - We used the **`r resolution_clustering_module`** resolution list for calling clusters. That included the following number of resolutions: **`r resolution_values`**.
-   - We used the **`r resolution_list_find_markers`** resolution for finding markers and explored the first **`r n_value_find_markers`** of top genes.
-   
+   - We used the **`r resolution_list_find_markers`** resolution to identify differentially accessible peaks per cluster and explored the **`r top_n_value_peaks`** peaks.
+
 
 # Future directions
 
