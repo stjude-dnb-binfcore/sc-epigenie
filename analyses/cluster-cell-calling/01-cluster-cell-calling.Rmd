@@ -1,0 +1,311 @@
+---
+title: "Cluster cell calling analysis for sc-ATAC-Seq Analysis in 10X Genomics data"
+author: "Antonia Chroni for SJCRH DNB_BINF_Core"
+papersize: a4
+fontsize: 11pt
+links-as-notes: true
+output:
+  html_document:
+    toc: TRUE
+    toc_float: TRUE
+    df_print: paged
+    code_folding: hide
+    toc_depth: 2
+    highlight: tango
+    number_sections: TRUE
+  pdf_document:
+    toc: TRUE
+    highlight: tango
+    number_sections: TRUE
+    latex_engine: lualatex
+    keep_tex: FALSE
+    fig_caption: yes
+    fig_crop: no
+    fig_height: 2
+    fig_width: 3
+    toc_depth: 2
+always_allow_html: TRUE
+urlcolor: blue
+linkcolor: black
+citecolor: blue
+geometry: margin=1in
+header-includes: 
+  - \usepackage{titling}
+  - \usepackage{fancyhdr}
+  - \usepackage{graphicx}
+  - \usepackage{float}
+params:
+  integration_method: '.'
+  num_dim: '.'
+  reduction_value: '.' 
+  resolution_list_default: '.'
+  resolution_list: '.'
+  algorithm_value: '.'
+  assay: '.'
+  future_globals_value: '.'
+  root_dir: './'
+  PROJECT_NAME: '.'
+  PI_NAME: '.'
+  TASK_ID: '.'
+  PROJECT_LEAD_NAME: '.'
+  DEPARTMENT: '.'
+  LEAD_ANALYSTS: '.'
+  GROUP_LEAD: '.'
+  CONTACT_EMAIL: '.'
+  PIPELINE: '.'
+  START_DATE: '.'
+  COMPLETION_DATE: '.'
+---
+
+```{r logo-file, echo=FALSE}
+attach(params)
+# Insert logo on the top of the html report 
+logo_file <- file.path(root_dir, "figures", "img", "DNB-BINF-Core-logo.png")
+htmltools::img(src = knitr::image_uri(logo_file), alt = "logo", style = "position:absolute; top:0; left:0; padding:0px; height:120px;")
+detach(params)
+```
+
+\addtolength{\headheight}{2.0cm} 
+\fancypagestyle{plain}{} 
+\thispagestyle{fancy}
+\fancyhead[L]{\includegraphics[height=120px]{`r logo_file`}}
+\renewcommand{\headrulewidth}{0pt}
+
+<style type="text/css">
+:root {--DNB_BINF_Core_color: #00427B;}
+
+h1.title {margin-top: 130px;
+          margin-bottom: 25px;
+          font-size: 36px;}
+
+.nobullet li {list-style-type: none;}
+
+.reporthead {font-size: 20px;}
+
+body { /* Normal */
+  font-size: 16px;
+  font-style: Arial, Helvetica, sans-serif;}
+
+h1 {color: var(--DNB_BINF_Core_color);
+    font-size: 28px;
+    margin-top: 50px;}
+
+h2 {color: var(--DNB_BINF_Core_color);
+    font-size: 20px;}
+
+.list-group-item.active, .list-group-item.active:focus, .list-group-item.active:hover {
+  background-color: var(--DNB_BINF_Core_color);}
+</style>
+
+<a href="https://wiki.stjude.org/display/CAB">
+
+</a>
+
+\pagebreak
+
+<div class="reporthead"><br/>
+**PI: `r params$PI_NAME`**  
+**Project: `r params$PROJECT_NAME`**  
+Task: `r params$TASK_ID`  
+Project Lead(s): `r params$PROJECT_LEAD_NAME`  
+Department: `r params$DEPARTMENT`  
+
+<br />  
+
+DNB Bioinformatics Core Analysis Team: 
+<br />  
+
+>**Lead Analyst(s): `r params$LEAD_ANALYSTS`**  
+>Group Lead: `r params$GROUP_LEAD`  
+<br />
+>**Contact E-mail:** `r params$CONTACT_EMAIL`  
+>**DNB Bioinformatics Core Pipeline:** `r params$PIPELINE`  
+
+Date started: `r params$START_DATE`  
+Date completed:  `r params$COMPLETION_DATE`  
+Report generated: `r format(Sys.time(), '%H:%M:%S %Z %m/%d/%Y')` \
+
+Reviewed by: _____________________   Date: ____________ \
+</div>
+\pagebreak
+  
+# Information about this notebook
+
+This notebook is tasked to calculate clusters across the project. For more information, see [Signac clustering](https://stuartlab.org/signac/articles/mouse_brain_vignette).
+
+In order to interpret the clustering and decide properly on the resolution, we should consider tissue type, total number of cells in the dataset, and expected known cell types in there (i.e., tissue ecosystem). That would help to determine the correct number of clusters in a biologically meaningful way, considering known cell types and avoiding splitting clusters into unstable, small ones. That can also help to explore smaller clusters that might contain unknown or disease/patient-specific clusters that are still worth considering and investigating from the research/clinical perspective. 
+
+
+# Set up
+
+```{r load-library, echo=TRUE}
+attach(params)
+suppressPackageStartupMessages({
+  library(future)
+  library(tidyverse)
+  library(patchwork)
+  library(Seurat)
+  library(clustree)
+  library(igraph)
+  library(scooter)
+  library(leiden)
+  library(knitr)
+  library(Signac)
+
+  # Evaluate Seurat R expressions asynchronously when possible using future package
+  options(future.globals.maxSize = future_globals_value, future.rng.onMisuse = "ignore") 
+  plan(multisession, workers = parallelly::availableCores())
+}) 
+```
+
+# Directories and paths to file Inputs/Outputs
+
+```{r set-dir-and-file-names, echo=TRUE}
+analysis_dir <- file.path(root_dir, "analyses", "cluster-cell-calling") 
+
+if (data_dir_module == "integrative-analysis"){
+  data_dir <- file.path(root_dir, "analyses", data_dir_module, "results")
+  data_file <- file.path(data_dir, glue::glue("seurat_obj_integrated_{integration_method}.rds"))
+  
+  } else if (data_dir_module == "upstream-analysis") {
+  data_dir <- file.path(root_dir, "analyses", data_dir_module, "results", glue::glue('03_Filter_object{suffix}'))
+  data_file <- file.path(data_dir, glue::glue("seurat_obj_merged_filtered.rds"))
+  } else {}
+
+
+# Create results_dir
+module_results_dir <- file.path(analysis_dir, "results")
+if (!dir.exists(module_results_dir)) {
+  dir.create(module_results_dir)}
+
+results_dir <- file.path(module_results_dir, glue::glue("01_cluster_cell_calling_{resolution}"))
+if (!dir.exists(results_dir)) {
+  dir.create(results_dir)}
+
+# Create plots directory
+module_plots_dir <- file.path(analysis_dir, "plots") 
+if (!dir.exists(module_plots_dir)) {
+  dir.create(module_plots_dir)}
+
+plots_dir <- file.path(module_plots_dir, glue::glue("01_cluster_cell_calling_{resolution}")) 
+if (!dir.exists(plots_dir)) {
+  dir.create(plots_dir)}
+
+source(paste0(root_dir, "/figures/scripts/theme_plot.R"))
+source(paste0(analysis_dir, "/util/function-cluster-cell-calling.R"))
+```
+
+```{r echo=FALSE, warning=FALSE}
+opts_chunk$set(fig.align='center',
+               external=TRUE,
+               echo=FALSE,
+               warning=FALSE,
+               fig.pos='H')
+a4width <- 8.3
+a4height <- 11.7
+```
+
+# Read seurat object
+First, we will use the seurat object as generated from the pipeline in the `r data_dir_module` module. 
+
+```{r read-object, echo=TRUE}
+seurat_obj <- readRDS(data_file)
+```
+
+# Cluster the cells
+
+In scATAC-seq analysis with Signac, clustering is performed using a graph-based approach, following the construction of a low-dimensional representation of the data via Latent Semantic Indexing (LSI). This method captures patterns in chromatin accessibility by performing singular value decomposition (SVD) on a term frequency–inverse document frequency (TF-IDF) matrix derived from peak-by-cell accessibility counts.
+
+Seurat (via Signac) then applies a shared nearest neighbor (SNN) graph-based clustering approach, similar to strategies used in single-cell transcriptomics [Macosko et al., 2015](https://www.cell.com/fulltext/S0092-8674(15)00549-8). The clustering method builds upon earlier graph-based techniques such as [SNN-Cliq, Xu and Su, Bioinformatics, 2015](https://academic.oup.com/bioinformatics/article/31/12/1974/214505) and CyTOF data [PhenoGraph, Levine et al., Cell, 2015](https://pubmed.ncbi.nlm.nih.gov/26095251/), where each cell is embedded in a K-nearest neighbor (KNN) graph based on similarity in their LSI space representation. Edges in the graph are weighted using Jaccard similarity, measuring the overlap between each cell’s neighborhood.
+
+This process is implemented using the [FindNeighbors()](https://satijalab.org/seurat/reference/findneighbors) function, with the first 2–30 LSI components typically used to define the neighborhood structure. It's important to avoid using the first LSI component (LSI 1), which often captures sequencing depth rather than biological variation—use dims = 2:30 instead.
+
+To perform clustering, Signac uses modularity optimization algorithms, such as the Louvain algorithm (default) or the more refined [SLM algorithm, Blondel et al., 2008](https://arxiv.org/abs/0803.0476). This is executed via the [FindClusters()](https://satijalab.org/seurat/reference/findclusters) function. The resolution parameter controls clustering granularity:
+
+   - Lower values (e.g., 0.2–0.4) yield fewer, broader clusters
+   - Higher values (e.g., 1.0–1.4) generate more fine-grained clusters
+
+Typical resolution settings for ~3,000 cells range between 0.4 and 1.2, though this should be tuned based on dataset size and expected heterogeneity. You can inspect cluster assignments using the [Idents()](https://satijalab.github.io/seurat-object/reference/Idents.html) function.
+
+```{r calculate-and-plot-clusters, fig.width = 12, fig.height = 6, fig.fullwidth = TRUE, echo=TRUE}
+# Remove previous clustering information
+seurat_obj$seurat_clusters <- NULL
+seurat_obj@meta.data <- seurat_obj@meta.data %>% select(-contains("snn_res."))
+DefaultAssay(seurat_obj) <- assay
+
+# Calculate clusters
+seurat_obj <- cluster_cell_calling(seurat_obj = seurat_obj,
+                                   reduction_value = reduction_value,
+                                   num_dim = num_dim,
+                                   plots_dir = plots_dir, 
+                                   resolution_list = resolution_list, 
+                                   resolution_list_default = resolution_list_default,
+                                   algorithm_value = algorithm_value,
+                                   assay = assay)
+head(seurat_obj@meta.data)
+```
+
+# Plotting clustering trees
+
+Clustering analysis is used in many contexts to group similar samples. One problem when conducting this kind of analysis is how many clusters to use. This is usually controlled by a parameter provided to the clustering algorithm, such as \(k\) for \(k\)-means clustering.
+
+Statistics designed to help make this choice typically either compare two clusterings or score a single clustering. A clustering tree is different in that it visualises the relationships between at a range of resolutions.
+
+To build a clustering tree we need to look at how cells move as the clustering resolution is increased. Each cluster forms a node in the tree and edges are constructed by considering the cells in a cluster at a lower resolution (say \(k = 2\)) that end up in a cluster at the next highest resolution (say \(k = 3\)). By connecting clusters in this way we can see how clusters are related to each other, which are clearly distinct and which are unstable. Extra information about the cells in each node can also be overlaid in order to help make the decision about which resolution to use. For more information about clustering trees please refer to the associated publication [Zappia and Oshlack 2018](https://doi.org/10.1093/gigascience/giy083) and [Plotting clustering trees](https://cran.r-project.org/web/packages/clustree/vignettes/clustree.html).
+
+# Intepretation of clustering trees
+
+To better understand the clustering trees structure, note that one cluster would be probably very distinct and will not change with the value of \(k\). This is the Center players which are very different to the other positions. On the other side of the tree we should see a single cluster that splits into the two (or more) clusters. After this the tree becomes messier and there might be even nodes with multiple incoming edges. This is a good indication that we have over clustered the data.
+
+# SC3 stability index
+Apart from information in the dataset itself it can useful to display measures of clustering quality as aesthetics. The stability index from the {SC3} package [Kiselev et al. 2017](https://doi.org/10.1038/nmeth.4236) measures the stability of clusters across resolutions and is automatically calculated when a clustering tree is built. It can be accessed by setting an aesthetic to `sc3_stability` and because it is calculated by cluster we don’t need to provide an aggregation function. 
+
+# Overlaying clustering trees
+
+One way to think of clustering trees is that they add an extra dimension to the data that shows how clusters "evolve" over time (increasing resolution). Sometimes it can be useful to overlay this dimension on other dimensions in the data, particularly those that come from dimensionality reduction techniques. We can do this using the `clustree_overlay` function:
+
+```{r nba-overlay, fig.width = 15, fig.height = 20, fig.fullwidth = TRUE, echo=TRUE}
+if (data_dir_module == "upstream-analysis"){
+  # Extract embeddings from the umap.rpca reduction
+  emb <- Embeddings(seurat_obj, "LSI")
+  
+  # Add to metadata with exact column names
+  seurat_obj@meta.data$LSI_1 <- emb[, 1]
+  seurat_obj@meta.data$LSI_2 <- emb[, 2]
+  } else {}
+  
+
+# Plot overlaying only if there are >1 resolutions
+if (length(resolution_list) > 1 | is.null(resolution_list)) {
+  name <- paste0(plots_dir, "/", glue::glue("plot_clustree_overlay.png"))
+  print(clustree_overlay(seurat_obj, prefix = glue::glue("{assay}_snn_res."), x_value = "LSI_1", y_value = "LSI_2",
+                         use_colour = "points", alt_colour = "blue", plot_sides = TRUE))
+} else {}
+
+# Define figure dimensions based on number of resolutions
+if (resolution == "custom_multiple"){
+  fig_width_value = 15
+  fig_height_value = 12
+  ggsave(file = name, width = fig_width_value, height = fig_height_value, device = "png")
+} else if (resolution == "default_multiple") {
+  fig_width_value = 15
+  fig_height_value = 20
+  ggsave(file = name, width = fig_width_value, height = fig_height_value, device = "png")
+} else {}
+```
+
+The easiest way to understand this plot is to imagine that you are looking down on the clustering tree from above. The x and y axes are the chosen dimensions in the data and the z axis is the clustering resolution. Each cluster node is placed at the mean x and y values of the samples it contains. We can also see points corresponding to the individual samples.
+
+
+```{r echo=FALSE}
+detach(params)
+```
+
+\pagebreak
+
+# Session Info
+
+```{r echo=FALSE}
+sessionInfo()
+```
+
