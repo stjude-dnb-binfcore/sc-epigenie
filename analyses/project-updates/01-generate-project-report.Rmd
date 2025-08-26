@@ -160,7 +160,7 @@ if (file.exists(fastqc_overrepresented_results_file)) {
   # (Insert your processing or plotting code here)
 } else {
   # File does not exist – skip and inform
-  message("⚠️ Skipping overrepresented sequences plot: file not found.")
+  message("Skipping overrepresented sequences plot: file not found.")
 }
 
 cellranger_results_file <- file.path(cellranger_results_dir, "QC_Summary_CellRanger_Report.tsv")
@@ -231,7 +231,7 @@ if (file.exists(fastqc_overrepresented_results_file)) {
     dplyr::mutate(across(where(is.numeric), ~ round(., 2))) %>%
     dplyr::arrange(Sample)
   } else {
-    cat("⚠️ **Overrepresented sequences data not found.** Skipping this section.\n")
+    cat("**Overrepresented sequences data not found.** Skipping this section.\n")
 }
 ```
 
@@ -271,7 +271,7 @@ if (file.exists(fastqc_overrepresented_results_file)) {
   cat("  \n</div>  \n")
   cat("  \n\\pagebreak  \n")
   } else {
-    cat("⚠️ **Overrepresented sequences data not found.** Skipping this section.\n")
+    cat("**Overrepresented sequences data not found.** Skipping this section.\n")
 } 
 ```
 
