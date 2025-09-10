@@ -333,7 +333,7 @@ We will identify and rename the cells with low-quality or no assignments to `una
 
 ## Predicted cell types: scATAC-seq cells vs scRNA-seq cells
 
-We can then view the predicted cell types on a UMAP representation of the scATAC-seq data and find that the transferred labels are highly consistent with the UMAP structure.
+We can then visualize the predicted cell types on a UMAP representation of the scATAC-seq data. Ideally, the transferred labels should align well with the structure captured by the UMAP.
 
 ```{r plot-comparison, fig.width = 18, fig.height = 6, fig.fullwidth = TRUE, echo=TRUE}
 name <- paste0(plots_dir, "/", glue::glue("plot-scATAC-seq-cells-vs-scRNA-seq-cells.png"))
@@ -490,7 +490,7 @@ if (!is.null(condition_value3)) {
 
 Finally, to visualize all the cells together, we can co-embed the scRNA-seq and scATAC-seq cells in the same low dimensional space. Here, we use the same anchors used earlier to transfer cell type labels to impute RNA-seq values for the scATAC-seq cells. We then merge the measured and imputed scRNA-seq data and run a standard UMAP analysis to visualize all the cells together. Note that this step is for visualization purposes only and is not a necessary part of the data transfer analysis.
 
-Here we will also plot all cells colored by either their assigned cell type or their predicted cell type from the data transfer procedure. Upon inspection of the UMAP embeddings, several clusters of cells appeared to be unique to a single modality. For example, certain cell populations might be detected exclusively in the transcriptomic dataset and not in the chromatin accessibility data. This likely reflects biological differences, such as cell types with minimal or absent nuclear material, or those in which chromatin accessibility is decoupled from transcriptional activity. As such, these cells may not align well across modalities and are expected to appear only in one dataset.
+Here we will also plot all cells colored by either their assigned cell type or their predicted cell type from the data transfer procedure. Upon inspection of the UMAP embeddings, we may notice clusters of cells that appear to be unique to a single modality. For example, certain cell populations might be detected exclusively in the transcriptomic dataset and not in the chromatin accessibility data. This likely reflects biological differences, such as cell types with minimal or absent nuclear material, or those in which chromatin accessibility is decoupled from transcriptional activity. As such, these cells may not align well across modalities and would be expected to appear only in one dataset.
 
 ```{r co-embedding, fig.width = 18, fig.height = 6, fig.fullwidth = TRUE, echo=TRUE}
 coembed <- co_embedding_cells(reference_obj = rna_reference, seurat_obj.query = atac_query, transfer.anchors = transfer.anchors, group_by_variable = group_by_variable)
