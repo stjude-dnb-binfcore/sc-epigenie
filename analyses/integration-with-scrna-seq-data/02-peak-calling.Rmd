@@ -1,0 +1,541 @@
+---
+title: "Calling peaks per cell type analysis for sc-ATAC-Seq Analysis in 10X Genomics data"
+author: "Antonia Chroni for SJCRH DNB_BINF_Core"
+papersize: a4
+fontsize: 11pt
+links-as-notes: true
+output:
+  html_document:
+    toc: TRUE
+    toc_float: TRUE
+    df_print: paged
+    code_folding: hide
+    toc_depth: 2
+    highlight: tango
+    number_sections: TRUE
+  pdf_document:
+    toc: TRUE
+    highlight: tango
+    number_sections: TRUE
+    latex_engine: lualatex
+    keep_tex: FALSE
+    fig_caption: yes
+    fig_crop: no
+    fig_height: 2
+    fig_width: 3
+    toc_depth: 2
+always_allow_html: TRUE
+urlcolor: blue
+linkcolor: black
+citecolor: blue
+geometry: margin=1in
+header-includes: 
+  - \usepackage{titling}
+  - \usepackage{fancyhdr}
+  - \usepackage{graphicx}
+  - \usepackage{float}
+params:
+  assay: '.'
+  resolution_list: '.'
+  future_globals_value: '.'
+  n_value: '.'
+  genome_name: '.'
+  ident.1_value: '.'
+  condition: '.'
+  min.cutoff_value: '.'
+  OrgDb_value: '.'
+  top_n_value_peaks: '.'
+  root_dir: './'
+  PROJECT_NAME: '.'
+  PI_NAME: '.'
+  TASK_ID: '.'
+  PROJECT_LEAD_NAME: '.'
+  DEPARTMENT: '.'
+  LEAD_ANALYSTS: '.'
+  GROUP_LEAD: '.'
+  CONTACT_EMAIL: '.'
+  PIPELINE: '.'
+  START_DATE: '.'
+  COMPLETION_DATE: '.'
+---
+
+```{r logo-file, echo=FALSE}
+attach(params)
+# Insert logo on the top of the html report 
+logo_file <- file.path(root_dir, "figures", "img", "DNB-BINF-Core-logo.png")
+htmltools::img(src = knitr::image_uri(logo_file), alt = "logo", style = "position:absolute; top:0; left:0; padding:0px; height:120px;")
+detach(params)
+```
+
+\addtolength{\headheight}{2.0cm} 
+\fancypagestyle{plain}{} 
+\thispagestyle{fancy}
+\fancyhead[L]{\includegraphics[height=120px]{`r logo_file`}}
+\renewcommand{\headrulewidth}{0pt}
+
+<style type="text/css">
+:root {--DNB_BINF_Core_color: #00427B;}
+
+h1.title {margin-top: 130px;
+          margin-bottom: 25px;
+          font-size: 36px;}
+
+.nobullet li {list-style-type: none;}
+
+.reporthead {font-size: 20px;}
+
+body { /* Normal */
+  font-size: 16px;
+  font-style: Arial, Helvetica, sans-serif;}
+
+h1 {color: var(--DNB_BINF_Core_color);
+    font-size: 28px;
+    margin-top: 50px;}
+
+h2 {color: var(--DNB_BINF_Core_color);
+    font-size: 20px;}
+
+.list-group-item.active, .list-group-item.active:focus, .list-group-item.active:hover {
+  background-color: var(--DNB_BINF_Core_color);}
+</style>
+
+<a href="https://wiki.stjude.org/display/CAB">
+
+</a>
+
+\pagebreak
+
+<div class="reporthead"><br/>
+**PI: `r params$PI_NAME`**  
+**Project: `r params$PROJECT_NAME`**  
+Task: `r params$TASK_ID`  
+Project Lead(s): `r params$PROJECT_LEAD_NAME`  
+Department: `r params$DEPARTMENT`  
+
+<br />  
+
+DNB Bioinformatics Core Analysis Team: 
+<br />  
+
+>**Lead Analyst(s): `r params$LEAD_ANALYSTS`**  
+>Group Lead: `r params$GROUP_LEAD`  
+<br />
+>**Contact E-mail:** `r params$CONTACT_EMAIL`  
+>**DNB Bioinformatics Core Pipeline:** `r params$PIPELINE`  
+
+Date started: `r params$START_DATE`  
+Date completed:  `r params$COMPLETION_DATE`  
+Report generated: `r format(Sys.time(), '%H:%M:%S %Z %m/%d/%Y')` \
+
+Reviewed by: _____________________   Date: ____________ \
+</div>
+\pagebreak
+  
+# Information about this notebook
+
+For more information, please see the [Calling peaks](https://stuartlab.org/signac/articles/peak_calling) vignette.
+
+# Set up
+
+```{r load-library, echo=TRUE}
+attach(params)
+suppressPackageStartupMessages({
+  library(future)
+  library(tidyverse)
+  library(Seurat)
+  library(Signac)
+  library(knitr)
+  library(DT)
+  library(glue)
+
+  library(htmlwidgets)
+  library(clusterProfiler)
+
+  library(enrichplot)
+
+  library(org.Hs.eg.db)
+  library(org.Mm.eg.db) # Mouse gene annotation (use org.Hs.eg.db for human)
+  
+  library(data.table)
+  library(R.utils)
+  library(Rsamtools)
+
+  # Evaluate Seurat R expressions asynchronously when possible using future package
+  options(future.globals.maxSize = future_globals_value, future.rng.onMisuse = "ignore") 
+  plan(multisession, workers = parallelly::availableCores())
+}) 
+```
+
+# Directories and paths to file Inputs/Outputs
+
+```{r set-dir-and-file-names, echo=TRUE}
+analysis_dir <- file.path(root_dir, "analyses", "integration-with-scrna-seq-data") 
+data_dir <- file.path(root_dir, "analyses", "integration-with-scrna-seq-data", "results", "01_integration_with_scrna_seq_data")
+module_results_dir <- file.path(analysis_dir, "results")
+module_plots_dir <- file.path(analysis_dir, "plots")
+
+util_dir <- file.path(root_dir, "analyses", "cluster-cell-calling") 
+
+# Input files
+data_file <- file.path(data_dir, "seurat_obj_reference.rds")
+
+# Create results_dir
+results_dir <- file.path(module_results_dir, "02_peak_calling")
+if (!dir.exists(results_dir)) {
+  dir.create(results_dir)}
+
+# Create plots directory
+plots_dir <- file.path(module_plots_dir, "02_peak_calling") 
+if (!dir.exists(plots_dir)) {
+  dir.create(plots_dir)}
+
+coverage_plots_dir <- file.path(plots_dir, "coverage_plots") 
+if (!dir.exists(coverage_plots_dir)) {
+  dir.create(coverage_plots_dir)}
+
+go_plots_dir <- file.path(plots_dir, "go_plots") 
+if (!dir.exists(go_plots_dir)) {
+  dir.create(go_plots_dir)}
+
+# Source functions
+source(paste0(util_dir, "/util/run-clusterwise-GO-enrichment.R"))
+```
+
+```{r echo=FALSE, warning=FALSE}
+opts_chunk$set(fig.align='center',
+               external=TRUE,
+               echo=FALSE,
+               warning=FALSE,
+               fig.pos='H')
+a4width <- 8.3
+a4height <- 11.7
+```
+
+# Read seurat object
+
+First, we will use the seurat object as generated from the pipeline in the `integration-with-scrna-seq-data` module. 
+
+```{r read-object, echo=TRUE}
+seurat_obj <- readRDS(data_file)
+DefaultAssay(seurat_obj) <- assay
+
+Idents(seurat_obj) <- seurat_obj$predicted.id # Set Idents(seurat_obj) to match the group.by parameter you will use
+table(Idents(seurat_obj)) # View cell identities, get summary table
+```
+
+```{r process-data, echo=TRUE}
+metadata_dir <- yaml$metadata_dir
+metadata_file <- yaml$metadata_file
+project_metadata_file <- file.path(metadata_dir, metadata_file) # metadata input file
+
+project_metadata <- read.csv(project_metadata_file, sep = "\t", header = TRUE)
+sample_name <- unique(as.character(project_metadata$ID))
+sample_name <- sort(sample_name, decreasing = FALSE)
+print(sample_name)
+
+##############################################################
+# We need to rename the fragments files to match the naming in the cell barcodes of the seurat_obj
+# or the CallPeaks function wont detect any peaks due to the naming mismatch
+##############################################################
+# Skip if final processed files already exist
+all_files_exist <- all(sapply(sample_name, function(sample) {
+  input_path <- file.path(yaml$data_dir, sample, "outs")
+  fragments_gz <- file.path(input_path, "fragments.tsv.gz")
+  index_file <- paste0(fragments_gz, ".tbi")
+  file.exists(fragments_gz) && file.exists(index_file)
+}))
+
+if (all_files_exist) {
+  message("All processed fragment files and their indexes already exist. Skipping renaming and re-indexing step.")
+} else {
+  ##############################################################
+  # Rename barcodes in fragment files and re-compress
+  for (i in seq_along(sample_name)) {
+    sample <- sample_name[i]
+    input_path <- file.path(yaml$data_dir, sample, "outs")
+    fragments_gz <- file.path(input_path, "fragments.tsv.gz")
+    backup_fragments_gz <- file.path(input_path, "fragments_original.tsv.gz")
+    fragments_tmp <- file.path(input_path, "fragments.tsv")
+
+    # Backup original
+    if (!file.exists(backup_fragments_gz)) {
+      file.copy(fragments_gz, backup_fragments_gz)
+      message(paste("Backup created for sample:", sample))
+    } else {
+      message(paste("Backup already exists for sample:", sample))
+    }
+
+    # Unzip, modify, and rewrite
+    gunzip(fragments_gz, remove = FALSE, overwrite = TRUE)
+    dt <- data.table::fread(fragments_tmp, header = FALSE, sep = "\t")
+    dt[[4]] <- paste0(sample, ":", gsub("-1$", "", dt[[4]]))
+    dt <- dt[, 1:5]
+    data.table::fwrite(dt, fragments_tmp, sep = "\t", col.names = FALSE)
+    R.utils::gzip(fragments_tmp, destname = fragments_gz, overwrite = TRUE)
+
+    message(paste0("Processed fragments for sample: ", sample))
+  }
+
+  ##############################################################
+  # Backup and re-index
+  for (sample in sample_name) {
+    input_path <- file.path(yaml$data_dir, sample, "outs")
+    fragments_gz <- file.path(input_path, "fragments.tsv.gz")
+    fragments_tsv <- file.path(input_path, "fragments.tsv")
+    index_file <- paste0(fragments_gz, ".tbi")
+    backup_index_file <- file.path(input_path, "fragments-original.tsv.gz.tbi")
+
+    if (!file.exists(fragments_tsv)) {
+      R.utils::gunzip(fragments_gz, remove = FALSE, overwrite = TRUE)
+    }
+
+    if (file.exists(index_file) && !file.exists(backup_index_file)) {
+      file.rename(index_file, backup_index_file)
+      message("Backup created: ", backup_index_file)
+    } else if (file.exists(backup_index_file)) {
+      message("Backup index already exists: ", backup_index_file)
+    }
+
+    Rsamtools::bgzip(fragments_tsv, dest = fragments_gz, overwrite = TRUE)
+    Rsamtools::indexTabix(fragments_gz, format = "bed")
+  }
+}
+```
+
+```{r fragment-list, echo=TRUE}
+# Build a list of fragment file paths, one for each sample
+# These are the corrected .tsv.gz files where the barcodes were prefixed with the sample ID
+fragment_paths <- file.path(yaml$data_dir, sample_name, "outs", "fragments.tsv.gz")
+
+fragment_list <- mapply(function(sample, frag_path) {
+  # CORRECTED: use `sample`, not `sample_name`
+  matching_cells <- grep(paste0("^", sample, ":"), colnames(seurat_obj), value = TRUE)
+
+  CreateFragmentObject(path = frag_path, cells = matching_cells)
+}, sample_name, fragment_paths, SIMPLIFY = FALSE)
+
+# Assign the list of Fragment objects to the assay with the peaks
+seurat_obj[[assay]]@fragments <- fragment_list
+# lapply(Fragments(seurat_obj), function(x) x@path) # Optional: confirm it worked
+```
+
+# Calling Peaks (with MACS2) on grouped fragments by cell type
+
+We use the [`CallPeaks()`](https://stuartlab.org/signac/reference/callpeaks) function from the **Signac** package to identify open chromatin regions (peaks) across different cell types or clusters from the raw fragment data. This function:
+
+- Groups cells using a metadata column (here, `seurat_obj$predicted.id`)
+- Calls peaks on the fragment data for each group
+- Internally runs MACS2 to identify accessible chromatin regions
+
+
+```{r call-peaks, echo=TRUE}
+# Now call peaks on the Seurat object
+peaks <- CallPeaks(
+  object = seurat_obj,
+  group.by = "predicted.id")
+
+write.table(peaks, file = paste(results_dir, "/", "peaks_all.tsv", sep = ""), sep = "\t", quote = FALSE, row.names = FALSE)
+```
+
+## Interactive Table of Calling peaks by cell type
+
+The results are returned as a GRanges object, with an additional metadata column listing the cell types that each peak was identified in:
+
+```{r call-peaks-interactive-table, echo=TRUE}
+# Interactive Table
+datatable(as.data.frame(peaks), 
+          options = list(pageLength = 5, 
+                         autoWidth = TRUE, 
+                         server = TRUE), 
+          filter = "top")
+```
+
+## Visualizing Differentially Accessible Peaks for the `r assay` assay
+
+Next, we scale the accessibility data for the selected features and generate a heatmap showing the accessibility profiles across all cells. These peaks are the most enriched in accessibility per predicted.id and can highlight regulatory elements associated with specific cell states.
+
+``` {r plot-peaks, fig.width = 25, fig.height = 15, fig.fullwidth = TRUE, echo=TRUE, include=FALSE}
+seurat_obj <- ScaleData(seurat_obj)
+
+# Select top 100 most variable peaks (or any subset)
+top_peaks <- head(VariableFeatures(seurat_obj), 100)
+
+name <- paste0(plots_dir, "/", glue::glue("Heatmap_peaks.png"), sep = "")
+DoHeatmap(seurat_obj, features = top_peaks)  # or specify your own peaks
+ggsave(file = name, width = 25, height = 15, device = "png")
+```
+
+### Heatmap Visualization of Selected Peaks
+
+``` {r plot-peaks-subset, fig.width = 25, fig.height = 15, fig.fullwidth = TRUE, echo=TRUE}
+name <- paste0(plots_dir, "/", glue::glue("Heatmap_peaks_subset.png"), sep = "")
+print(DoHeatmap(subset(seurat_obj, downsample = 100), features = top_peaks))
+ggsave(file = name, width = 25, height = 15, device = "png")
+```
+
+
+# Find differentially accessible peaks between cell types 
+
+We aim to identify and visualize the top differentially accessible peaks (DAPs) for each cell type. To achieve this, we use the [FindAllMarkers](https://satijalab.org/seurat/reference/findallmarkers) function, which performs differential accessibility analysis across the cell types defined in the predicted.id metadata column. This allows us to highlight peaks that are specifically enriched in accessibility within each cell type compared to the others.
+
+```{r find-markers, echo=TRUE}
+# Get unique cell types from predicted.id
+cell_types <- unique(seurat_obj$predicted.id)
+
+# Find markers 
+# Try adjusting min.pct or logfc.threshold to be less stringent - useful for cases with groups of very few cells
+markers <- FindAllMarkers(seurat_obj, group.by = "predicted.id", only.pos = TRUE,
+                          min.pct = 0.1, logfc.threshold = 0.1,
+                          min.cells.group = 1)
+write.table(markers, file = paste(results_dir, "/", "markers_all.tsv", sep = ""), sep = "\t", quote = FALSE, row.names = FALSE)
+```
+
+```{r find-markers-interactive-table, echo=TRUE}
+# Interactive Table
+datatable(markers, 
+          options = list(pageLength = 5, 
+                         autoWidth = TRUE, 
+                         server = TRUE), 
+          filter = "top")
+```
+
+We will filter out and keep the first 3 top markers by cell type.
+
+```{r}
+top_markers <- markers %>% group_by(cluster) %>% top_n(n = 3, wt = avg_log2FC)
+print(top_markers)
+```
+
+```{r top-markers-interactive-table, echo=TRUE}
+# Interactive Table
+datatable(top_markers, 
+          options = list(pageLength = 5, 
+                         autoWidth = TRUE, 
+                         server = TRUE), 
+          filter = "top")
+```
+
+## Plotting genomic regions
+
+We will loop over each cell type and generate CoveragePlot by gene and marker. We can plot the frequency of Tn5 integration across regions of the genome for cells grouped by cluster, cell type, or any other metadata stored in the object for any genomic region using the [CoveragePlot()](https://stuartlab.org/signac/reference/coverageplot) function. These plots represent pseudo-bulk chromatin accessibility, where accessibility signal from all cells in a group is aggregated and visualized as a single track (thanks to Andrew Hill for giving the inspiration for this function in his excellent [blog post](https://andrewjohnhill.com/blog/2019/04/12/streamlining-scatac-seq-visualization-and-analysis/)). Alongside these accessibility tracks we can visualize other important information including gene annotation, peak coordinates, and genomic links (if they’re stored in the object). For more information, see [Plotting genomic regions](https://stuartlab.org/signac/articles/pbmc_vignette#plotting-genomic-regions) and [Visualization vignette](https://stuartlab.org/signac/articles/visualization).
+
+```{r coverage-plot, fig.width = 10, fig.height = 6, fig.fullwidth = TRUE, echo=TRUE}
+for (i in seq_len(nrow(top_markers))) {
+  gene <- top_markers$gene[i]
+  ct <- top_markers$cluster[i]
+  
+  message("Plotting ", gene, " for cell type ", ct)
+  
+  p <- CoveragePlot(
+    object = seurat_obj,
+    region = gene,
+    group.by = "predicted.id",
+    idents = ct,
+    ranges = peaks,
+    ranges.title = "MACS2",
+    assay = assay) 
+  
+  print(p)
+  
+  # Save the plot as PNG
+  plot_path <- file.path(coverage_plots_dir, paste0("CoveragePlot_", ct, "_", gene, ".png"))
+  ggsave(plot_path, plot = p, width = 10, height = 6)
+  
+  message("Saved plot to: ", plot_path)
+}
+```
+
+## Use shared marker peaks across cell types
+
+```{r coverage-plot-shared-peaks, fig.width = 10, fig.height = 6, fig.fullwidth = TRUE, echo=TRUE}
+# If `markers` contains DE peaks across cell types (from Signac peak assay)
+shared_peaks <- markers %>%
+  group_by(gene) %>%
+  summarize(n_groups = n_distinct(cluster)) %>%
+  filter(n_groups > 1) %>%
+  arrange(desc(n_groups))
+
+region_to_plot <- shared_peaks$gene[1]
+
+# Step 2: Select top N shared peaks (e.g., top 3)
+top_n_peaks <- head(shared_peaks$gene, 3)
+
+# Step 3: Loop over each shared peak and generate a CoveragePlot
+for (region_to_plot in top_n_peaks) {
+  
+  message("Plotting shared peak: ", region_to_plot)
+  
+  p <- CoveragePlot(
+    object = seurat_obj,
+    region = region_to_plot,
+    group.by = "predicted.id",  # show all groups in same plot
+    ranges = peaks,
+    ranges.title = "MACS2",
+    assay = assay  
+  )
+  
+  print(p)
+  # Save plot
+  plot_path <- file.path(coverage_plots_dir, paste0("CoveragePlot_all_cell_types_shared_genes_", region_to_plot, ".png"))
+  ggsave(plot_path, plot = p, width = 10, height = 6)
+  
+  message("Saved plot to: ", plot_path)
+}
+``` 
+
+# Peak coordinates
+
+Interpreting peak coordinates alone can be challenging. To gain functional insight, we use [ClosestFeature()](https://stuartlab.org/signac/reference/closestfeature) function to annotate each peak with its nearest gene.
+
+```{r find-closest-gene-peaks, echo=TRUE}
+closest_genes_list <- list()
+
+for (clust in unique(markers$cluster)) {
+  message("Processing cluster: ", clust)
+  
+  open_peaks <- markers %>%
+    filter(cluster == clust, avg_log2FC > 1) %>%
+    pull(gene)
+  
+  message("Number of open peaks before filtering: ", length(open_peaks))
+  
+  open_peaks <- open_peaks[open_peaks %in% rownames(seurat_obj[[assay]])]
+  
+  message("Number of open peaks after filtering: ", length(open_peaks))
+  
+  if (length(open_peaks) > 0) {
+    closest <- ClosestFeature(seurat_obj, regions = open_peaks)
+    closest <- closest %>% mutate(cluster = clust)
+    closest_genes_list[[as.character(clust)]] <- closest
+  } else {
+    message("No open peaks to process for cluster: ", clust)
+  }
+}
+
+# Combine all clusters into a single data frame and save to file
+closest_genes_all <- do.call(rbind, closest_genes_list)
+write.table(closest_genes_all, file = file.path(results_dir, "peak_called_in_wise_closest_genes.tsv"), sep = "\t", quote = FALSE, row.names = FALSE)
+```
+
+We can follow up these results by performing gene ontology (GO) enrichment analysis on the gene sets identified using [ClosestFeature()](https://stuartlab.org/signac/reference/closestfeature). Several R packages support this, including popular tools like GOstats and clusterProfiler.
+
+# Gene Ontology (GO) enrichment analysis using clusterProfiler
+
+In this step, we conduct Gene Ontology (GO) enrichment analysis to identify biological processes associated with cluster-specific accessible regions (e.g., differentially accessible peaks near genes). Using the [clusterProfiler](https://bioconductor.org/packages/devel/bioc/html/clusterProfiler.html) package, we assess whether any GO terms are significantly enriched among these gene sets. This approach helps interpret the functional implications of differential chromatin accessibility across clusters, i.e., predicted cell type.
+
+```{r go-clusterProfiler, fig.width = 15, fig.height = 8, fig.fullwidth = TRUE, echo=TRUE}
+ego_results <- run_clusterwise_GO_enrichment(closest_genes_all = closest_genes_all, OrgDb_value = OrgDb_value, plots_dir = go_plots_dir)
+```
+
+```{r echo=FALSE}
+detach(params)
+```
+
+\pagebreak
+
+# Session Info
+
+```{r echo=FALSE}
+sessionInfo()
+```
+
