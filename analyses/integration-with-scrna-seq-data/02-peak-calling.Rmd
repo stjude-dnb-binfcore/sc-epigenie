@@ -199,6 +199,8 @@ if (!dir.exists(go_plots_dir)) {
 
 # Source functions
 source(paste0(util_dir, "/util/run-clusterwise-GO-enrichment.R"))
+source(paste0(analysis_dir, "/util/function_process_fragments.R"))
+
 ```
 
 ```{r echo=FALSE, warning=FALSE}
@@ -223,7 +225,7 @@ Idents(seurat_obj) <- seurat_obj$predicted.id # Set Idents(seurat_obj) to match 
 table(Idents(seurat_obj)) # View cell identities, get summary table
 ```
 
-```{r process-data, echo=TRUE}
+```{r read-project-metadata, echo=TRUE}
 metadata_dir <- yaml$metadata_dir
 metadata_file <- yaml$metadata_file
 project_metadata_file <- file.path(metadata_dir, metadata_file) # metadata input file
@@ -232,83 +234,22 @@ project_metadata <- read.csv(project_metadata_file, sep = "\t", header = TRUE)
 sample_name <- unique(as.character(project_metadata$ID))
 sample_name <- sort(sample_name, decreasing = FALSE)
 print(sample_name)
-
-##############################################################
-# We need to rename the fragments files to match the naming in the cell barcodes of the seurat_obj
-# or the CallPeaks function wont detect any peaks due to the naming mismatch
-##############################################################
-# Skip if final processed files already exist
-all_files_exist <- all(sapply(sample_name, function(sample) {
-  input_path <- file.path(yaml$data_dir, sample, "outs")
-  fragments_gz <- file.path(input_path, "fragments.tsv.gz")
-  index_file <- paste0(fragments_gz, ".tbi")
-  file.exists(fragments_gz) && file.exists(index_file)
-}))
-
-if (all_files_exist) {
-  message("All processed fragment files and their indexes already exist. Skipping renaming and re-indexing step.")
-} else {
-  ##############################################################
-  # Rename barcodes in fragment files and re-compress
-  for (i in seq_along(sample_name)) {
-    sample <- sample_name[i]
-    input_path <- file.path(yaml$data_dir, sample, "outs")
-    fragments_gz <- file.path(input_path, "fragments.tsv.gz")
-    backup_fragments_gz <- file.path(input_path, "fragments_original.tsv.gz")
-    fragments_tmp <- file.path(input_path, "fragments.tsv")
-
-    # Backup original
-    if (!file.exists(backup_fragments_gz)) {
-      file.copy(fragments_gz, backup_fragments_gz)
-      message(paste("Backup created for sample:", sample))
-    } else {
-      message(paste("Backup already exists for sample:", sample))
-    }
-
-    # Unzip, modify, and rewrite
-    gunzip(fragments_gz, remove = FALSE, overwrite = TRUE)
-    dt <- data.table::fread(fragments_tmp, header = FALSE, sep = "\t")
-    dt[[4]] <- paste0(sample, ":", gsub("-1$", "", dt[[4]]))
-    dt <- dt[, 1:5]
-    data.table::fwrite(dt, fragments_tmp, sep = "\t", col.names = FALSE)
-    R.utils::gzip(fragments_tmp, destname = fragments_gz, overwrite = TRUE)
-
-    message(paste0("Processed fragments for sample: ", sample))
-  }
-
-  ##############################################################
-  # Backup and re-index
-  for (sample in sample_name) {
-    input_path <- file.path(yaml$data_dir, sample, "outs")
-    fragments_gz <- file.path(input_path, "fragments.tsv.gz")
-    fragments_tsv <- file.path(input_path, "fragments.tsv")
-    index_file <- paste0(fragments_gz, ".tbi")
-    backup_index_file <- file.path(input_path, "fragments-original.tsv.gz.tbi")
-
-    if (!file.exists(fragments_tsv)) {
-      R.utils::gunzip(fragments_gz, remove = FALSE, overwrite = TRUE)
-    }
-
-    if (file.exists(index_file) && !file.exists(backup_index_file)) {
-      file.rename(index_file, backup_index_file)
-      message("Backup created: ", backup_index_file)
-    } else if (file.exists(backup_index_file)) {
-      message("Backup index already exists: ", backup_index_file)
-    }
-
-    Rsamtools::bgzip(fragments_tsv, dest = fragments_gz, overwrite = TRUE)
-    Rsamtools::indexTabix(fragments_gz, format = "bed")
-  }
-}
 ```
 
-```{r fragment-list, echo=TRUE}
+```{r process-data, echo=TRUE}
+# Example YAML
+yaml_files <- list(metadata_dir = yaml$metadata_dir, metadata_file = yaml$metadata_file, data_dir = yaml$data_dir)
+
+# Run
+process_fragments(yaml_files)
+```
+
+```{r create-fragment-list, echo=TRUE}
 # Build a list of fragment file paths, one for each sample
 # These are the corrected .tsv.gz files where the barcodes were prefixed with the sample ID
 fragment_paths <- file.path(yaml$data_dir, sample_name, "outs", "fragments.tsv.gz")
 
 fragment_list <- mapply(function(sample, frag_path) {
-  # CORRECTED: use `sample`, not `sample_name`
   matching_cells <- grep(paste0("^", sample, ":"), colnames(seurat_obj), value = TRUE)
 
   CreateFragmentObject(path = frag_path, cells = matching_cells)
@@ -415,7 +356,7 @@ datatable(top_markers,
           filter = "top")
 ```
 
-## Plotting genomic regions
+## Plotting genomic regions across cell types
 
 We will loop over each cell type and generate CoveragePlot by gene and marker. We can plot the frequency of Tn5 integration across regions of the genome for cells grouped by cluster, cell type, or any other metadata stored in the object for any genomic region using the [CoveragePlot()](https://stuartlab.org/signac/reference/coverageplot) function. These plots represent pseudo-bulk chromatin accessibility, where accessibility signal from all cells in a group is aggregated and visualized as a single track (thanks to Andrew Hill for giving the inspiration for this function in his excellent [blog post](https://andrewjohnhill.com/blog/2019/04/12/streamlining-scatac-seq-visualization-and-analysis/)). Alongside these accessibility tracks we can visualize other important information including gene annotation, peak coordinates, and genomic links (if they’re stored in the object). For more information, see [Plotting genomic regions](https://stuartlab.org/signac/articles/pbmc_vignette#plotting-genomic-regions) and [Visualization vignette](https://stuartlab.org/signac/articles/visualization).
 
@@ -445,7 +386,7 @@ for (i in seq_len(nrow(top_markers))) {
 }
 ```
 
-## Use shared marker peaks across cell types
+## Plotting shared genomic regions across cell types
 
 ```{r coverage-plot-shared-peaks, fig.width = 10, fig.height = 6, fig.fullwidth = TRUE, echo=TRUE}
 # If `markers` contains DE peaks across cell types (from Signac peak assay)
