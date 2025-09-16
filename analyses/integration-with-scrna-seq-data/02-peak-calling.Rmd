@@ -291,9 +291,9 @@ datatable(as.data.frame(peaks),
           filter = "top")
 ```
 
-## Visualizing Differentially Accessible Peaks for the `r assay` assay
+## Visualizing Highly Variable Peaks for the `r assay` assay
 
-Next, we scale the accessibility data for the selected features and generate a heatmap showing the accessibility profiles across all cells. These peaks are the most enriched in accessibility per predicted.id and can highlight regulatory elements associated with specific cell states.
+Next, we scale the accessibility data for the selected features and generate a heatmap showing the accessibility profiles across all cells. Here, we select the top variable peaks (based on variability across cells), which can highlight regulatory elements that distinguish different cell states.
 
 ``` {r plot-peaks, fig.width = 25, fig.height = 15, fig.fullwidth = TRUE, echo=TRUE, include=FALSE}
 seurat_obj <- ScaleData(seurat_obj)
@@ -315,7 +315,7 @@ ggsave(file = name, width = 25, height = 15, device = "png")
 ```
 
 
-# Find differentially accessible peaks between cell types 
+# Find Differentially Accessible Peaks between cell types 
 
 We aim to identify and visualize the top differentially accessible peaks (DAPs) for each cell type. To achieve this, we use the [FindAllMarkers](https://satijalab.org/seurat/reference/findallmarkers) function, which performs differential accessibility analysis across the cell types defined in the predicted.id metadata column. This allows us to highlight peaks that are specifically enriched in accessibility within each cell type compared to the others.
 
