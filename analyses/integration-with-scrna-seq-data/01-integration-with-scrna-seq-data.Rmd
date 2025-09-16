@@ -199,7 +199,7 @@ a4height <- 11.7
 
 # Read seurat object
 
-First, we will use the `gene activity matrix` object as generated from the pipeline in the `input_data` module. As a QC step, we will also filter out all cells here with fewer than `r nfeatures_value` total counts in the scATAC-seq data.
+First, we load the scATAC-seq query object, which contains a pre-computed gene activity matrix from the `input_data` module. We set the default assay to `"RNA"` so that gene activity values can be directly compared with the scRNA-seq reference. As a preprocessing step, we also identify the most variable genes, which will be used for integration.
 
 ```{r read-object, echo=TRUE}
 atac_query <- readRDS(data_file)

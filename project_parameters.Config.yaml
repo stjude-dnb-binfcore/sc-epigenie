@@ -137,6 +137,19 @@ ident.1_value: 1 # Run differential testing between cluster 1 vs. all others (de
 OrgDb_value: "org.Mm.eg.db"   # Options for gene annotation: (1) Human: "org.Hs.eg.db"; (2) Mouse: "org.Mm.eg.db"
 top_n_value_peaks: 1 # Number of top peaks per cluster to plot. Start with top_n_value = 1 to quickly generate results and check if the plots look good. If you want deeper analysis and have time/resources, increase to 3 or more. Often 3 is a good balance between thoroughness and efficiency - top_n_value = 3 (or higher) means you plot more peaks per cluster.
 
+# `./analyses/integration-with-scrna-seq-data`
+module_with_input_data: "cluster-cell-calling" # Options: "cluster-cell-calling" or "cell-contamination-removal-analysis"
+input_data_folder_name: "02_create_gene_activity_matrix" # Options: "02_create_gene_activity_matrix" or "03_cluster_cell_calling" if the data are coming from the `cell-contamination-removal-analysis` module
+reduction_value_annotation_module: "umap" # Options: For seurat and harmony use: "umap"; For Liger: "glue::glue("{integration_method}")" or "umapndim30nn30" (for cohorts with a single sample or any other name based on the values used for `num_dim_seurat_qc` and `num_neighbors_seurat_qc`.
+assay_annotation_module: "peaks" # Options: "peaks" (default ALWAYS)
+nfeatures_value_module: 5000 # Options: 5000 (default). This is a a preprocessing step to identify the most variable genes, which will be used for integration.  You may need to modify the threshold for your experiment.
+ct_palette_file_value: "cell_types_palette.tsv"  # File name with the cell types. It needs to be in `tsv` format. Please ensure cell type names exist and match the ones in the `.figures/palettes/cell_types_palette.tsv`. Alternatively, create a tsv file with your own palette and add it to the `.figures/palettes/` folder. 
+group_by_variable_module: "seq_technology_assay" # Set column name from metadata that indicates the assay used RNA vs ATAC. This will be used for the `01-integration-with-scrna-seq-data.Rmd` in the `co-embedding-cells` process.
+
+reference_dir_annotation_module: "./sc-rna-seq-snap/analyses/cell-types-annotation/results/cell_types_annotations_all" # absolute path to the directory from the sc-rna-seq project analysis (e.g., sc-rna-seq-snap) that contains the results from the cell type annotation module.
+reference_file_name_annotation_module: "seurat_obj_cell_types_annotations_all.rds" # File name with the object that contains the cell type annotation. It needs to be in `rds` format.
+celltype_reference_module: "predicted.cell.signature.ident" # Column name from the reference object to be used to transfer labels
+
 # `./analyses/project-updates`
 results_filepath: "./" # Absolute path to the dir where local fork repo lives
 mac_results_filepath: "./" # Absolute path to the dir where local fork repo lives
