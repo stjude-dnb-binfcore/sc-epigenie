@@ -141,9 +141,12 @@ Important Considerations:
 ```
 ├── analyses
 |  ├── cellranger-analysis
+|  ├── cluster-cell-calling
 |  ├── fastqc-analysis
-|  ├── upstream-analysis
-|  └── README.md
+|  ├── integrative-analysis
+|  ├── project-updates
+|  ├── README.md
+|  └── upstream-analysis
 ├── data
 ├── figures
 ├── LICENSE
