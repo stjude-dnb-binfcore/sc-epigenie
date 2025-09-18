@@ -60,7 +60,7 @@ suppressPackageStartupMessages({
   library(cowplot)
   library(data.table)
   library(flexmix)
-  library(flextable)
+  #library(flextable)
   library(forcats)
   library(fs)
   library(future)
@@ -91,7 +91,7 @@ suppressPackageStartupMessages({
   library(SeuratObject)
   library(SeuratWrappers)
   library(shiny)
-  #library(Signac)
+  library(Signac)
   library(SoupX)
   library(stringr)
   library(tidytext)
@@ -131,8 +131,8 @@ suppressPackageStartupMessages({
   #library(motifmatchr)
   library(BSgenome.Hsapiens.UCSC.hg19)
   
-  #library(monocle3)
-  #library(cicero)
+  library(monocle3)
+  library(cicero)
   library(biovizBase)
   library(clusterProfiler)
   ####################################################

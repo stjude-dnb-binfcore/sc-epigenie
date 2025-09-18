@@ -41,8 +41,11 @@ module load singularity/4.1.1
 1. Pull the singularity container from the `sc-epigenie` root_dir
 
 ```
-singularity pull docker://achronistjude/rstudio_4.4.0_seurat_4.4.0_signac_1.14.9:latest
+singularity pull docker://achronistjude/singlecell-r4.4-seurat4.4-signac1.14:latest
+
 ```
+
+
 
 
 ### 4. Start the Singularity Container

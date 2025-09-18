@@ -19,5 +19,5 @@ export APPTAINERENV_RSTUDIO_SESSION_TIMEOUT=0
 export APPTAINERENV_USER=$(id -un)
 
 singularity exec --cleanenv -c -W ${workdir}/${version} \
-                 --bind .:/home/$USER,/research:/research,/hpcf:/hpcf,${workdir}/${version}/run:/run,${workdir}/${version}/tmp:/tmp,${workdir}/database.conf:/etc/rstudio/database.conf,${workdir}/${version}/var/lib/rstudio-server:/var/lib/rstudio-server rstudio_4.4.0_seurat_4.4.0_signac_1.14.9_latest.sif \
+                 --bind .:/home/$USER,/research:/research,/hpcf:/hpcf,${workdir}/${version}/run:/run,${workdir}/${version}/tmp:/tmp,${workdir}/database.conf:/etc/rstudio/database.conf,${workdir}/${version}/var/lib/rstudio-server:/var/lib/rstudio-server singlecell-r4.4-seurat4.4-signac1.14_latest.sif \
   /bin/bash
