@@ -53,14 +53,12 @@ suppressPackageStartupMessages({
   library(infercnv)
   
   library(scooter)
-  #library(RcppPlanc)
   library(numbat)
 
   library(clustree)
   library(cowplot)
   library(data.table)
   library(flexmix)
-  #library(flextable)
   library(forcats)
   library(fs)
   library(future)
@@ -84,7 +82,6 @@ suppressPackageStartupMessages({
   library(purrr)
   library(RColorBrewer)
   library(reshape2)
-  #library(rliger)
   library(rlist)
   library(R.utils)
   library(Seurat)
@@ -117,24 +114,30 @@ suppressPackageStartupMessages({
   library(Matrix)
   library(htmlwidgets)
 
-  library(enrichplot)
 
   library(org.Hs.eg.db)
   library(org.Mm.eg.db) # Mouse gene annotation (use org.Hs.eg.db for human)
   
   # Motif analysis with Signac
   library(JASPAR2020)
-  #library(TFBSTools)
+  library(TFBSTools)
   library(BSgenome.Mmusculus.UCSC.mm10)
   
   # Transcription factor footprinting
-  #library(motifmatchr)
   library(BSgenome.Hsapiens.UCSC.hg19)
   
   library(monocle3)
   library(cicero)
   library(biovizBase)
   library(clusterProfiler)
+  ####################################################
+  
+  # Troubleshooting #
+  library(flextable)
+  library(rliger)
+  library(RcppPlanc)
+  library(enrichplot)
+  library(motifmatchr)
   ####################################################
   
 })
