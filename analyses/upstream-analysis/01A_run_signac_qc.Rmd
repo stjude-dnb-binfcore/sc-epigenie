@@ -350,6 +350,7 @@ Note that the last three metrics can be obtained from the output of CellRanger (
 ```{r add-qc-metrics, echo=TRUE}
 cat("Generating QC metrics for sample", sample_name[i], "\n")
 seurat_obj <- create_qc_metrics(seurat_obj = seurat_obj)
+head(seurat_obj@meta.data)
 ```
 
 # Plotting QC metrics before filtering
@@ -409,13 +410,13 @@ p <- print(VlnPlot(object = seurat_obj,
 ggsave(file = name, width = 15, height = 6, device = "png")
 ```
 
-```{r vln-plot-before-filtering-2, fig.width = 15, fig.height = 6, fig.fullwidth = TRUE, echo=TRUE}
+```{r vln-plot-before-filtering-2, fig.width = 25, fig.height = 6, fig.fullwidth = TRUE, echo=TRUE}
 name <- paste0(plots_dir, "/", glue::glue("04-vln-plot-before-filtering-2.png"))
 p <- print(VlnPlot(object = seurat_obj,
-                   features = c("pct_reads_in_peaks", "peak_region_fragments", "mitochondrial", "duplicate"),
-                     #"pct_reads_in_peaks_promoters", "pct_reads_in_peaks_enhancers", 
-                   pt.size = 0.1, ncol = 4) + plot_annotation(title = glue::glue("Before-filtering: {sample_name[i]}")))
-ggsave(file = name, width = 15, height = 6, device = "png")
+                   features = c("pct_reads_in_peaks", "peak_region_fragments", "mitochondrial", "duplicate",
+                     "pct_reads_in_peaks_promoters", "pct_reads_in_peaks_enhancers"), 
+                   pt.size = 0.1, ncol = 6) + plot_annotation(title = glue::glue("Before-filtering: {sample_name[i]}")))
+ggsave(file = name, width = 25, height = 6, device = "png")
 ```
 
 # Save object before filtering
@@ -461,15 +462,13 @@ p <- print(VlnPlot(object = seurat_obj,
 ggsave(file = name, width = 15, height = 6, device = "png")
 ```
 
-```{r vln-plot-after-filtering-2, fig.width = 15, fig.height = 6, fig.fullwidth = TRUE, echo=TRUE}
+```{r vln-plot-after-filtering-2, fig.width = 25, fig.height = 6, fig.fullwidth = TRUE, echo=TRUE}
 name <- paste0(plots_dir, "/", glue::glue("06-vln-plot-after-filtering-2.png"))
 p <- print(VlnPlot(object = seurat_obj,
-        features = c("pct_reads_in_peaks", "peak_region_fragments", "mitochondrial", "duplicate"
-                     #"pct_reads_in_peaks_promoters", "pct_reads_in_peaks_enhancers", 
-                     ),
-        pt.size = 0.1, ncol = 4) + 
-             plot_annotation(title = glue::glue("After-filtering: {sample_name[i]}")))
-ggsave(file = name, width = 15, height = 6, device = "png")
+        features = c("pct_reads_in_peaks", "peak_region_fragments", "mitochondrial", "duplicate",
+                     "pct_reads_in_peaks_promoters", "pct_reads_in_peaks_enhancers"),
+        pt.size = 0.1, ncol = 4) + plot_annotation(title = glue::glue("After-filtering: {sample_name[i]}")))
+ggsave(file = name, width = 25, height = 6, device = "png")
 ```
 
 # Processing Seurat object after filtering

@@ -26,8 +26,8 @@ create_qc_metrics <- function(seurat_obj) {
   seurat_obj$pct_reads_in_peaks <- seurat_obj$peak_region_fragments / seurat_obj$passed_filters * 100
   
   # https://support.10xgenomics.com/single-cell-atac/software/pipelines/latest/output/singlecell
-  #seurat_obj$pct_reads_in_peaks_promoters <- seurat_obj$promoter_region_fragments / seurat_obj$passed_filters * 100
-  #seurat_obj$pct_reads_in_peaks_enhancers <- seurat_obj$enhancer_region_fragments / seurat_obj$passed_filters * 100
+  seurat_obj$pct_reads_in_peaks_promoters <- seurat_obj$promoter_region_fragments / seurat_obj$passed_filters * 100
+  seurat_obj$pct_reads_in_peaks_enhancers <- seurat_obj$enhancer_region_fragments / seurat_obj$passed_filters * 100
   
   # Add more QC
   seurat_obj$high.tss <- ifelse(seurat_obj$TSS.enrichment > 2, 'High', 'Low')
