@@ -339,6 +339,15 @@ We can now compute some QC metrics for the scATAC-seq experiment. We currently s
 
 - **Transcriptional start site (TSS) enrichment score**: The [ENCODE project](https://www.encodeproject.org/data-standards/terms/) has defined an ATAC-seq targeting score based on the ratio of fragments centered at the TSS to fragments in TSS-flanking regions. Poor ATAC-seq experiments typically will have a low TSS enrichment score. We can compute this metric for each cell with the TSSEnrichment() function, and the results are stored in metadata under the column name TSS.enrichment.
 
+
+- **Ratio reads in peaks promoters**: Promoter regions represent the proximal regulatory elements of genes, typically defined as windows surrounding transcription start sites (TSS). A high proportion of reads mapping to promoter peaks indicates strong accessibility signal at gene promoters, which is often associated with well-positioned transcriptional regulation. Conversely, very low promoter accessibility relative to total peak counts may reflect poor data quality or cell states with globally reduced promoter activity. 
+
+    - Interpretation guidance: While the exact range is experiment-dependent, cells with extremely low fractions (e.g., <5–10%) may represent low-quality libraries or non-regulatory fragments. Cells with abnormally high fractions may reflect technical artifacts or over-restriction of accessible regions to promoters.
+
+- **Ratio reads in peaks enhancers**: Enhancer regions are distal regulatory elements that contribute to context-specific gene regulation. Reads mapping to enhancer peaks provide information about cell type–specific regulatory programs and can complement promoter accessibility profiles. A balanced proportion of enhancer accessibility is expected in high-quality single-cell chromatin data, depending on the cell type and assay. Excessively low fractions may suggest limited capture of distal elements, while unusually high fractions may reflect biased enrichment. 
+
+    - Interpretation guidance: Cells with near-zero enhancer fractions often indicate poor sensitivity or data quality. On the other hand, enhancer fractions that dominate total peak accessibility (e.g., >80–90%) may signal technical bias or contamination. Typical distributions vary by tissue and cell type, so thresholds should be chosen relative to dataset-specific quality profiles.
+
 - **Total number of fragments in peaks**: A measure of cellular sequencing depth / complexity. Cells with very few reads may need to be excluded due to low sequencing depth. Cells with extremely high levels may represent doublets, nuclei clumps, or other artefacts.
 
 - **Fraction of fragments in peaks**: Represents the fraction of all fragments that fall within ATAC-seq peaks. Cells with low values (i.e. <15-20%) often represent low-quality cells or technical artifacts that should be removed. Note that this value can be sensitive to the set of peaks used.
@@ -350,7 +359,6 @@ Note that the last three metrics can be obtained from the output of CellRanger (
 ```{r add-qc-metrics, echo=TRUE}
 cat("Generating QC metrics for sample", sample_name[i], "\n")
 seurat_obj <- create_qc_metrics(seurat_obj = seurat_obj)
-head(seurat_obj@meta.data)
 ```
 
 # Plotting QC metrics before filtering
