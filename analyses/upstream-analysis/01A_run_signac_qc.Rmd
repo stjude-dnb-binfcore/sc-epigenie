@@ -467,7 +467,7 @@ name <- paste0(plots_dir, "/", glue::glue("06-vln-plot-after-filtering-2.png"))
 p <- print(VlnPlot(object = seurat_obj,
         features = c("pct_reads_in_peaks", "peak_region_fragments", "mitochondrial", "duplicate",
                      "pct_reads_in_peaks_promoters", "pct_reads_in_peaks_enhancers"),
-        pt.size = 0.1, ncol = 4) + plot_annotation(title = glue::glue("After-filtering: {sample_name[i]}")))
+        pt.size = 0.1, ncol = 6) + plot_annotation(title = glue::glue("After-filtering: {sample_name[i]}")))
 ggsave(file = name, width = 25, height = 6, device = "png")
 ```
 
