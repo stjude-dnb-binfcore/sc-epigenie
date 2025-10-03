@@ -50,7 +50,6 @@ RUN apt-get -y install cmake libhdf5-dev
 RUN apt-get update && \
     apt-get install -y openjdk-8-jre-headless fastqc curl
 
-
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Upgrade pip and install Python deps
@@ -62,17 +61,35 @@ RUN pip install --no-cache-dir --upgrade pip && \
       leidenalg \
       multiqc==1.25 \
       macs3==3.0.0a7
-    
- 
-
 
 # -------------------------------------------------------------------
 # R setup
 # -------------------------------------------------------------------
-RUN echo "options(repos = c(CRAN = 'https://packagemanager.posit.co/cran/__linux__/jammy/latest'))" >> /usr/local/lib/R/etc/Rprofile.site
 
-# Core R package managers
-RUN Rscript -e 'install.packages(c("BiocManager","devtools","remotes","usethis"))'
+# install unix utils required by R libraries and not already installed above
+# Needed for R libraries
+RUN apt-get update && apt-get install -y libfontconfig1-dev \
+    libharfbuzz-dev \
+    libfribidi-dev \
+    libfreetype6-dev \
+    libpng-dev \
+    libtiff5-dev \
+    libjpeg-dev \
+    libcairo2-dev \
+    libxml2-dev \
+    libgsl-dev \
+    libgit2-dev \
+    libudunits2-dev \
+    libgdal-dev \
+    gdal-bin \
+    libhdf5-dev \
+    g++ \
+    git \
+    libboost-all-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+## Core R package managers
+RUN Rscript -e 'install.packages(c("BiocManager","devtools","usethis"))'
 
 # Pin Bioconductor version to 3.20
 RUN Rscript -e 'BiocManager::install(version="3.20")'
@@ -80,80 +97,152 @@ RUN Rscript -e 'BiocManager::install(version="3.20")'
 # -------------------------------------------------------------------
 # R packages: core dependencies
 # -------------------------------------------------------------------
-RUN Rscript -e 'BiocManager::install(c( \
-  "celldex","infercnv","scDblFinder","numbat","miQC","scater", \
-  "SingleCellExperiment","SingleR","ggbio","TxDb.Hsapiens.UCSC.hg19.knownGene", \
-  "org.Hs.eg.db","org.Mm.eg.db", \
-  "BSgenome.Hsapiens.UCSC.hg19","EnsDb.Hsapiens.v75", \
-  "BSgenome.Hsapiens.UCSC.hg38","EnsDb.Hsapiens.v86", \
-  "BSgenome.Mmusculus.UCSC.mm10","EnsDb.Mmusculus.v79", \
-  "JASPAR2020"), ask=FALSE, update=FALSE, verbose=TRUE)'
 
+# install dependencies from Guangchuang Yu's lab dependencies and libraries
+RUN Rscript -e 'remotes::install_version("ggplot2", version = "3.5.0", repos="https://packagemanager.posit.co/cran/__linux__/jammy/latest")'
+RUN Rscript -e 'install.packages("yulab.utils", repos="https://packagemanager.posit.co/cran/__linux__/jammy/latest")'
+RUN Rscript -e 'install.packages("ggfun", repos="https://packagemanager.posit.co/cran/__linux__/jammy/latest")'
+RUN Rscript -e 'install.packages("ggtangle", repos="https://packagemanager.posit.co/cran/__linux__/jammy/latest")'
+RUN Rscript -e 'BiocManager::install("enrichplot", ask=FALSE, update=FALSE, verbose=TRUE)'
+#RUN Rscript -e 'BiocManager::install("DOSE", ask=FALSE, update=FALSE, verbose=TRUE)'
+#RUN Rscript -e 'BiocManager::install("ggtree", ask=FALSE, update=FALSE, verbose=TRUE)'
+RUN Rscript -e 'BiocManager::install("clusterProfiler", ask=FALSE, update=FALSE, verbose=TRUE)'
 
+# install bioconductor packages
+RUN Rscript -e 'install.packages("matrixStats", repos="https://packagemanager.posit.co/cran/__linux__/jammy/latest")'
+RUN Rscript -e 'BiocManager::install("celldex", ask=FALSE, update=FALSE, verbose=TRUE)'
+RUN Rscript -e 'BiocManager::install("infercnv", ask=FALSE, update=FALSE, verbose=TRUE)'
+RUN Rscript -e 'BiocManager::install("scDblFinder", ask=FALSE, update=FALSE, verbose=TRUE)'
+RUN Rscript -e 'BiocManager::install("numbat", ask=FALSE, update=FALSE, verbose=TRUE)'
+RUN Rscript -e 'BiocManager::install("miQC", ask=FALSE, update=FALSE, verbose=TRUE)'
+RUN Rscript -e 'BiocManager::install("scater", ask=FALSE, update=FALSE, verbose=TRUE)'
+#RUN Rscript -e 'BiocManager::install("SingleCellExperiment", ask=FALSE, update=FALSE, verbose=TRUE)'
+RUN Rscript -e 'BiocManager::install("SingleR", ask=FALSE, update=FALSE, verbose=TRUE)'
+RUN Rscript -e 'BiocManager::install("ggbio", ask=FALSE, update=FALSE, verbose=TRUE)'
+RUN Rscript -e 'BiocManager::install("TxDb.Hsapiens.UCSC.hg19.knownGene", ask=FALSE, update=FALSE, verbose=TRUE)'
+RUN Rscript -e 'BiocManager::install("org.Hs.eg.db", ask=FALSE, update=FALSE, verbose=TRUE)'
+RUN Rscript -e 'BiocManager::install("org.Mm.eg.db", ask=FALSE, update=FALSE, verbose=TRUE)'
+RUN Rscript -e 'BiocManager::install("BSgenome.Hsapiens.UCSC.hg19", ask=FALSE, update=FALSE, verbose=TRUE)'
+RUN Rscript -e 'BiocManager::install("EnsDb.Hsapiens.v75", ask=FALSE, update=FALSE, verbose=TRUE)'
+RUN Rscript -e 'BiocManager::install("BSgenome.Hsapiens.UCSC.hg38", ask=FALSE, update=FALSE, verbose=TRUE)'
+RUN Rscript -e 'BiocManager::install("EnsDb.Hsapiens.v86", ask=FALSE, update=FALSE, verbose=TRUE)'
+RUN Rscript -e 'BiocManager::install("BSgenome.Mmusculus.UCSC.mm10", ask=FALSE, update=FALSE, verbose=TRUE)'
+RUN Rscript -e 'BiocManager::install("EnsDb.Mmusculus.v79", ask=FALSE, update=FALSE, verbose=TRUE)'
+RUN Rscript -e 'BiocManager::install("JASPAR2020", ask=FALSE, update=FALSE, verbose=TRUE)'
+#RUN Rscript -e 'BiocManager::install("GOSemSim", ask=FALSE, update=FALSE, verbose=TRUE)'
+#RUN Rscript -e 'BiocManager::install("ggfun", ask=FALSE, update=FALSE, verbose=TRUE)'
+#RUN Rscript -e 'BiocManager::install("ggnewscale", ask=FALSE, update=FALSE, verbose=TRUE)'
+#RUN Rscript -e 'BiocManager::install("ggplot2", ask=FALSE, update=FALSE, verbose=TRUE)'
+#RUN Rscript -e 'BiocManager::install("ggrepel", ask=FALSE, update=FALSE, verbose=TRUE)'
+#RUN Rscript -e 'BiocManager::install("ggtangle", ask=FALSE, update=FALSE, verbose=TRUE)'
+#RUN Rscript -e 'BiocManager::install("igraph", ask=FALSE, update=FALSE, verbose=TRUE)'
+#RUN Rscript -e 'BiocManager::install("magrittr", ask=FALSE, update=FALSE, verbose=TRUE)'
+#RUN Rscript -e 'BiocManager::install("plyr", ask=FALSE, update=FALSE, verbose=TRUE)'
+#RUN Rscript -e 'BiocManager::install("purrr", ask=FALSE, update=FALSE, verbose=TRUE)'
+#RUN Rscript -e 'BiocManager::install("RColorBrewer", ask=FALSE, update=FALSE, verbose=TRUE)'
+#RUN Rscript -e 'BiocManager::install("reshape2", ask=FALSE, update=FALSE, verbose=TRUE)'
+#RUN Rscript -e 'BiocManager::install("rlang", ask=FALSE, update=FALSE, verbose=TRUE)'
+#RUN Rscript -e 'BiocManager::install("scatterpie", ask=FALSE, update=FALSE, verbose=TRUE)'
 
-
-# -------------------------------------------------------------------------------------------------------------------------------------------------------------
-# Troubleshoot
-# Converted the `meta.yaml` to `dockerfile`
-# https://github.com/bioconda/bioconda-recipes/blob/master/recipes/bioconductor-enrichplot/meta.yaml
-
-RUN R -e "install.packages('BiocManager', repos='https://cloud.r-project.org'); \
-    BiocManager::install(c('DOSE>=4.0.0,<4.1.0','ggtree>=3.14.0,<3.15.0','GOSemSim>=2.32.0,<2.33.0','aplot>=0.2.1','ggfun>=0.1.7','ggnewscale','ggplot2','ggrepel>=0.9.0','ggtangle>=0.0.4','igraph','magrittr','plyr','purrr','RColorBrewer','reshape2','rlang','scatterpie','yulab.utils>=0.1.6','enrichplot','clusterProfiler'), version='3.20', update=FALSE)"
+# Install TFBSTools + motifmatchr with explicit dependencies
+#RUN Rscript -e 'BiocManager::install("Biostrings", ask=FALSE, update=FALSE, verbose=TRUE)'
+#RUN Rscript -e 'BiocManager::install("GenomicRanges", ask=FALSE, update=FALSE, verbose=TRUE)'
+#RUN Rscript -e 'BiocManager::install("IRanges", ask=FALSE, update=FALSE, verbose=TRUE)'
+#RUN Rscript -e 'BiocManager::install("S4Vectors", ask=FALSE, update=FALSE, verbose=TRUE)'
+#RUN Rscript -e 'BiocManager::install("GenomeInfoDb", ask=FALSE, update=FALSE, verbose=TRUE)'
+#RUN Rscript -e 'BiocManager::install("BiocGenerics", ask=FALSE, update=FALSE, verbose=TRUE)'
+#RUN Rscript -e 'BiocManager::install("seqLogo", ask=FALSE, update=FALSE, verbose=TRUE)'
+#RUN Rscript -e 'BiocManager::install("TFMPvalue", ask=FALSE, update=FALSE, verbose=TRUE)'
+#RUN Rscript -e 'BiocManager::install("DirichletMultinomial", ask=FALSE, update=FALSE, verbose=TRUE)'
+#RUN Rscript -e 'BiocManager::install("pwalign", ask=FALSE, update=FALSE, verbose=TRUE)'
+RUN Rscript -e 'BiocManager::install("TFBSTools", ask=FALSE, update=FALSE, verbose=TRUE)'
+RUN Rscript -e 'BiocManager::install("motifmatchr", ask=FALSE, update=FALSE, verbose=TRUE)'
 
 # -------------------------------------------------------------------
 # Test installation
 # -------------------------------------------------------------------
-RUN R -e "library(enrichplot); library(clusterProfiler)"
-# -------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-
-# Install TFBSTools + motifmatchr with explicit dependencies
-RUN Rscript -e 'BiocManager::install(c( \
-  "Biostrings","GenomicRanges","IRanges","S4Vectors","GenomeInfoDb","BiocGenerics", \
-  "seqLogo","TFMPvalue","DirichletMultinomial","pwalign"), ask=FALSE, update=FALSE, verbose=TRUE)' && \
-    Rscript -e 'BiocManager::install(c("TFBSTools","motifmatchr"), ask=FALSE, update=FALSE, verbose=TRUE)'
+RUN Rscript -e "library(enrichplot); library(clusterProfiler)"
+# -------------------------
 
 # -------------------------------------------------------------------
 # GitHub packages (pinned where necessary)
 # -------------------------------------------------------------------
-RUN Rscript -e 'devtools::install_github("stuart-lab/signac", ref="develop")'
-RUN Rscript -e 'remotes::install_github("satijalab/seurat-wrappers@community-vignette")' && \
-    Rscript -e 'remotes::install_version("Seurat", version="4.4.0")'
-RUN Rscript -e 'remotes::install_github("cole-trapnell-lab/monocle3")' && \
-    Rscript -e 'remotes::install_github("cole-trapnell-lab/cicero-release", ref="monocle3")'
-RUN Rscript -e 'devtools::install_github("welch-lab/RcppPlanc@5744d5f351f3dd1d45e4a59b9d2e4a0e8fdab6e7")'
-RUN Rscript -e 'devtools::install_github("welch-lab/liger", dependencies=TRUE, force=TRUE)'
-RUN Rscript -e 'devtools::install_github("YuLab-SMU/ggtree", dependencies=TRUE)'
-RUN Rscript -e 'devtools::install_github("kharchenkolab/numbat", dependencies=TRUE)'
-RUN Rscript -e 'devtools::install_github("SGDDNB/ShinyCell")'
-RUN Rscript -e 'devtools::install_github("igordot/scooter")'
-RUN Rscript -e 'devtools::install_github("YuLab-SMU/enrichplot")'
+RUN Rscript -e 'devtools::install_github("stuart-lab/signac", ref="develop", upgrade="never")'
+RUN Rscript -e 'remotes::install_github("satijalab/seurat-wrappers@community-vignette", upgrade="never")' && \
+    Rscript -e 'remotes::install_version("Seurat", version="4.4.0", upgrade="never")'
+RUN Rscript -e 'remotes::install_github("cole-trapnell-lab/monocle3", upgrade="never")' && \
+    Rscript -e 'remotes::install_github("cole-trapnell-lab/cicero-release", ref="monocle3", upgrade="never")'
+
+# install newer cmake, needed for RcppPlanc
+RUN apt-get update && apt-get install -y wget g++ make \
+   && wget https://cmake.org/files/v3.28/cmake-3.28.3.tar.gz \
+   && tar -zxvf cmake-3.28.3.tar.gz \
+   && cd cmake-3.28.3 && ./bootstrap && make -j$(nproc) && make install \
+   && cd .. && rm -rf cmake-3.28.3*
+ 
+RUN Rscript -e 'devtools::install_github("theAeon/HighFive", upgrade="never")' # needed for RcppPlanc
+RUN Rscript -e 'devtools::install_github("welch-lab/RcppPlanc@5744d5f351f3dd1d45e4a59b9d2e4a0e8fdab6e7", upgrade="never")'
+RUN Rscript -e 'devtools::install_github("welch-lab/liger", dependencies=TRUE, force=TRUE, upgrade="never")'
+#RUN Rscript -e 'devtools::install_github("YuLab-SMU/ggtree", dependencies=TRUE)'
+#RUN Rscript -e 'devtools::install_github("kharchenkolab/numbat", dependencies=TRUE)'
+RUN Rscript -e 'devtools::install_github("SGDDNB/ShinyCell",  upgrade="never")'
+#RUN Rscript -e 'devtools::install_github("igordot/scooter", upgrade="never")'
+#RUN Rscript -e 'devtools::install_github("YuLab-SMU/enrichplot")'
 
 # Double-check after installation
 RUN Rscript -e 'if (!requireNamespace("enrichplot", quietly = TRUE)) stop("enrichplot not installed!")'
 
-
 # -------------------------------------------------------------------
 # Additional R CRAN packages
 # -------------------------------------------------------------------
-RUN Rscript -e 'install.packages(c( \
-  "clustree","cowplot","data.table","flexmix","flextable","forcats","fs","future","GGally", \
-  "ggh4x","ggplot2","ggpmisc","ggrepel","ggthemes","harmony","igraph","irlba", \
-  "knitr","optparse","patchwork","purrr","RColorBrewer","remotes","reshape2","rlist","R.utils", \
-  "SeuratObject","shiny","SoupX","stringr","tidytext","tidyverse","tinytex","yaml", \
-  "shinyhelper","DT","ggdendro","ragg","pkgdown"))'
-  
+RUN Rscript -e 'install.packages("clustree", repos="https://packagemanager.posit.co/cran/__linux__/jammy/latest", upgrade="never")'
+#RUN Rscript -e 'install.packages("cowplot", repos="https://packagemanager.posit.co/cran/__linux__/jammy/latest", upgrade="never")'
+#RUN Rscript -e 'install.packages("data.table", repos="https://packagemanager.posit.co/cran/__linux__/jammy/latest", upgrade="never")'
+#RUN Rscript -e 'install.packages("flexmix", repos="https://packagemanager.posit.co/cran/__linux__/jammy/latest", upgrade="never")'
+RUN Rscript -e 'install.packages("flextable", repos="https://packagemanager.posit.co/cran/__linux__/jammy/latest", upgrade="never")'
+#RUN Rscript -e 'install.packages("forcats", repos="https://packagemanager.posit.co/cran/__linux__/jammy/latest", upgrade="never")'
+#RUN Rscript -e 'install.packages("fs", repos="https://packagemanager.posit.co/cran/__linux__/jammy/latest", upgrade="never")'
+#RUN Rscript -e 'install.packages("future", repos="https://packagemanager.posit.co/cran/__linux__/jammy/latest", upgrade="never")'
+#RUN Rscript -e 'install.packages("GGally", repos="https://packagemanager.posit.co/cran/__linux__/jammy/latest", upgrade="never")'
+RUN Rscript -e 'install.packages("ggh4x", repos="https://packagemanager.posit.co/cran/__linux__/jammy/latest", upgrade="never")'
+# Rscript -e 'install.packages("ggplot2", repos="https://packagemanager.posit.co/cran/__linux__/jammy/latest", upgrade="never")'
+RUN Rscript -e 'install.packages("ggpmisc", repos="https://packagemanager.posit.co/cran/__linux__/jammy/latest", upgrade="never")'
+#RUN Rscript -e 'install.packages("ggrepel", repos="https://packagemanager.posit.co/cran/__linux__/jammy/latest", upgrade="never")'
+RUN Rscript -e 'install.packages("ggthemes", repos="https://packagemanager.posit.co/cran/__linux__/jammy/latest", upgrade="never")'
+RUN Rscript -e 'install.packages("harmony", repos="https://packagemanager.posit.co/cran/__linux__/jammy/latest", upgrade="never")'
+RUN Rscript -e 'install.packages("igraph", repos="https://packagemanager.posit.co/cran/__linux__/jammy/latest", upgrade="never")'
+#RUN Rscript -e 'install.packages("irlba", repos="https://packagemanager.posit.co/cran/__linux__/jammy/latest", upgrade="never")'
+#RUN Rscript -e 'install.packages("knitr", repos="https://packagemanager.posit.co/cran/__linux__/jammy/latest", upgrade="never")'
+#RUN Rscript -e 'install.packages("optparse", repos="https://packagemanager.posit.co/cran/__linux__/jammy/latest", upgrade="never")'
+#RUN Rscript -e 'install.packages("patchwork", repos="https://packagemanager.posit.co/cran/__linux__/jammy/latest", upgrade="never")'
+#RUN Rscript -e 'install.packages("purrr", repos="https://packagemanager.posit.co/cran/__linux__/jammy/latest", upgrade="never")'
+#RUN Rscript -e 'install.packages("RColorBrewer", repos="https://packagemanager.posit.co/cran/__linux__/jammy/latest", upgrade="never")'
+#RUN Rscript -e 'install.packages("reshape2", repos="https://packagemanager.posit.co/cran/__linux__/jammy/latest", upgrade="never")'
+RUN Rscript -e 'install.packages("rlist", repos="https://packagemanager.posit.co/cran/__linux__/jammy/latest", upgrade="never")'
+#RUN Rscript -e 'install.packages("R.utils", repos="https://packagemanager.posit.co/cran/__linux__/jammy/latest", upgrade="never")'
+#RUN Rscript -e 'install.packages("SeuratObject", repos="https://packagemanager.posit.co/cran/__linux__/jammy/latest", upgrade="never")'
+#RUN Rscript -e 'install.packages("shiny", repos="https://packagemanager.posit.co/cran/__linux__/jammy/latest", upgrade="never")'
+RUN Rscript -e 'install.packages("SoupX", repos="https://packagemanager.posit.co/cran/__linux__/jammy/latest", upgrade="never")'
+#RUN Rscript -e 'install.packages("stringr", repos="https://packagemanager.posit.co/cran/__linux__/jammy/latest", upgrade="never")'
+RUN Rscript -e 'install.packages("tidytext", repos="https://packagemanager.posit.co/cran/__linux__/jammy/latest", upgrade="never")'
+#RUN Rscript -e 'install.packages("tidyverse", repos="https://packagemanager.posit.co/cran/__linux__/jammy/latest", upgrade="never")'
+#RUN Rscript -e 'install.packages("tinytex", repos="https://packagemanager.posit.co/cran/__linux__/jammy/latest", upgrade="never")'
+#RUN Rscript -e 'install.packages("yaml", repos="https://packagemanager.posit.co/cran/__linux__/jammy/latest", upgrade="never")'
+RUN Rscript -e 'install.packages("shinyhelper", repos="https://packagemanager.posit.co/cran/__linux__/jammy/latest", upgrade="never")'
+RUN Rscript -e 'install.packages("DT", repos="https://packagemanager.posit.co/cran/__linux__/jammy/latest", upgrade="never")'
+RUN Rscript -e 'install.packages("ggdendro", repos="https://packagemanager.posit.co/cran/__linux__/jammy/latest", upgrade="never")'
+#RUN Rscript -e 'install.packages("ragg", repos="https://packagemanager.posit.co/cran/__linux__/jammy/latest", upgrade="never")'
+#RUN Rscript -e 'install.packages("pkgdown", repos="https://packagemanager.posit.co/cran/__linux__/jammy/latest", upgrade="never")'
 
+# make sure flextable is installed
 RUN Rscript -e 'if (!requireNamespace("flextable", quietly = TRUE)) stop("flextable not installed!")'
 
 
-#
-#
 # -------------------------------------------------------------------
 # Install texlive full version
 # This step can break easily. The code is correct, user needs to keep bulding until it passes this step (very time consuming).
 # I do not know why it breaks, but there must be some issue from Cloudflare that interferes with permissions and proper installation.
-#
+# -------------------------------------------------------------------
 ENV TEXLIVE_INSTALL_NO_CONTEXT_CACHE=1 \
     NOPERLDOC=1
 
@@ -166,36 +255,23 @@ RUN apt-get update && \
     && rm -rf /var/lib/apt/lists/*
 
 # Install TeX Live (scheme-basic)
-RUN wget http://mirror.ctan.org/systems/texlive/tlnet/install-tl-unx.tar.gz -O /tmp/install-tl-unx.tar.gz && \
-    tar -xzf /tmp/install-tl-unx.tar.gz -C /tmp && \
-    cd /tmp/install-tl-* && \
+WORKDIR /
+RUN wget http://mirror.ctan.org/systems/texlive/tlnet/install-tl-unx.tar.gz -O /tmp/install-tl-unx.tar.gz && tar -xzf /tmp/install-tl-unx.tar.gz -C /tmp
+RUN rm -f /tmp/install-tl-unx.tar.gz
+RUN TEX_TMP=$(find /tmp/install-tl* -mindepth 0 -maxdepth 0 -type d) && \
+    cd $TEX_TMP && \
     echo "selected_scheme scheme-basic" > texlive.profile && \
-    echo "TEXDIR /usr/local/texlive/2024" >> texlive.profile && \
-    ./install-tl --profile=texlive.profile && \
-    rm -rf /tmp/install-tl-* /tmp/install-tl-unx.tar.gz
+    echo "TEXDIR /usr/local/texlive/2025" >> texlive.profile && \
+    cd $TEX_TMP && ./install-tl --profile=texlive.profile
+RUN cd / && rm -rf /tmp/install-tl-*
 
-# Dynamically find tlmgr bin dir and add to PATH
-RUN TEXLIVE_BIN=$(find /usr/local/texlive/2024/bin -type d -name "x86_64-*" | head -n1) && \
-    echo "export PATH=$TEXLIVE_BIN:\$PATH" >> /etc/profile && \
-    echo "PATH=$TEXLIVE_BIN:\$PATH" >> /etc/environment && \
-    ln -s $TEXLIVE_BIN/tlmgr /usr/local/bin/tlmgr
-
-ENV PATH="/usr/local/texlive/2024/bin/x86_64-linux:$PATH"
+# Add TeX Live binaries to PATH
+ENV PATH="/usr/local/texlive/2025/bin/aarch64-linux/:$PATH"
 
 # Install missing LuaLaTeX math packages
 RUN tlmgr update --self && \
     tlmgr install unicode-math fontspec xunicode lualatex-math luaotfload
 
-# Optional: update all packages to latest (can take time)
-# RUN tlmgr update --all
-# -------------------------------------------------------------------
-#
-#
-
-
-# -------------------------------------------------------------------
-# Run virtual end on container startup- adjust as needed.
-# -------------------------------------------------------------------
-ENTRYPOINT . /opt/container-venv/bin/activate
-
+# set ENTRYPOINT for container
+#ENTRYPOINT . /opt/container-venv/bin/activate
 
