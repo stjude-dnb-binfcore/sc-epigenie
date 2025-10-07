@@ -213,31 +213,28 @@ RUN Rscript -e 'if (!requireNamespace("flextable", quietly = TRUE)) stop("flexta
 ENV TEXLIVE_INSTALL_NO_CONTEXT_CACHE=1 \
     NOPERLDOC=1
 
-# Install TexLive prerequisites
+# Install prerequisites
 RUN apt-get update && \
-    apt-get install -y wget unzip tar \
-    make fontconfig perl openjdk-8-jre libgetopt-long-descriptive-perl \
-    libdigest-perl-md5-perl libncurses5 \
+    apt-get install -y wget unzip tar make fontconfig perl openjdk-8-jre \
+    libgetopt-long-descriptive-perl libdigest-perl-md5-perl libncurses5 \
     python3-pygments && \
     rm -rf /var/lib/apt/lists/*
 
-    
-# Install TeX Live
+# Install TeX Live 2024 with full scheme
 RUN wget http://mirror.ctan.org/systems/texlive/tlnet/install-tl-unx.tar.gz -O /tmp/install-tl-unx.tar.gz && \
     tar -xzf /tmp/install-tl-unx.tar.gz -C /tmp && \
     cd /tmp/install-tl-* && \
-    echo "selected_scheme scheme-basic" > texlive.profile && \
+    echo "selected_scheme scheme-full" > texlive.profile && \
     echo "TEXDIR /usr/local/texlive/2024" >> texlive.profile && \
     ./install-tl --profile=texlive.profile && \
     rm -rf /tmp/install-tl-* /tmp/install-tl-unx.tar.gz
 
-# Dynamically find tlmgr bin dir and add to PATH
-RUN TEXLIVE_BIN=$(find /usr/local/texlive/2024/bin -type d -name "x86_64-*" | head -n1) && \
-    echo "export PATH=$TEXLIVE_BIN:\$PATH" >> /etc/profile && \
-    echo "PATH=$TEXLIVE_BIN:\$PATH" >> /etc/environment && \
-    ln -s $TEXLIVE_BIN/tlmgr /usr/local/bin/tlmgr
-
+# Set PATH for TeX Live 2024
 ENV PATH="/usr/local/texlive/2024/bin/x86_64-linux:$PATH"
+
+# Optional: update tlmgr (not strictly needed for scheme-full, but still good practice)
+RUN tlmgr option repository http://mirror.ctan.org/systems/texlive/tlnet && \
+    tlmgr update --self
 
 # ------------------------------------------------------------------------------------------------------------------------------------------------------------------
 #
