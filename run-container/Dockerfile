@@ -210,34 +210,65 @@ RUN Rscript -e 'if (!requireNamespace("flextable", quietly = TRUE)) stop("flexta
 # tex is automatically checking the cpu architecture during the image build and is only compiling for one based on that. 
 # (note you can probably emulate x86 via docker if you need to).
 # -------------------------------------------------------------------
+# Prevent caching of the TeX Live installer context
 ENV TEXLIVE_INSTALL_NO_CONTEXT_CACHE=1 \
     NOPERLDOC=1
 
-# Install TexLive prerequisites
+# Install prerequisites
 RUN apt-get update && \
     apt-get install -y wget unzip tar \
-    make fontconfig perl openjdk-8-jre libgetopt-long-descriptive-perl \
-    libdigest-perl-md5-perl libncurses5 \
-    python3-pygments && \
+        make fontconfig perl \
+        openjdk-8-jre \
+        libgetopt-long-descriptive-perl libdigest-perl-md5-perl \
+        libncurses5 python3-pygments && \
     rm -rf /var/lib/apt/lists/*
 
-    
-# Install TeX Live
+WORKDIR /
+
+# Download and extract TeX Live installer
 RUN wget http://mirror.ctan.org/systems/texlive/tlnet/install-tl-unx.tar.gz -O /tmp/install-tl-unx.tar.gz && \
     tar -xzf /tmp/install-tl-unx.tar.gz -C /tmp && \
-    cd /tmp/install-tl-* && \
-    echo "selected_scheme scheme-basic" > texlive.profile && \
-    echo "TEXDIR /usr/local/texlive/2024" >> texlive.profile && \
-    ./install-tl --profile=texlive.profile && \
-    rm -rf /tmp/install-tl-* /tmp/install-tl-unx.tar.gz
+    rm /tmp/install-tl-unx.tar.gz
 
-# Dynamically find tlmgr bin dir and add to PATH
-RUN TEXLIVE_BIN=$(find /usr/local/texlive/2024/bin -type d -name "x86_64-*" | head -n1) && \
-    echo "export PATH=$TEXLIVE_BIN:\$PATH" >> /etc/profile && \
-    echo "PATH=$TEXLIVE_BIN:\$PATH" >> /etc/environment && \
-    ln -s $TEXLIVE_BIN/tlmgr /usr/local/bin/tlmgr
+# Install with a “full” scheme so tlmgr works well
+RUN set -eux; \
+    TEX_TMP="$(find /tmp -maxdepth 1 -type d -name 'install-tl-*' | head -n1)"; \
+    cd "$TEX_TMP"; \
+    { \
+      echo "selected_scheme scheme-full"; \
+      echo "TEXDIR /usr/local/texlive/2025"; \
+      echo "tlpdbopt_install_docfiles 0"; \
+      echo "tlpdbopt_install_srcfiles 0"; \
+    } > texlive.profile; \
+    ./install-tl --profile=texlive.profile; \
+    cd /; \
+    rm -rf "$TEX_TMP"
 
+# Add TeX Live binaries to PATH
+# Adjust architecture segment (e.g. aarch64-linux or x86_64-linux)
+#ENV PATH="/usr/local/texlive/2025/bin/aarch64-linux:${PATH}"
 ENV PATH="/usr/local/texlive/2024/bin/x86_64-linux:$PATH"
+
+# Also set PERL5LIB so tlmgr’s Perl modules (in tlpkg) are found
+ENV PERL5LIB="/usr/local/texlive/2025/tlpkg"
+
+# Now update tlmgr and install TeX packages
+RUN /usr/local/texlive/2025/bin/x86_64-linux/tlmgr update --self && \
+    /usr/local/texlive/2025/bin/x86_64-linux/tlmgr install \
+      latex-bin collection-latex collection-latexrecommended collection-latexextra \
+      collection-fontsrecommended collection-mathscience collection-xetex \
+      unicode-math lualatex-math \
+      amsmath amssymb upquote microtype hyperref xcolor listings \
+      fancyvrb booktabs caption geometry float grffile graphicx pdfpages \
+      pgf tikz-cd titling url xurl setspace subcaption etoolbox fontspec \
+      enumitem longtable multirow siunitx tabularx tocloft textcomp \
+      babel csquotes biblatex bibtex biber || true
+
+
+# Update tlmgr and then install packages
+#RUN tlmgr update --self && \
+#    tlmgr install unicode-math fontspec xunicode lualatex-math luaotfload
+
 
 # ------------------------------------------------------------------------------------------------------------------------------------------------------------------
 #
@@ -246,7 +277,7 @@ ENV PATH="/usr/local/texlive/2024/bin/x86_64-linux:$PATH"
 #
 # -------------------------------------------------------------------
 # Run virtual end on container startup- adjust as needed.
-ENTRYPOINT . /opt/container-venv/bin/activate
+#ENTRYPOINT . /opt/container-venv/bin/activate
 # -------------------------------------------------------------------
 #
 #
