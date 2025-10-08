@@ -13,8 +13,7 @@ We provide a Dockerfile and Definition file that include all tools, packages, an
      - [b. Running from the Terminal](#b-running-from-the-terminal)
      - [c. Running from RStudio](#c-running-from-rstudio)
      - [d. Fixing Issues with RStudio Server](#d-fixing-issues-with-rstudio-server)
-   - [5. Building the Container (If Needed)](#5-building-the-container-if-needed)
-   
+
 2. [Running the Container Outside HPC (Docker)](#running-the-container-outside-hpc-docker)
 
 
@@ -99,13 +98,13 @@ These folders cache history and user info. Then, kill the interactive session, s
 1. Pull the Docker Container from the `sc-epigenie` root_dir:
 
 ```
-docker pull docker://achroni/rstudio_4.4.0_seurat_4.4.0_signac_1.14.9:latest
+docker pull docker://achroni/singlecell-r4.4-seurat4.4-signac1.14:latest
 ```
 
 2. Start and Run the Docker Container from the terminal:
 
 ```
-docker run --platform linux/amd64 --name review -d -e PASSWORD=ANYTHING -p 8787:8787 -v $PWD:/home/rstudio/sc-epigenie docker://achroni/rstudio_4.4.0_seurat_4.4.0_signac_1.14.9:latest
+docker run --platform linux/amd64 --name review -d -e PASSWORD=ANYTHING -p 8787:8787 -v $PWD:/home/rstudio/sc-epigenie docker://achroni/singlecell-r4.4-seurat4.4-signac1.14:latest
 ```
 
 Start the container and open a terminal:
