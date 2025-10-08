@@ -47,16 +47,8 @@ The structure of this folder is as follows:
 ├── 02-peak-calling.Rmd
 ├── lsf_script.txt
 ├── plots
-|   ├── 01_integration_with_scrna_seq_data
-|   ├── 02_peak_calling
-|   ├── Report-integration-with-scrna-seq-data-<Sys.Date()>.html
-|   └── Report-integration-with-scrna-seq-data-<Sys.Date()>.pdf
-|   ├── Report-peak-calling-<Sys.Date()>.html
-|   └── Report-peak-calling-<Sys.Date()>.pdf
 ├── README.md
 ├── results
-|   ├── 01_integration_with_scrna_seq_data
-|   └── 02_peak_calling
 ├── run-integration-with-scrna-seq-data.R
 ├── run-integration-with-scrna-seq-data.sh
 └── util
