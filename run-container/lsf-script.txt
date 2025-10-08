@@ -1,0 +1,8 @@
+#BSUB -P project
+#BSUB -J run-container
+#BSUB -oo job.out -eo job.err
+#BSUB -n 1
+#BSUB -R "rusage[mem=16GB] span[hosts=1]"
+#BSUB -cwd "."
+
+singularity exec ../singlecell-r4.4-seurat4.4-signac1.14_latest.sif bash run-container.sh

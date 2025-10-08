@@ -1,0 +1,162 @@
+---
+title: "Debugging step: Verify installations"
+author: "Antonia Chroni for SJCRH DNB_BINF_Core"
+papersize: a4
+fontsize: 11pt
+links-as-notes: true
+output:
+  html_document:
+    toc: TRUE
+    toc_float: TRUE
+    df_print: paged
+    code_folding: hide
+    toc_depth: 2
+    highlight: tango
+    number_sections: TRUE
+  pdf_document:
+    toc: TRUE
+    highlight: tango
+    number_sections: TRUE
+    latex_engine: lualatex
+    keep_tex: FALSE
+    fig_caption: yes
+    fig_crop: no
+    fig_height: 2
+    fig_width: 3
+    toc_depth: 2
+always_allow_html: TRUE
+urlcolor: blue
+linkcolor: black
+citecolor: blue
+geometry: margin=1in
+header-includes: 
+  - \usepackage{titling}
+  - \usepackage{fancyhdr}
+  - \usepackage{graphicx}
+  - \usepackage{float}
+---
+
+# Set up
+
+```{r load-library, include=FALSE, echo=TRUE}
+suppressPackageStartupMessages({
+  library(BiocManager)
+  library(devtools)
+  library(remotes)
+  
+  library(miQC)
+  library(scater)
+  library(scDblFinder)
+  library(SingleCellExperiment)
+  library(celldex)
+  library(SingleR)
+  library(infercnv)
+  
+  library(scooter)
+  library(numbat)
+
+  library(clustree)
+  library(cowplot)
+  library(data.table)
+  library(flexmix)
+  library(forcats)
+  library(fs)
+  library(future)
+  library(GGally)
+  library(ggh4x)
+  library(ggplot2)
+  library(ggpmisc)
+  library(ggrepel)
+  
+  
+  library(ggthemes)
+  library(grid)
+  library(harmony)
+  library(hdf5r)
+  library(igraph)
+  library(irlba)
+  library(knitr)
+  library(leiden)
+  library(optparse)
+  library(patchwork)
+  library(purrr)
+  library(RColorBrewer)
+  library(reshape2)
+  library(rlist)
+  library(R.utils)
+  library(Seurat)
+  library(SeuratObject)
+  library(SeuratWrappers)
+  library(shiny)
+  library(Signac)
+  library(SoupX)
+  library(stringr)
+  library(tidytext)
+  library(tidyverse)
+  library(tinytex)
+  library(yaml)
+  
+  library(ShinyCell)
+  library(shinyhelper)
+  library(DT)
+  library(ggdendro)
+  
+  
+  ####################################################
+  # sc-epigenie
+  library(AnnotationHub)
+  library(ensembldb)
+  library(GenomeInfoDb) #translation between chromosome names
+
+  library(GenomicRanges)
+  library(rtracklayer)
+
+  library(Matrix)
+  library(htmlwidgets)
+
+
+  library(org.Hs.eg.db)
+  library(org.Mm.eg.db) # Mouse gene annotation (use org.Hs.eg.db for human)
+  
+  # Motif analysis with Signac
+  library(JASPAR2020)
+  library(TFBSTools)
+  library(BSgenome.Mmusculus.UCSC.mm10)
+  
+  # Transcription factor footprinting
+  library(BSgenome.Hsapiens.UCSC.hg19)
+  
+  library(monocle3)
+  library(cicero)
+  library(biovizBase)
+  library(clusterProfiler)
+  ####################################################
+  
+  # Troubleshooting #
+  library(flextable)
+  library(rliger)
+  library(RcppPlanc)
+  library(enrichplot)
+  library(motifmatchr)
+  ####################################################
+  
+})
+```
+
+
+```{r echo=FALSE, warning=FALSE}
+opts_chunk$set(fig.align='center',
+               external=TRUE,
+               echo=FALSE,
+               warning=FALSE,
+               fig.pos='H')
+a4width <- 8.3
+a4height <- 11.7
+```
+
+# Session Info
+
+```{r echo=FALSE}
+sessionInfo()
+```
+
