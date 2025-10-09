@@ -203,7 +203,7 @@ First, we load the scATAC-seq query object, which contains a pre-computed gene a
 
 ```{r read-object, echo=TRUE}
 atac_query <- readRDS(data_file)
-DefaultAssay(atac_query) <- 'RNA'
+DefaultAssay(atac_query) <- 'GeneActivity'
 atac_query <- FindVariableFeatures(object = atac_query, nfeatures = nfeatures_value)
 ```
 
