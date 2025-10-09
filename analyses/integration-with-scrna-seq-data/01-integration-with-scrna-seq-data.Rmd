@@ -205,7 +205,7 @@ First, we load the scATAC-seq query object, which contains a pre-computed gene a
 
 ```{r read-object, echo=TRUE}
 atac_query <- readRDS(data_file)
-DefaultAssay(atac_query) <- 'GeneActivity'
+DefaultAssay(atac_query) <- 'RNA'
 atac_query <- FindVariableFeatures(object = atac_query, nfeatures = nfeatures_value)
 ```
 
@@ -231,6 +231,8 @@ rna_reference <- readRDS(reference_file)
 # Rename column containing cell types in the reference
 rna_reference@meta.data$celltype <- rna_reference@meta.data[[celltype_reference]]
 print(table(rna_reference@meta.data$celltype))
+print(table(rna_reference@meta.data$DYE))
+print(table(atac_query@meta.data$DYE))
 
 # Plot
 name <- paste0(plots_dir, "/", glue::glue("plot-scATAC-vs-scRNA-seq-cells.png"))
@@ -252,7 +254,7 @@ transfer.anchors <- FindTransferAnchors(reference = rna_reference,
                                           query = atac_query, 
                                           reduction = "cca",
                                           dims = 1:30)
-  
+
 cat("Transferring predicted labels...\n")
 predicted.labels <- TransferData(anchorset = transfer.anchors,
                                  refdata = rna_reference$celltype,
