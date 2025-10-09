@@ -181,6 +181,8 @@ if (!dir.exists(results_dir)) {
 # Create plots directory
 module_plots_dir <- file.path(analysis_dir, "plots") 
 plots_dir <- file.path(module_plots_dir, "01_integration_with_scrna_seq_data") 
+if (!dir.exists(plots_dir)) {
+  dir.create(plots_dir)}
 
 source(paste0(root_dir, "/figures/scripts/theme_plot.R"))
 source(paste0(analysis_dir, "/util/function-cell-type-fractions.R"))
