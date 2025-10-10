@@ -1,5 +1,5 @@
 <p align="center";">
-  <img src="figures/img/sc-epigenie-logo-v1.png" alt="sc-epigenie repository logo" width="560px" />
+  <img src="figures/img/ScEpiGenie_Logo_HRZ_Color_HZ.png" alt="sc-epigenie repository logo" width="560px" />
 </p>
 <p align="center";">
   <a href="https://www.repostatus.org/#active">
