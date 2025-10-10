@@ -150,11 +150,9 @@ suppressPackageStartupMessages({
 
   library(htmlwidgets)
   library(clusterProfiler)
-
   library(enrichplot)
-
   library(org.Hs.eg.db)
-  library(org.Mm.eg.db) # Mouse gene annotation (use org.Hs.eg.db for human)
+  library(org.Mm.eg.db)
   
   library(data.table)
   library(R.utils)

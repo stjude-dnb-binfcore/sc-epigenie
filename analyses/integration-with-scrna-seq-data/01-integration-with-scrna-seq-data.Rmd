@@ -181,6 +181,8 @@ if (!dir.exists(results_dir)) {
 # Create plots directory
 module_plots_dir <- file.path(analysis_dir, "plots") 
 plots_dir <- file.path(module_plots_dir, "01_integration_with_scrna_seq_data") 
+if (!dir.exists(plots_dir)) {
+  dir.create(plots_dir)}
 
 source(paste0(root_dir, "/figures/scripts/theme_plot.R"))
 source(paste0(analysis_dir, "/util/function-cell-type-fractions.R"))
@@ -229,6 +231,8 @@ rna_reference <- readRDS(reference_file)
 # Rename column containing cell types in the reference
 rna_reference@meta.data$celltype <- rna_reference@meta.data[[celltype_reference]]
 print(table(rna_reference@meta.data$celltype))
+print(table(rna_reference@meta.data$DYE))
+print(table(atac_query@meta.data$DYE))
 
 # Plot
 name <- paste0(plots_dir, "/", glue::glue("plot-scATAC-vs-scRNA-seq-cells.png"))
@@ -250,7 +254,7 @@ transfer.anchors <- FindTransferAnchors(reference = rna_reference,
                                           query = atac_query, 
                                           reduction = "cca",
                                           dims = 1:30)
-  
+
 cat("Transferring predicted labels...\n")
 predicted.labels <- TransferData(anchorset = transfer.anchors,
                                  refdata = rna_reference$celltype,
