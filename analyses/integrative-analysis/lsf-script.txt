@@ -5,4 +5,4 @@
 #BSUB -R "rusage[mem=96GB] span[hosts=1]"
 #BSUB -cwd "."
 
-singularity exec ../../rstudio_4.4.0_seurat_4.4.0_latest.sif bash run-integrative-analysis.sh
+singularity exec ../../singlecell-r4.4-seurat4.4-signac1.14_latest.sif bash run-integrative-analysis.sh
