@@ -384,6 +384,13 @@ For more information, please see: `r results_filepath`/`r cohort_value`/analyses
    - We used the **`r resolution_list_find_markers`** resolution to identify differentially accessible peaks per cluster and explored the **`r top_n_value_peaks`** peaks.
 
 
+## integration-with-scrna-seq-data
+
+For more information, please see: `r results_filepath`/`r cohort_value`/analyses/integration-with-scrna-seq-data/plots
+
+   - We used the **`r reference_file_name_annotation_module`** object that contains the cell type annotation.
+
+
 # Future directions
 
 - **QC upstream analyses**: 
