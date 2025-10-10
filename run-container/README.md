@@ -1,4 +1,4 @@
-# Running the Container for scEpiGenie: A Workflow for Single-cell ATAC-seq (scATAC-seq)
+# Running the Container for Single-cell ATAC-seq workflow (scEpiGenie)
 
 We provide a Dockerfile and Definition file that include all tools, packages, and dependencies necessary for running the **scEpiGenie** analysis modules. These are customized for `Rstudio/R v4.4.0`, `Seurat v4.4.0` and `Signac v1.14.9`.
 

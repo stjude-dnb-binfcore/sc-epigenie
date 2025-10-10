@@ -10,7 +10,7 @@
   </a>
 </p>
 
-# scEpiGenie: A Workflow for Single-cell ATAC-seq (scATAC-seq)
+# Single-cell ATAC-seq workflow (scEpiGenie)
 
 **scEpiGenie** is a comprehensive suite of tools and workflows for analyzing single-cell ATAC (scATAC-Seq) data from 10X Genomics sequencing technology supporting human and mouse genome cohorts. **scEpiGenie** is an initiative of the [Bioinformatics Core](https://www.stjude.org/research/departments/developmental-neurobiology/shared-resources/bioinformatic-core.html) at the Department of Developmental Neurobiology at the St. Jude Children's Research Hospital.
 
