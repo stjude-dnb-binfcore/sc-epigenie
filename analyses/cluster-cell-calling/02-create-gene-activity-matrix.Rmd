@@ -277,7 +277,7 @@ if (compute_gene_activities_manual == "YES"){
   rownames(gene_activity_counts) <- gene_names
   
   # Optionally: add gene activity matrix as a new assay to your Seurat object
-  seurat_obj[["GeneActivity"]] <- CreateAssayObject(counts = gene_activity_counts)
+  seurat_obj[["RNA"]] <- CreateAssayObject(counts = gene_activity_counts)
   ###--------------------------------------------
   
   } else {
@@ -291,7 +291,7 @@ if (compute_gene_activities_manual == "YES"){
    gene.activities <- GeneActivity(seurat_obj)
 
    # Optionally: add gene activity matrix as a new assay to your Seurat object
-   seurat_obj[["GeneActivity"]] <- CreateAssayObject(counts = gene.activities)
+   seurat_obj[["RNA"]] <- CreateAssayObject(counts = gene.activities)
 }
 ```
 
@@ -300,18 +300,18 @@ Now we can visualize the activities of canonical marker genes to help interpret 
 ```{r normalize-matrix, echo=TRUE}
 # Normalize the gene activity data (optional but common)
 seurat_obj <- NormalizeData(seurat_obj, 
-                            assay = "GeneActivity",
+                            assay = "RNA",
                             normalization.method = 'LogNormalize',
-                            scale.factor = median(seurat_obj$nCount_GeneActivity))
+                            scale.factor = median(seurat_obj$nCount_RNA))
 
-seurat_obj <- FindVariableFeatures(seurat_obj, assay = "GeneActivity")
+seurat_obj <- FindVariableFeatures(seurat_obj, assay = "RNA")
 
 # View features
-# VariableFeatures(seurat_obj[["GeneActivity"]])[1:10]
+# VariableFeatures(seurat_obj[["RNA"]])[1:10]
 ```
 
 ```{r feature-plot, echo=TRUE, eval=FALSE}
-DefaultAssay(seurat_obj) <- 'GeneActivity'
+DefaultAssay(seurat_obj) <- 'RNA'
 
 print(FeaturePlot(
   object = seurat_obj,
@@ -325,7 +325,7 @@ print(FeaturePlot(
 
 Now we have:
 
-  - A new assay "GeneActivity" in the Seurat object that contains a gene-by-cell matrix of inferred regulatory activity.
+  - A new assay "RNA" in the Seurat object that contains a gene-by-cell matrix of inferred regulatory activity.
   - A foundation for label transfer, dimensionality reduction, or integration with scRNA-seq.
   
 ```{r gene-activities-interactive-table, echo=TRUE, eval=FALSE}

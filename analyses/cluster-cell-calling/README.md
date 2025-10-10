@@ -30,6 +30,7 @@ bsub < lsf-script.txt
 ```
 
 ## Folder content
+
 This folder contains a script tasked to calculate clusters and find differentially accessible peaks for each cluster across the project.
 
 ## Analysis strategy:
@@ -43,8 +44,6 @@ For more information, see [Signac clustering](https://stuartlab.org/signac/artic
 
 In order to interpret the clustering and decide properly on the resolution, we should consider tissue type, total number of cells in the dataset, and expected known cell types in there (i.e., tissue ecosystem). That would help to determine the correct number of clusters in a biologically meaningful way, considering known cell types and avoiding splitting clusters into unstable, small ones. That can also help to explore smaller clusters that might contain unknown or disease/patient-specific clusters that are still worth considering and investigating from the research/clinical perspective. 
 
-After inspection of the two rounds of results in the `cluster-cell-calling` module, user can remove clusters if necessary. This is relevant to projects in which we need to remove clusters from the object. This is the case, e.g., in PDX projects, there might be both human and mouse clusters identified after the `03-find-peaks.Rmd` step of the the `cluster-cell-calling` module. In this case, we recommend the user to run the `contamination-remove-cells-analysis` module that allows to remove clusters, repeat normalization and integration steps. This object can then be used for cell type annotation or other type of analysis.
-
 
 ## Folder structure 
 
@@ -56,19 +55,8 @@ The structure of this folder is as follows:
 ├── 03-find-peaks.Rmd
 ├── lsf-script.txt
 ├── plots
-|   ├── 01_cluster_cell_calling_{resolution}
-|   ├── 03_find_markers
-|   ├── Report_cluster_cell_calling_{resolution}_<Sys.Date()>.html
-|   ├── Report_cluster_cell_calling_{resolution}_<Sys.Date()>.pdf
-|   ├── Report_create-gene-activity-matrix_{resolution}_<Sys.Date()>.html
-|   ├── Report_create-gene-activity-matrix_{resolution}_<Sys.Date()>.pdf
-|   ├── Report_find_peaks_<Sys.Date()>.html
-|   └── Report_find_peaks_<Sys.Date()>.pdf
 ├── README.md
 ├── results
-|   ├── 01_cluster_cell_calling_{resolution}
-|   ├── 02_create_gene_activity_matrix
-|   └── 03_find_peaks
 ├── run-cluster-cell-calling-step1.R
 ├── run-cluster-cell-calling-step2.R
 ├── run-cluster-cell-calling.sh

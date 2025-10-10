@@ -150,13 +150,9 @@ suppressPackageStartupMessages({
   library(glue)
 
   library(htmlwidgets)
-  #BiocManager::install("clusterProfiler")
   library(clusterProfiler)
-
-  #BiocManager::install("enrichplot")
   library(enrichplot)
-
-  #BiocManager::install("org.Mm.eg.db")
+  library(DOSE)
   library(org.Hs.eg.db)
   library(org.Mm.eg.db) # Mouse gene annotation (use org.Hs.eg.db for human)
   
