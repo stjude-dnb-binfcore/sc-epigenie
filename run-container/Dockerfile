@@ -57,11 +57,11 @@ RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir \
       pandas==2.2.3 \
-      numpy==2.2.1 \
+      numpy==1.23.5 \
       scipy==1.14.1 \
       leidenalg \
       multiqc==1.25 \
-      macs3==3.0.0a7
+      MACS2==2.2.9.1
     
  
 

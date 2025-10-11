@@ -24,7 +24,8 @@ fastqc --version
 multiqc --version
 pandoc --version
 tex --version
-macs3 --version
+#macs3 --version
+macs2 --version
 
 # Run R script with all R packages
 Rscript -e "rmarkdown::render('01-run-test-packages.Rmd', clean = TRUE,
