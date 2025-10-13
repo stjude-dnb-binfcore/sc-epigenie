@@ -54,7 +54,7 @@ We recommend that users fork the `sc-epigenie` repository and then clone their f
 
 Navigate to the main page of the `stjude-dnb-binfcore/sc-epigenie` repository and click the "Fork" button.
 
-<img width="650" alt="how-to-fork-repo-1" src="https://github.com/stjude-dnb-binfcore/sc-epigenie/blob/add-logo/figures/img/how-to-fork-repo-1.png">
+<img width="650" alt="how-to-fork-repo-1" src="https://github.com/stjude-dnb-binfcore/sc-epigenie/blob/main/figures/img/how-to-fork-repo-1.png">
 
 
 2. Create Your Fork
@@ -62,12 +62,12 @@ Navigate to the main page of the `stjude-dnb-binfcore/sc-epigenie` repository an
 You can change the name of the forked repository (optional - unless you will use it for multiple projects). Click "Create fork" to proceed.
 
 
-<img width="650" alt="how-to-fork-repo-2" src="https://github.com/stjude-dnb-binfcore/sc-epigenie/blob/add-logo/figures/img/how-to-fork-repo-2.png">
+<img width="650" alt="how-to-fork-repo-2" src="https://github.com/stjude-dnb-binfcore/sc-epigenie/blob/main/figures/img/how-to-fork-repo-2.png">
 
 
 3. Enjoy your new project repo!
 
-<img width="650" alt="how-to-fork-repo-3" src="https://github.com/stjude-dnb-binfcore/sc-epigenie/blob/add-logo/figures/img/how-to-fork-repo-3.png">
+<img width="650" alt="how-to-fork-repo-3" src="https://github.com/stjude-dnb-binfcore/sc-epigenie/blob/main/figures/img/how-to-fork-repo-3.png">
 
 
 4. Clone Your Fork
