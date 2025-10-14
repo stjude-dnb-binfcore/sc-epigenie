@@ -40,8 +40,7 @@ module load singularity/4.1.1
 1. Pull the singularity container from the `sc-epigenie` root_dir
 
 ```
-singularity pull docker://achronistjude/singlecell-r4.4-seurat4.4-signac1.14:latest
-
+singularity pull docker://achronistjude/singlecell-r4.4-seurat4.4-signac1.16:latest
 ```
 
 
@@ -98,13 +97,13 @@ These folders cache history and user info. Then, kill the interactive session, s
 1. Pull the Docker Container from the `sc-epigenie` root_dir:
 
 ```
-docker pull docker://achroni/singlecell-r4.4-seurat4.4-signac1.14:latest
+docker pull docker://achroni/singlecell-r4.4-seurat4.4-signac1.16:latest
 ```
 
 2. Start and Run the Docker Container from the terminal:
 
 ```
-docker run --platform linux/amd64 --name review -d -e PASSWORD=ANYTHING -p 8787:8787 -v $PWD:/home/rstudio/sc-epigenie docker://achroni/singlecell-r4.4-seurat4.4-signac1.14:latest
+docker run --platform linux/amd64 --name review -d -e PASSWORD=ANYTHING -p 8787:8787 -v $PWD:/home/rstudio/sc-epigenie docker://achroni/singlecell-r4.4-seurat4.4-signac1.16:latest
 ```
 
 Start the container and open a terminal:
