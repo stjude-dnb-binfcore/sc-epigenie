@@ -1,6 +1,6 @@
 # Running the Container for Single-cell ATAC-seq workflow (scEpiGenie)
 
-We provide a Dockerfile and Definition file that include all tools, packages, and dependencies necessary for running the **scEpiGenie** analysis modules. These are customized for `Rstudio/R v4.4.0`, `Seurat v4.4.0` and `Signac v1.14.9`.
+We provide a Dockerfile and Definition file that include all tools, packages, and dependencies necessary for running the **scEpiGenie** analysis modules. These are customized for `Rstudio/R v4.4.0`, `Seurat v4.4.0` and `Signac v1.16.0`.
 
 ## Table of Contents
 
@@ -40,7 +40,7 @@ module load singularity/4.1.1
 1. Pull the singularity container from the `sc-epigenie` root_dir
 
 ```
-singularity pull docker://achronistjude/singlecell-r4.4-seurat4.4-signac1.14:latest
+singularity pull docker://achronistjude/singlecell-r4.4-seurat4.4-signac1.16:latest
 ```
 
 
@@ -96,13 +96,13 @@ These folders cache history and user info. Then, kill the interactive session, s
 1. Pull the Docker Container from the `sc-epigenie` root_dir:
 
 ```
-docker pull docker://achroni/singlecell-r4.4-seurat4.4-signac1.14:latest
+docker pull docker://achroni/singlecell-r4.4-seurat4.4-signac1.16:latest
 ```
 
 2. Start and Run the Docker Container from the terminal:
 
 ```
-docker run --platform linux/amd64 --name review -d -e PASSWORD=ANYTHING -p 8787:8787 -v $PWD:/home/rstudio/sc-epigenie docker://achroni/singlecell-r4.4-seurat4.4-signac1.14:latest
+docker run --platform linux/amd64 --name review -d -e PASSWORD=ANYTHING -p 8787:8787 -v $PWD:/home/rstudio/sc-epigenie docker://achroni/singlecell-r4.4-seurat4.4-signac1.16:latest
 ```
 
 Start the container and open a terminal:
