@@ -43,6 +43,8 @@ top_n_value_peaks <- yaml$top_n_value_peaks
 #annotation_file1 <- yaml$gene_markers_file_name_annotation_module
 #annotation_file2 <- yaml$reference_file_name_annotation_module
 integration_method <-  yaml$integration_method_clustering_module
+reference_file_name_annotation_module <- yaml$reference_file_name_annotation_module
+
 
 # Set variables for `project-updates` module
 results_filepath <- yaml$results_filepath

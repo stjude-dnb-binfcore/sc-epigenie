@@ -201,7 +201,7 @@ All results can be found here:
 - `r results_filepath`/`r cohort_value`/analyses/
 
 
-We used FastQC (v0.11.9) and multiqc (v1.25) to perform quality control tool for all libraries across the project from the raw sequencing reads. Next, we aligned these reads using CellRanger (v8.0.1) (10x Genomics). 
+We used FastQC (v0.11.9) and multiqc (v1.25) to perform quality control tool for all libraries across the project from the raw sequencing reads. Next, we aligned these reads using CellRanger ATAC (v2.1.0) (10x Genomics). 
 
 ## fastqc-analysis
 
@@ -382,6 +382,13 @@ For more information, please see: `r results_filepath`/`r cohort_value`/analyses
 
    - We used the **`r resolution_clustering_module`** resolution list for calling clusters. That included the following number of resolutions: **`r resolution_values`**.
    - We used the **`r resolution_list_find_markers`** resolution to identify differentially accessible peaks per cluster and explored the **`r top_n_value_peaks`** peaks.
+
+
+## integration-with-scrna-seq-data
+
+For more information, please see: `r results_filepath`/`r cohort_value`/analyses/integration-with-scrna-seq-data/plots
+
+   - We used the **`r reference_file_name_annotation_module`** object that contains the cell type annotation.
 
 
 # Future directions
