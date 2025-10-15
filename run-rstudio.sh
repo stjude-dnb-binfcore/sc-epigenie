@@ -30,7 +30,7 @@ END
 
 # Singularity call to start RStudio Container
 singularity exec --cleanenv -c -W ${workdir}/${version} \
-                 --bind .:/home/$USER,/research:/research,/hpcf:/hpcf,${workdir}/${version}/run:/run,${workdir}/${version}/tmp:/tmp,${workdir}/database.conf:/etc/rstudio/database.conf,${workdir}/${version}/var/lib/rstudio-server:/var/lib/rstudio-server singlecell-r4.4-seurat4.4-signac1.14_latest.sif \
+                 --bind .:/home/$USER,/research:/research,/hpcf:/hpcf,${workdir}/${version}/run:/run,${workdir}/${version}/tmp:/tmp,${workdir}/database.conf:/etc/rstudio/database.conf,${workdir}/${version}/var/lib/rstudio-server:/var/lib/rstudio-server singlecell-r4.4-seurat4.4-signac1.16_latest.sif \
     rserver --www-port ${PORT} \
             --secure-cookie-key-file "/tmp/rstudio-server/secure-cookie-key" \
             --auth-stay-signed-in-days=30 \
