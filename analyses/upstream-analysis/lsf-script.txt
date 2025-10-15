@@ -5,4 +5,6 @@
 #BSUB -R "rusage[mem=30GB] span[hosts=1]"
 #BSUB -cwd "."
 
-singularity exec ../../rstudio_4.4.0_seurat_4.4.0_latest.sif bash run-upstream-analysis.sh
+
+singularity exec ../../singlecell-r4.4-seurat4.4-signac1.16_latest.sif bash run-upstream-analysis.sh
+

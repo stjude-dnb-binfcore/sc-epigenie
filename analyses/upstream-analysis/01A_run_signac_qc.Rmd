@@ -174,25 +174,15 @@ suppressPackageStartupMessages({
   library(AnnotationHub)
   library(future)
   library(scooter)
-  
-  ####################################################
-  # These don't exist in the container - TO ADD!!! - June 10, 2025
-  #BiocManager::install("GenomeInfoDb") #translation between chromosome names
-  #BiocManager::install("biovizBase")
-  
-  # https://bioconductor.org/packages/release/bioc/vignettes/AnnotationHub/inst/doc/AnnotationHub.html#annotationhub-objects
   library(AnnotationHub)
-  #library(ensembldb)
   library(GenomeInfoDb) #translation between chromosome names
   library(biovizBase)
-  ####################################################
   
   # Evaluate ggrepel
   options(ggrepel.max.overlaps = Inf, repr.plot.width=12, repr.plot.height=8)
   
   # Evaluate Seurat R expressions asynchronously when possible using future package
   options(future.globals.maxSize = future_globals_value) 
-  #plan(multisession, workers = parallelly::availableCores())
   # If future is defaulting to multisession, override it to run in the main process. You can revert later using plan("multisession").
   plan("sequential") # Forces everything to run in main R session. 
 })
