@@ -143,6 +143,7 @@ Important Considerations:
 |  ├── cellranger-analysis
 |  ├── cluster-cell-calling
 |  ├── fastqc-analysis
+|  ├── integration-with-scrna-seq-data
 |  ├── integrative-analysis
 |  ├── project-updates
 |  ├── README.md
