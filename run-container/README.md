@@ -44,12 +44,11 @@ singularity pull docker://achronistjude/singlecell-r4.4-seurat4.4-signac1.16:lat
 ```
 
 
-
 ### 4. Start the Singularity Container
 
 #### a. Running Analysis Modules via LSF
 
-All analysis modules (except for `.analyses/cellranger-analysis`) are designed to be run while executing the container. User only needs to run the lsf script as described in the `README.md` files in each analysis module.
+All analysis modules (except for `./analyses/cellranger-analysis`) are designed to be run while executing the container. User only needs to run the lsf script as described in the `README.md` files in each analysis module.
 
 
 #### b. Running from the Terminal

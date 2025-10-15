@@ -6,3 +6,4 @@
 #BSUB -cwd "."
 
 singularity exec ../../singlecell-r4.4-seurat4.4-signac1.16_latest.sif bash run-integrative-analysis.sh
+

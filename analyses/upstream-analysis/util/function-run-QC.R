@@ -49,7 +49,7 @@ create_qc_metrics <- function(seurat_obj) {
 run_QC <- function(seurat_obj) {
   if (use_threshold_filtering == "YES"){
     
-    message("🔍 We will subset based on threshold values defined in the YAML.")
+    message("We will subset based on threshold values defined in the YAML.")
     
     seurat_obj <- subset(x = seurat_obj,
                          subset = 
@@ -65,11 +65,11 @@ run_QC <- function(seurat_obj) {
                            #mitochondrial < mitochondrial_value &
                            nucleosome_signal < nucleosome_signal_value &
                            TSS.enrichment > TSS.enrichment_value)
-    message("✅ Filtering based on fixed thresholds complete.")
+    message("Filtering based on fixed thresholds complete.")
     
   } else {
     
-    message("🔍 We will subset based on percentile for filtering. That means that we will set thresholds via the quantile function that differentiates between bottom 2% and everything else.")
+    message("We will subset based on percentile for filtering. That means that we will set thresholds via the quantile function that differentiates between bottom 2% and everything else.")
     
     # Calculate thresholds using quantiles (without print)
     # https://github.com/mousepixels/sanbomics_scripts/blob/main/scATAC_intro_R.Rmd
@@ -87,7 +87,7 @@ run_QC <- function(seurat_obj) {
                            blacklist_ratio < high_blr &
                            nucleosome_signal < hig_ns &
                            TSS.enrichment > low_ts)
-    message("✅ Filtering based on percentiles complete.")
+    message("Filtering based on percentiles complete.")
     
   } 
   
