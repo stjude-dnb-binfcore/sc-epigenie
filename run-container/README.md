@@ -1,4 +1,4 @@
-# Running the Container for scEpiGenie: A Workflow for Single-cell ATAC-seq (scATAC-seq)
+# Running the Container for Single-cell ATAC-seq workflow (scEpiGenie)
 
 We provide a Dockerfile and Definition file that include all tools, packages, and dependencies necessary for running the **scEpiGenie** analysis modules. These are customized for `Rstudio/R v4.4.0`, `Seurat v4.4.0` and `Signac v1.14.9`.
 
@@ -41,16 +41,14 @@ module load singularity/4.1.1
 
 ```
 singularity pull docker://achronistjude/singlecell-r4.4-seurat4.4-signac1.14:latest
-
 ```
-
 
 
 ### 4. Start the Singularity Container
 
 #### a. Running Analysis Modules via LSF
 
-All analysis modules (except for `.analyses/cellranger-analysis`) are designed to be run while executing the container. User only needs to run the lsf script as described in the `README.md` files in each analysis module.
+All analysis modules (except for `./analyses/cellranger-analysis`) are designed to be run while executing the container. User only needs to run the lsf script as described in the `README.md` files in each analysis module.
 
 
 #### b. Running from the Terminal
