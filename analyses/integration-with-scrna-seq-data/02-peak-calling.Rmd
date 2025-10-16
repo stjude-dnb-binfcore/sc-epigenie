@@ -350,7 +350,7 @@ We will filter out and keep the first 3 top markers by cell type.
 
 ```{r}
 top_markers <- markers %>% group_by(cluster) %>% top_n(n = 3, wt = avg_log2FC)
-print(top_markers)
+#print(top_markers)
 ```
 
 ```{r top-markers-interactive-table, echo=TRUE}
