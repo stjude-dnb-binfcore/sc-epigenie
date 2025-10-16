@@ -242,19 +242,32 @@ process_fragments(yaml_files)
 ```
 
 ```{r create-fragment-list, echo=TRUE}
-# Build a list of fragment file paths, one for each sample
-# These are the corrected .tsv.gz files where the barcodes were prefixed with the sample ID
+# Attach appropriate fragments files to use for plotting later
 fragment_paths <- file.path(yaml$data_dir, sample_name, "outs", "fragments.tsv.gz")
 
-fragment_list <- mapply(function(sample, frag_path) {
-  matching_cells <- grep(paste0("^", sample, ":"), colnames(seurat_obj), value = TRUE)
 
-  CreateFragmentObject(path = frag_path, cells = matching_cells)
+fragment_list <- mapply(function(sample, frag_path) {
+  if (!file.exists(frag_path)) {
+    warning("Fragment file not found for sample: ", sample)
+    return(NULL)
+  }
+  matching_cells <- paste0(
+    str_remove(grep(paste0("^", sample, ":"), colnames(seurat_obj), value = TRUE), pattern = paste0(sample, ":")),
+    "-1"
+  )
+  names(matching_cells) <- grep(paste0("^", sample, ":"), colnames(seurat_obj), value = TRUE)
+  
+  tryCatch({
+    CreateFragmentObject(path = frag_path, cells = matching_cells)
+  }, error = function(e) {
+    warning("Failed to create fragment object for sample: ", sample, " (", e$message, ")")
+    return(NULL)
+  })
 }, sample_name, fragment_paths, SIMPLIFY = FALSE)
 
-# Assign the list of Fragment objects to the assay with the peaks
+# Remove any NULL entries in case of failure
+fragment_list <- Filter(Negate(is.null), fragment_list)
 seurat_obj[[assay]]@fragments <- fragment_list
-# lapply(Fragments(seurat_obj), function(x) x@path) # Optional: confirm it worked
 ```
 
 # Calling Peaks (with MACS2) on grouped fragments by cell type
@@ -272,7 +285,7 @@ peaks <- CallPeaks(
   object = seurat_obj,
   group.by = "predicted.id")
 
-write.table(peaks, file = paste(results_dir, "/", "peaks_all.tsv", sep = ""), sep = "\t", quote = FALSE, row.names = FALSE)
+write.table(peaks, file = paste(results_dir, "/", "peaks.tsv", sep = ""), sep = "\t", quote = FALSE, row.names = FALSE)
 ```
 
 ## Interactive Table of Calling peaks by cell type
@@ -319,6 +332,35 @@ We aim to identify and visualize the top differentially accessible peaks (DAPs) 
 ```{r find-markers, echo=TRUE}
 # Get unique cell types from predicted.id
 cell_types <- unique(seurat_obj$predicted.id)
+
+
+all_markers <- list()
+
+for (sample in sample_name) {
+  # Subset to cells from this sample
+  sample_cells <- grep(paste0("^", sample, ":"), colnames(seurat_obj), value = TRUE)
+  seurat_obj_sample <- subset(seurat_obj, cells = sample_cells)
+  
+  # Find markers within this sample
+  markers <- FindAllMarkers(
+    seurat_obj_sample,
+    group.by = "predicted.id",
+    only.pos = TRUE,
+    min.pct = 0.1,
+    logfc.threshold = 0.1,
+    min.cells.group = 1
+  )
+  
+  # Add a sample column
+  markers$sample <- sample
+  all_markers[[sample]] <- markers
+}
+
+# Combine results for all samples
+markers_by_sample <- do.call(rbind, all_markers)
+
+
+
 
 # Find markers 
 # Try adjusting min.pct or logfc.threshold to be less stringent - useful for cases with groups of very few cells
@@ -380,6 +422,42 @@ for (i in seq_len(nrow(top_markers))) {
   ggsave(plot_path, plot = p, width = 10, height = 6)
   
   message("Saved plot to: ", plot_path)
+}
+
+
+
+
+
+
+for (sample in sample_name) {
+  # Subset the Seurat object for the current sample
+  sample_cells <- grep(paste0("^", sample, ":"), colnames(seurat_obj), value = TRUE)
+  seurat_obj_sample <- subset(seurat_obj, cells = sample_cells)
+  
+  for (i in seq_len(nrow(top_markers))) {
+    gene <- top_markers$gene[i]
+    ct <- top_markers$cluster[i]
+    
+    message("Plotting ", gene, " for cell type ", ct, " in sample ", sample)
+    
+    p <- CoveragePlot(
+      object = seurat_obj_sample,
+      region = gene,
+      group.by = "predicted.id",
+      idents = ct,
+      ranges = peaks,
+      ranges.title = "MACS2",
+      assay = assay
+    )
+    
+    print(p)
+    
+    # Save the plot as PNG, including sample name in the filename
+    plot_path <- file.path(coverage_plots_dir, paste0("CoveragePlot_", sample, "_", ct, "_", gene, ".png"))
+    ggsave(plot_path, plot = p, width = 10, height = 6)
+    
+    message("Saved plot to: ", plot_path)
+  }
 }
 ```
 
