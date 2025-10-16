@@ -376,7 +376,7 @@ clusters <- levels(seurat_obj)
 
 # Add feature column to top_n da_peaks data frame
 top_n_value$feature <- top_n_value$gene
-# Palot top da_peaks
+# Plot top da_peaks
 export_cluster_peak_plots(seurat_obj = seurat_obj, fc_df_combined = top_n_value, top_n = top_n_value_peaks, min.cutoff_value = min.cutoff_value, plots_dir = coverage_plots_dir, clustering_column = use_res_col)
 ``` 
 
