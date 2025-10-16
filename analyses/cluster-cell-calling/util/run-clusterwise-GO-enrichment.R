@@ -63,24 +63,46 @@ run_clusterwise_GO_enrichment <- function(closest_genes_all,
     ego <- pairwise_termsim(ego)
     ego_results[[as.character(clust)]] <- ego
     
-    # Save and print plots
-    bar <- print(barplot(ego, showCategory = 20) +
-      ggtitle(glue::glue("GO Enrichment - Cluster {clust} (Barplot)")))
-    ggsave(file.path(plots_dir, glue::glue("barplot-cluster{clust}_ego.png")),
-           plot = bar, width = 15, height = 8)
-    
-    dot <- print(dotplot(ego, showCategory = 20) +
-      ggtitle(glue::glue("GO Enrichment - Cluster {clust} (Dotplot)")))
-    ggsave(file.path(plots_dir, glue::glue("dotplot-cluster{clust}_ego.png")),
-           plot = dot, width = 15, height = 8)
-    
-    emap <- print(emapplot(ego, showCategory = 20, layout.params = list(layout = "kk")) +
-      ggtitle(glue::glue("GO Enrichment - Cluster {clust} (Emapplot)")))
-    ggsave(file.path(plots_dir, glue::glue("emapplot-cluster{clust}_ego.png")),
-           plot = emap, width = 15, height = 8)
+    if (!is.null(ego) && nrow(as.data.frame(ego)) > 0) {
+      # Barplot
+      cat("Attempting barplot for cluster:", clust, "\n")
+      try({
+        suppressWarnings({
+          bar <- print(barplot(ego, showCategory = 20) +
+            ggtitle(glue::glue("GO Enrichment - Cluster {clust} (Barplot)")))
+          ggsave(file.path(plots_dir, glue::glue("barplot-cluster{clust}_ego.png")),
+                 plot = bar, width = 15, height = 8)
+        })
+      }, silent = TRUE)
+      
+      # Dotplot
+      cat("Attempting dotplot for cluster:", clust, "\n")
+      try({
+        suppressWarnings({
+          dot <- print(dotplot(ego, showCategory = 20) +
+            ggtitle(glue::glue("GO Enrichment - Cluster {clust} (Dotplot)")))
+          ggsave(file.path(plots_dir, glue::glue("dotplot-cluster{clust}_ego.png")),
+                 plot = dot, width = 15, height = 8)
+        })
+      }, silent = TRUE)
+      
+      # Emapplot
+      cat("Attempting emapplot for cluster:", clust, "\n")
+      try({
+        suppressWarnings({
+          emap <- print(emapplot(ego, showCategory = 20, layout = "kk") +
+            ggtitle(glue::glue("GO Enrichment - Cluster {clust} (Emapplot)")))
+          ggsave(file.path(plots_dir, glue::glue("emapplot-cluster{clust}_ego.png")),
+                 plot = emap, width = 15, height = 8)
+      })
+    }, silent = TRUE)
+      
+      } else {
+        message("No significant GO terms for cluster: ", clust)
+        }
     
   }
-  message("✔ Saved GO enrichment plots for cluster ", clust)
+  message("Saved GO enrichment plots for cluster ", clust)
   return(ego_results)
 }
 ############################################################################################################

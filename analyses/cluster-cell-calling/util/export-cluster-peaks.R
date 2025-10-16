@@ -41,7 +41,7 @@ export_cluster_peak_plots <- function(seurat_obj,
   # Use cluster levels from Seurat object if not provided
   if (is.null(clusters)) {
     clusters <- levels(factor(seurat_obj@meta.data[[clustering_column]]))
-    message(glue::glue("📌 Using clusters from column '{clustering_column}': {paste(clusters, collapse = ', ')}"))
+    message(glue::glue("Using clusters from column '{clustering_column}': {paste(clusters, collapse = ', ')}"))
   }
   
   for (clust in clusters) {
@@ -60,9 +60,9 @@ export_cluster_peak_plots <- function(seurat_obj,
       region <- format_peak(peak_name)
       region <- as.character(peak_name)
 
-      # ⛔ Skip if peak not found
+      # Skip if peak not found
       if (!(peak_name %in% rownames(seurat_obj[["peaks"]]))) {
-        warning("❌ Peak not found in Seurat object: ",  peak_name)
+        warning("Peak not found in Seurat object: ",  peak_name)
         next
       }
       
@@ -104,7 +104,7 @@ export_cluster_peak_plots <- function(seurat_obj,
       #htmlwidgets::saveWidget(cb, file = browser_file, selfcontained = TRUE)
     }
   }
-  message("✔ Done Processing cluster: ", clust)
+  message("Done Processing cluster: ", clust)
   
 }
 ############################################################################################################

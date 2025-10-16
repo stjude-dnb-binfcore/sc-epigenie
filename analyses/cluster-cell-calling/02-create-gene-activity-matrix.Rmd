@@ -226,7 +226,7 @@ By manually building the gene activity matrix, we ensure that every step is full
 
 
 ```{r compute-gene-activities-manual, echo=TRUE}
-# Indicates whether or not to use miQC
+# Indicates whether or not to use the GeneActivity() function.
 if (compute_gene_activities_manual == "YES"){
   print("We will compute the gene activities matrix manually.")
   
@@ -249,14 +249,14 @@ if (compute_gene_activities_manual == "YES"){
 
   # Step 4: Subset peak count matrix to peaks in filtered peaks_gr
   # Convert back GRanges to strings
-  filtered_peak_names <- paste0(seqnames(peaks_gr), "-", start(peaks_gr), "-", end(peaks_gr))
+  #filtered_peak_names <- paste0(seqnames(peaks_gr), "-", start(peaks_gr), "-", end(peaks_gr))
 
   # Subset counts matrix to matching rows
-  counts <- GetAssayData(seurat_obj, assay = "peaks", layer = "counts")
-  counts <- counts[filtered_peak_names, ]
+  #counts <- GetAssayData(seurat_obj, assay = "peaks", layer = "counts")
+  #counts <- counts[filtered_peak_names, ]
 
   # Confirm match
-  stopifnot(nrow(counts) == length(peaks_gr))
+  #stopifnot(nrow(counts) == length(peaks_gr))
 
   # Step 5: Find overlaps
   # You're explicitly overlapping our own GRanges of peaks with our own gene annotations.
@@ -264,20 +264,48 @@ if (compute_gene_activities_manual == "YES"){
   # User might be using full gene bodies or custom promoter definitions.
   overlaps <- findOverlaps(peaks_gr, anno)
 
-  # Step 6: Peak-to-gene mapping
-  peak2gene <- sparseMatrix(i = queryHits(overlaps),j = subjectHits(overlaps), dims = c(length(peaks_gr), length(anno)))
+    # Subset peaks_gr regions to regions which had a hit in the findOverlaps results
+  peak_region_hits <- peaks_gr[queryHits(overlaps)]
 
-  # Step 7: Multiply to get gene-by-cell activity matrix
-  gene_activity_counts <- t(peak2gene) %*% counts
+  # Subset anno regions to regions which had a peaks region overlapping them in the findOverlaps results
+  anno_region_hits <- anno[subjectHits(overlaps)]
 
-  # Step 8: Clean and assign gene names
-  gene_names <- as.character(anno$gene_name)
-  gene_names[is.na(gene_names) | gene_names == ""] <- paste0("Gene_", seq_len(sum(is.na(gene_names) | gene_names == "")))
-  gene_names <- make.unique(gene_names)
-  rownames(gene_activity_counts) <- gene_names
+  # Create a data frame which records the peak regions with overlapping hits,
+  # the anno region which it overlaps,
+  # the corresponding gene names from the anno regions,
+  # and the gene ids from the anno regions
+  peaks_genes_df <- data.frame("peak_regions" = paste0(seqnames(peak_region_hits), "-", start(peak_region_hits), "-", end(peak_region_hits)),
+                               "anno_regions" = paste0(seqnames(anno_region_hits), "-", start(anno_region_hits), "-", end(anno_region_hits)),
+                               "gene_name" = anno_region_hits$gene_name,
+                               "gene_id" = anno_region_hits$gene_id)
+
+  # Since some regions may not have a gene name annotation, use gene ids for those regions
+  # Make a column which uses gene_id if gene_name is missing
+  peaks_genes_df$gene <- ifelse(peaks_genes_df$gene_name != "", peaks_genes_df$gene_name, peaks_genes_df$gene_id)
   
-  # Optionally: add gene activity matrix as a new assay to your Seurat object
-  seurat_obj[["GeneActivity"]] <- CreateAssayObject(counts = gene_activity_counts)
+  # If a peak region matches the same gene multiple times, only want to count it towards gene activity once
+  # Otherwise we will be falsely inflating the gene activity contributed from the duplicated peak region
+  # So deduplicate the peaks_genes_df based on the peak region column and gene column
+
+  # Note this can happens for things like genes with multiple transcript isoforms for example
+  # So then the peak region would be the same and even the anno region might be the same
+  # And the gene name and id is the same, but the transcript ID is where it differs, which cause multiple hits for the same peak region with the same gene name/id
+  peaks_genes_df_dedup <- distinct(peaks_genes_df, peak_regions, gene, .keep_all= TRUE)
+
+  # Generate a matrix from the peak counts matrix which includes only those peak regions identified to overlap anno regions
+  peaks_genes_matrix <- seurat_obj@assays$peaks@counts[peaks_genes_df_dedup$peak_regions,]
+
+  # Set rownames for this matrix to the gene annotations
+  # Note that matrices can have duplicated rownames
+  # So this matrix can and likely will have multiple rows for the same gene 
+  # This happens when multiple different peak regions overlap the same gene region from the anno regions
+  rownames(peaks_genes_matrix) <- peaks_genes_df_dedup$gene
+
+  # Collapse matrix to have one row per gene by summing all rows with the same gene name
+  peaks_genes_matrix_sum <- DelayedArray::rowsum(peaks_genes_matrix, rownames(peaks_genes_matrix))
+
+  # Add the gene activity matrix to the Seurat object
+  seurat_obj[["RNA"]] <- CreateAssayObject(counts = peaks_genes_matrix_sum)
   ###--------------------------------------------
   
   } else {
@@ -291,7 +319,7 @@ if (compute_gene_activities_manual == "YES"){
    gene.activities <- GeneActivity(seurat_obj)
 
    # Optionally: add gene activity matrix as a new assay to your Seurat object
-   seurat_obj[["GeneActivity"]] <- CreateAssayObject(counts = gene.activities)
+   seurat_obj[["RNA"]] <- CreateAssayObject(counts = gene.activities)
 }
 ```
 
@@ -300,18 +328,18 @@ Now we can visualize the activities of canonical marker genes to help interpret 
 ```{r normalize-matrix, echo=TRUE}
 # Normalize the gene activity data (optional but common)
 seurat_obj <- NormalizeData(seurat_obj, 
-                            assay = "GeneActivity",
+                            assay = "RNA",
                             normalization.method = 'LogNormalize',
-                            scale.factor = median(seurat_obj$nCount_GeneActivity))
+                            scale.factor = median(seurat_obj$nCount_RNA))
 
-seurat_obj <- FindVariableFeatures(seurat_obj, assay = "GeneActivity")
+seurat_obj <- FindVariableFeatures(seurat_obj, assay = "RNA")
 
 # View features
-# VariableFeatures(seurat_obj[["GeneActivity"]])[1:10]
+# VariableFeatures(seurat_obj[["RNA"]])[1:10]
 ```
 
 ```{r feature-plot, echo=TRUE, eval=FALSE}
-DefaultAssay(seurat_obj) <- 'GeneActivity'
+DefaultAssay(seurat_obj) <- 'RNA'
 
 print(FeaturePlot(
   object = seurat_obj,
@@ -325,7 +353,7 @@ print(FeaturePlot(
 
 Now we have:
 
-  - A new assay "GeneActivity" in the Seurat object that contains a gene-by-cell matrix of inferred regulatory activity.
+  - A new assay "RNA" in the Seurat object that contains a gene-by-cell matrix of inferred regulatory activity.
   - A foundation for label transfer, dimensionality reduction, or integration with scRNA-seq.
   
 ```{r gene-activities-interactive-table, echo=TRUE, eval=FALSE}

@@ -150,13 +150,9 @@ suppressPackageStartupMessages({
   library(glue)
 
   library(htmlwidgets)
-  #BiocManager::install("clusterProfiler")
   library(clusterProfiler)
-
-  #BiocManager::install("enrichplot")
   library(enrichplot)
-
-  #BiocManager::install("org.Mm.eg.db")
+  library(DOSE)
   library(org.Hs.eg.db)
   library(org.Mm.eg.db) # Mouse gene annotation (use org.Hs.eg.db for human)
   
@@ -228,6 +224,39 @@ Idents(object = seurat_obj) <- use_res_col
 # View cell identities, get summary table
 #Idents(seurat_obj)
 table(Idents(seurat_obj))
+
+# Attach appropriate fragments files to use for plotting later
+sample_name <- unique(as.character(seurat_obj$ID))
+sample_name <- sort(sample_name, decreasing = FALSE)
+sample_name
+
+fragment_paths <- file.path(yaml$data_dir, sample_name, "outs", "fragments.tsv.gz")
+
+
+fragment_list <- mapply(function(sample, frag_path) {
+  if (!file.exists(frag_path)) {
+    warning("Fragment file not found for sample: ", sample)
+    return(NULL)
+  }
+  matching_cells <- paste0(
+    str_remove(grep(paste0("^", sample, ":"), colnames(seurat_obj), value = TRUE), pattern = paste0(sample, ":")),
+    "-1"
+  )
+  names(matching_cells) <- grep(paste0("^", sample, ":"), colnames(seurat_obj), value = TRUE)
+  
+  tryCatch({
+    CreateFragmentObject(path = frag_path, cells = matching_cells)
+  }, error = function(e) {
+    warning("Failed to create fragment object for sample: ", sample, " (", e$message, ")")
+    return(NULL)
+  })
+}, sample_name, fragment_paths, SIMPLIFY = FALSE)
+
+# Remove any NULL entries in case of failure
+fragment_list <- Filter(Negate(is.null), fragment_list)
+seurat_obj[[assay]]@fragments <- fragment_list
+
+
 ```
 
 # Find differentially accessible peaks
@@ -327,18 +356,30 @@ datatable(fc_df_combined,
 
 We can plot the frequency of Tn5 integration across regions of the genome for cells grouped by cluster, cell type, or any other metadata stored in the object for any genomic region using the [CoveragePlot()](https://stuartlab.org/signac/reference/coverageplot) function. These represent pseudo-bulk accessibility tracks, where signal from all cells within a group have been averaged together to visualize the DNA accessibility in a region (thanks to Andrew Hill for giving the inspiration for this function in his excellent [blog post](https://andrewjohnhill.com/blog/2019/04/12/streamlining-scatac-seq-visualization-and-analysis/)). Alongside these accessibility tracks we can visualize other important information including gene annotation, peak coordinates, and genomic links (if they’re stored in the object).
 
-For more information, see [Plotting genomic regions](https://stuartlab.org/signac/articles/pbmc_vignette#plotting-genomic-regions) and [Visualization vignette](https://stuartlab.org/signac/articles/visualization).
+For more information, see [Plotting genomic regions](https://stuartlab.org/signac/articles/pbmc_vignette#plotting-genomic-regions), [Visualization vignette](https://stuartlab.org/signac/articles/visualization), and [Tutorial using DA peaks](https://www.youtube.com/watch?v=pRi4IEb361w).
 
-```{r coverage-plot, fig.width = 15, fig.height = 8, fig.fullwidth = TRUE, echo=TRUE}
+```{r coverage-plot-fold-change, fig.width = 15, fig.height = 8, fig.fullwidth = TRUE, echo=TRUE, eval=FALSE}
 # Loop over clusters
 Idents(seurat_obj) <- use_res_col
 clusters <- levels(seurat_obj)
 
 # Clean feature names before loop
 fc_df_combined$feature <- sub("\\.\\.\\..*$", "", fc_df_combined$feature)
-
+# Plot top fold_changes
 export_cluster_peak_plots(seurat_obj = seurat_obj, fc_df_combined = fc_df_combined, top_n = top_n_value_peaks, min.cutoff_value = min.cutoff_value, plots_dir = coverage_plots_dir, clustering_column = use_res_col)
 ``` 
+
+```{r coverage-plot-da-peaks, fig.width = 15, fig.height = 8, fig.fullwidth = TRUE, echo=TRUE}
+# Loop over clusters
+Idents(seurat_obj) <- use_res_col
+clusters <- levels(seurat_obj)
+
+# Add feature column to top_n da_peaks data frame
+top_n_value$feature <- top_n_value$gene
+# Plot top da_peaks
+export_cluster_peak_plots(seurat_obj = seurat_obj, fc_df_combined = top_n_value, top_n = top_n_value_peaks, min.cutoff_value = min.cutoff_value, plots_dir = coverage_plots_dir, clustering_column = use_res_col)
+``` 
+
 
 # Peak coordinates
 
