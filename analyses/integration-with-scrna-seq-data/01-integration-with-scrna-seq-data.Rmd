@@ -284,7 +284,7 @@ plot <- ggplot(atac_query@meta.data, aes(x = prediction.score.max)) +
   geom_histogram(binwidth = 0.05, fill = "skyblue", color = "white") +
   geom_vline(xintercept = 0.5, color = "red", linetype = "dashed", size = 1) +
   labs(title = "Histogram of Prediction Scores", x = "prediction.score.max", y = "Count") +
-  theme_plot()
+  theme_Publication()
 print(plot)
 ggsave(file = name, plot = plot, width = 8, height = 6, device = "png")
 
@@ -301,7 +301,7 @@ name <- paste0(plots_dir, "/", glue::glue("plot-umap-cells-prediction.score.max.
 p <- DimPlot(atac_query, reduction = "umap", group.by = "score_group") +
   scale_color_manual(values = c("Above 0.5" = "#1b9e77", "0.5 or Below" = "#d95f02")) +
   labs(title = "UMAP: Cells by Prediction Score Group") +
-  theme_plot()
+  theme_Publication()
 print(p)
 ggsave(file = name, plot = p, width = 8, height = 6, device = "png")
 
