@@ -198,7 +198,6 @@ if (!dir.exists(go_plots_dir)) {
 # Source functions
 source(paste0(util_dir, "/util/run-clusterwise-GO-enrichment.R"))
 source(paste0(analysis_dir, "/util/function_process_fragments.R"))
-
 ```
 
 ```{r echo=FALSE, warning=FALSE}
