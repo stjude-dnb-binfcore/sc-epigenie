@@ -226,7 +226,7 @@ By manually building the gene activity matrix, we ensure that every step is full
 
 
 ```{r compute-gene-activities-manual, echo=TRUE}
-# Indicates whether or not to use miQC
+# Indicates whether or not to use the GeneActivity() function.
 if (compute_gene_activities_manual == "YES"){
   print("We will compute the gene activities matrix manually.")
   
