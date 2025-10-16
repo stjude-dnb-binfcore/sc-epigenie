@@ -34,7 +34,7 @@ compute_fold_change_peaks <- function(seurat_obj, da_peaks, results_dir, assay =
   # 5. Save to TSV
   output_file <- file.path(results_dir, "fc_df_combined.tsv")
   write_tsv(fc_df_combined, file = output_file)
-  message("✔ Fold change results saved to: ", output_file)
+  message("Fold change results saved to: ", output_file)
   
   return(fc_df_combined)
 }

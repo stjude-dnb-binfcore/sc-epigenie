@@ -102,7 +102,7 @@ run_clusterwise_GO_enrichment <- function(closest_genes_all,
         }
     
   }
-  message("✔ Saved GO enrichment plots for cluster ", clust)
+  message("Saved GO enrichment plots for cluster ", clust)
   return(ego_results)
 }
 ############################################################################################################
