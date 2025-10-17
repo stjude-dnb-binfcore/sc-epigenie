@@ -366,6 +366,8 @@ datatable(top_markers,
 
 We will loop over each cell type and generate CoveragePlot by gene and marker. We can plot the frequency of Tn5 integration across regions of the genome for cells grouped by cluster, cell type, or any other metadata stored in the object for any genomic region using the [CoveragePlot()](https://stuartlab.org/signac/reference/coverageplot) function. These plots represent pseudo-bulk chromatin accessibility, where accessibility signal from all cells in a group is aggregated and visualized as a single track (thanks to Andrew Hill for giving the inspiration for this function in his excellent [blog post](https://andrewjohnhill.com/blog/2019/04/12/streamlining-scatac-seq-visualization-and-analysis/)). Alongside these accessibility tracks we can visualize other important information including gene annotation, peak coordinates, and genomic links (if they’re stored in the object). For more information, see [Plotting genomic regions](https://stuartlab.org/signac/articles/pbmc_vignette#plotting-genomic-regions) and [Visualization vignette](https://stuartlab.org/signac/articles/visualization).
 
+### Overall
+
 ```{r coverage-plot, fig.width = 10, fig.height = 6, fig.fullwidth = TRUE, echo=TRUE}
 for (i in seq_len(nrow(top_markers))) {
   gene <- top_markers$gene[i]
@@ -385,16 +387,48 @@ for (i in seq_len(nrow(top_markers))) {
   print(p)
   
   # Save the plot as PNG
-  plot_path <- file.path(coverage_plots_dir, paste0("CoveragePlot_", ct, "_", gene, ".png"))
+  plot_path <- file.path(coverage_plots_dir, paste0("CoveragePlot_overall_", ct, "_", gene, ".png"))
   ggsave(plot_path, plot = p, width = 10, height = 6)
   
   message("Saved plot to: ", plot_path)
 }
 ```
 
+### Split by ID
+
+
+```{r coverage-plot-split-by-id, fig.width = 10, fig.height = 15, fig.fullwidth = TRUE, echo=TRUE}
+for (i in seq_len(nrow(top_markers))) {
+  gene <- top_markers$gene[i]
+  ct <- top_markers$cluster[i]
+  
+  message("Plotting ", gene, " for cell type ", ct)
+  
+  p <- CoveragePlot(
+    object = seurat_obj,
+    region = gene,
+    group.by = "predicted.id",
+    split.by = "ID",
+    ranges = peaks,
+    ranges.title = "MACS2",
+    assay = assay) 
+  
+  print(p)
+  
+  # Save the plot as PNG
+  plot_path <- file.path(coverage_plots_dir, paste0("CoveragePlot_ID_", ct, "_", gene, ".png"))
+  ggsave(plot_path, plot = p, width = 10, height = 15)
+  
+  message("Saved plot to: ", plot_path)
+}
+```
+
+
 ## Plotting shared genomic regions across cell types
 
-```{r coverage-plot-shared-peaks, fig.width = 10, fig.height = 6, fig.fullwidth = TRUE, echo=TRUE}
+### Overall
+
+```{r coverage-plot-shared-peaks-overall, fig.width = 10, fig.height = 6, fig.fullwidth = TRUE, echo=TRUE}
 # If `markers` contains DE peaks across cell types (from Signac peak assay)
 shared_peaks <- markers %>%
   group_by(gene) %>%
@@ -423,8 +457,47 @@ for (region_to_plot in top_n_peaks) {
   
   print(p)
   # Save plot
-  plot_path <- file.path(coverage_plots_dir, paste0("CoveragePlot_all_cell_types_shared_genes_", region_to_plot, ".png"))
+  plot_path <- file.path(coverage_plots_dir, paste0("CoveragePlot_all_cell_types_shared_genes_overall_", region_to_plot, ".png"))
   ggsave(plot_path, plot = p, width = 10, height = 6)
+  
+  message("Saved plot to: ", plot_path)
+}
+``` 
+
+### Split by ID
+
+```{r coverage-plot-shared-peaks-split-by-id, fig.width = 10, fig.height = 15, fig.fullwidth = TRUE, echo=TRUE}
+# If `markers` contains DE peaks across cell types (from Signac peak assay)
+shared_peaks <- markers %>%
+  group_by(gene) %>%
+  summarize(n_groups = n_distinct(cluster)) %>%
+  filter(n_groups > 1) %>%
+  arrange(desc(n_groups))
+
+region_to_plot <- shared_peaks$gene[1]
+
+# Step 2: Select top N shared peaks (e.g., top 3)
+top_n_peaks <- head(shared_peaks$gene, 3)
+
+# Step 3: Loop over each shared peak and generate a CoveragePlot
+for (region_to_plot in top_n_peaks) {
+  
+  message("Plotting shared peak: ", region_to_plot)
+  
+  p <- CoveragePlot(
+    object = seurat_obj,
+    region = region_to_plot,
+    group.by = "predicted.id",  # show all groups in same plot
+    split.by = "ID",
+    ranges = peaks,
+    ranges.title = "MACS2",
+    assay = assay  
+  )
+  
+  print(p)
+  # Save plot
+  plot_path <- file.path(coverage_plots_dir, paste0("CoveragePlot_all_cell_types_shared_genes_ID_", region_to_plot, ".png"))
+  ggsave(plot_path, plot = p, width = 10, height = 15)
   
   message("Saved plot to: ", plot_path)
 }
