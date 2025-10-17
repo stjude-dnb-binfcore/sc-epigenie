@@ -197,7 +197,7 @@ if (!dir.exists(go_plots_dir)) {
 
 # Source functions
 source(paste0(util_dir, "/util/run-clusterwise-GO-enrichment.R"))
-source(paste0(analysis_dir, "/util/function_process_fragments.R"))
+#source(paste0(analysis_dir, "/util/function_process_fragments.R"))
 ```
 
 ```{r echo=FALSE, warning=FALSE}
@@ -235,10 +235,10 @@ print(sample_name)
 
 ```{r process-data, echo=TRUE}
 # Example YAML
-yaml_files <- list(metadata_dir = yaml$metadata_dir, metadata_file = yaml$metadata_file, data_dir = yaml$data_dir)
+# yaml_files <- list(metadata_dir = yaml$metadata_dir, metadata_file = yaml$metadata_file, data_dir = yaml$data_dir)
 
 # Run
-process_fragments(yaml_files)
+# process_fragments(yaml_files)
 ```
 
 ```{r create-fragment-list, echo=TRUE}
