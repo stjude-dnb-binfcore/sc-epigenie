@@ -35,69 +35,46 @@ process_fragments <- function(yaml) {
   sample_name <- sort(unique(as.character(project_metadata$ID)), decreasing = FALSE)
   print(sample_name)
   
-  # Check if all processed files and indexes exist
-  all_files_exist <- all(sapply(sample_name, function(sample) {
-    input_path <- file.path(yaml$data_dir, sample, "outs")
-    fragments_gz <- file.path(input_path, "fragments.tsv.gz")
-    index_file <- paste0(fragments_gz, ".tbi")
-    file.exists(fragments_gz) && file.exists(index_file)
-  }))
-  
-  if (all_files_exist) {
-    message("All processed fragment files and indexes already exist. Skipping processing.")
-    return(invisible(NULL))
-  }
-  
-  # Step 1: Rename barcodes and re-compress
   for (sample in sample_name) {
     input_path <- file.path(yaml$data_dir, sample, "outs")
     fragments_gz <- file.path(input_path, "fragments.tsv.gz")
+    index_file <- paste0(fragments_gz, ".tbi")
     backup_fragments_gz <- file.path(input_path, "fragments_original.tsv.gz")
-    fragments_tmp <- file.path(input_path, "fragments.tsv")
     
-    # Backup original if not already backed up
+    # Check if processed fragments and index exist
+    if (file.exists(fragments_gz) && file.exists(index_file)) {
+      message("Processed fragments and index exist for sample: ", sample, ". Skipping to next sample.")
+      next
+    }
+    
+    # If not, check for original backup and process if needed
     if (!file.exists(backup_fragments_gz)) {
-      file.copy(fragments_gz, backup_fragments_gz)
-      message("Backup created for sample: ", sample)
+      # Backup the original fragments file
+      if (file.exists(fragments_gz)) {
+        file.copy(fragments_gz, backup_fragments_gz)
+        message("Backup created for sample: ", sample)
+      } else {
+        message("No fragments.tsv.gz found for sample: ", sample, ". Skipping.")
+        next
+      }
     } else {
       message("Backup already exists for sample: ", sample)
     }
     
     # Unzip, modify barcodes, save, and re-compress
-    R.utils::gunzip(fragments_gz, remove = FALSE, overwrite = TRUE)
+    fragments_tmp <- file.path(input_path, "fragments.tsv")
+    R.utils::gunzip(backup_fragments_gz, destname = fragments_tmp, remove = FALSE, overwrite = TRUE)
     dt <- data.table::fread(fragments_tmp, header = FALSE, sep = "\t")
     dt[[4]] <- paste0(sample, ":", gsub("-1$", "", dt[[4]]))  # Modify barcode column
     dt <- dt[, 1:5]  # Ensure only first 5 columns
     data.table::fwrite(dt, fragments_tmp, sep = "\t", col.names = FALSE)
     R.utils::gzip(fragments_tmp, destname = fragments_gz, overwrite = TRUE)
-    
     message("Processed fragments for sample: ", sample)
-  }
-  
-  # Step 2: Re-index fragment files
-  for (sample in sample_name) {
-    input_path <- file.path(yaml$data_dir, sample, "outs")
-    fragments_gz <- file.path(input_path, "fragments.tsv.gz")
-    fragments_tsv <- file.path(input_path, "fragments.tsv")
-    index_file <- paste0(fragments_gz, ".tbi")
-    backup_index_file <- file.path(input_path, "fragments-original.tsv.gz.tbi")
     
-    # Unzip if needed
-    if (!file.exists(fragments_tsv)) {
-      R.utils::gunzip(fragments_gz, remove = FALSE, overwrite = TRUE)
-    }
-    
-    # Backup index if not already done
-    if (file.exists(index_file) && !file.exists(backup_index_file)) {
-      file.rename(index_file, backup_index_file)
-      message("📦 Backup created: ", backup_index_file)
-    } else if (file.exists(backup_index_file)) {
-      message("📦 Backup index already exists: ", backup_index_file)
-    }
-    
-    # Recompress and re-index
-    Rsamtools::bgzip(fragments_tsv, dest = fragments_gz, overwrite = TRUE)
+    # Re-index the processed fragments file
+    Rsamtools::bgzip(fragments_tmp, dest = fragments_gz, overwrite = TRUE)
     Rsamtools::indexTabix(fragments_gz, format = "bed")
+    message("Re-indexed fragments for sample: ", sample)
   }
   
   message("Fragment processing and indexing complete.")

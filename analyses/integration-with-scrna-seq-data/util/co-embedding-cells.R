@@ -25,7 +25,7 @@ co_embedding_cells <- function(reference_obj, seurat_obj.query, transfer.anchors
   imputation <- TransferData(anchorset = transfer.anchors, 
                              refdata = refdata, 
                              weight.reduction = seurat_obj.query[["lsi"]], 
-                             dims = 1:30)
+                             dims = 2:30)
   
   # this line adds the imputed data matrix to the seurat_obj.query object
   seurat_obj.query[["RNA"]] <- imputation
