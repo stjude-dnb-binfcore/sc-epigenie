@@ -220,6 +220,9 @@ DefaultAssay(seurat_obj) <- assay
 
 Idents(seurat_obj) <- seurat_obj$predicted.id # Set Idents(seurat_obj) to match the group.by parameter you will use
 table(Idents(seurat_obj)) # View cell identities, get summary table
+
+#matching_cells <- paste0(str_remove(grep(paste0("^", sample, ":"), colnames(seurat_obj), value = TRUE), pattern = paste0(sample,":")),"-1")
+#names(matching_cells) <- grep(paste0("^", sample, ":"), colnames(seurat_obj), value = TRUE)
 ```
 
 ```{r read-project-metadata, echo=TRUE}
@@ -362,7 +365,7 @@ datatable(top_markers,
           filter = "top")
 ```
 
-## Plotting genomic regions across cell types
+## Plotting genomic regions across cell types: Overall
 
 We will loop over each cell type and generate CoveragePlot by gene and marker. We can plot the frequency of Tn5 integration across regions of the genome for cells grouped by cluster, cell type, or any other metadata stored in the object for any genomic region using the [CoveragePlot()](https://stuartlab.org/signac/reference/coverageplot) function. These plots represent pseudo-bulk chromatin accessibility, where accessibility signal from all cells in a group is aggregated and visualized as a single track (thanks to Andrew Hill for giving the inspiration for this function in his [blog post](https://andrewjohnhill.com/blog/2019/04/12/streamlining-scatac-seq-visualization-and-analysis/)). Alongside these accessibility tracks we can visualize other important information including gene annotation, peak coordinates, and genomic links (if they’re stored in the object). For more information, see [Plotting genomic regions](https://stuartlab.org/signac/articles/pbmc_vignette#plotting-genomic-regions) and [Visualization vignette](https://stuartlab.org/signac/articles/visualization).
 
@@ -424,7 +427,7 @@ for (i in seq_len(nrow(top_markers))) {
 ```
 
 
-## Plotting shared genomic regions across cell types
+## Plotting genomic regions across cell types: Shared
 
 ### Overall
 
