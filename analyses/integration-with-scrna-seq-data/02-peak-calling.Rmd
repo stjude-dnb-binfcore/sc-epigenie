@@ -150,11 +150,9 @@ suppressPackageStartupMessages({
 
   library(htmlwidgets)
   library(clusterProfiler)
-
   library(enrichplot)
-
   library(org.Hs.eg.db)
-  library(org.Mm.eg.db) # Mouse gene annotation (use org.Hs.eg.db for human)
+  library(org.Mm.eg.db)
   
   library(data.table)
   library(R.utils)
@@ -199,8 +197,7 @@ if (!dir.exists(go_plots_dir)) {
 
 # Source functions
 source(paste0(util_dir, "/util/run-clusterwise-GO-enrichment.R"))
-source(paste0(analysis_dir, "/util/function_process_fragments.R"))
-
+#source(paste0(analysis_dir, "/util/function_process_fragments.R"))
 ```
 
 ```{r echo=FALSE, warning=FALSE}
@@ -223,6 +220,9 @@ DefaultAssay(seurat_obj) <- assay
 
 Idents(seurat_obj) <- seurat_obj$predicted.id # Set Idents(seurat_obj) to match the group.by parameter you will use
 table(Idents(seurat_obj)) # View cell identities, get summary table
+
+#matching_cells <- paste0(str_remove(grep(paste0("^", sample, ":"), colnames(seurat_obj), value = TRUE), pattern = paste0(sample,":")),"-1")
+#names(matching_cells) <- grep(paste0("^", sample, ":"), colnames(seurat_obj), value = TRUE)
 ```
 
 ```{r read-project-metadata, echo=TRUE}
@@ -238,26 +238,39 @@ print(sample_name)
 
 ```{r process-data, echo=TRUE}
 # Example YAML
-yaml_files <- list(metadata_dir = yaml$metadata_dir, metadata_file = yaml$metadata_file, data_dir = yaml$data_dir)
+# yaml_files <- list(metadata_dir = yaml$metadata_dir, metadata_file = yaml$metadata_file, data_dir = yaml$data_dir)
 
 # Run
-process_fragments(yaml_files)
+# process_fragments(yaml_files)
 ```
 
 ```{r create-fragment-list, echo=TRUE}
-# Build a list of fragment file paths, one for each sample
-# These are the corrected .tsv.gz files where the barcodes were prefixed with the sample ID
+# Attach appropriate fragments files to use for plotting later
 fragment_paths <- file.path(yaml$data_dir, sample_name, "outs", "fragments.tsv.gz")
 
-fragment_list <- mapply(function(sample, frag_path) {
-  matching_cells <- grep(paste0("^", sample, ":"), colnames(seurat_obj), value = TRUE)
 
-  CreateFragmentObject(path = frag_path, cells = matching_cells)
+fragment_list <- mapply(function(sample, frag_path) {
+  if (!file.exists(frag_path)) {
+    warning("Fragment file not found for sample: ", sample)
+    return(NULL)
+  }
+  matching_cells <- paste0(
+    str_remove(grep(paste0("^", sample, ":"), colnames(seurat_obj), value = TRUE), pattern = paste0(sample, ":")),
+    "-1"
+  )
+  names(matching_cells) <- grep(paste0("^", sample, ":"), colnames(seurat_obj), value = TRUE)
+  
+  tryCatch({
+    CreateFragmentObject(path = frag_path, cells = matching_cells)
+  }, error = function(e) {
+    warning("Failed to create fragment object for sample: ", sample, " (", e$message, ")")
+    return(NULL)
+  })
 }, sample_name, fragment_paths, SIMPLIFY = FALSE)
 
-# Assign the list of Fragment objects to the assay with the peaks
+# Remove any NULL entries in case of failure
+fragment_list <- Filter(Negate(is.null), fragment_list)
 seurat_obj[[assay]]@fragments <- fragment_list
-# lapply(Fragments(seurat_obj), function(x) x@path) # Optional: confirm it worked
 ```
 
 # Calling Peaks (with MACS2) on grouped fragments by cell type
@@ -268,14 +281,13 @@ We use the [`CallPeaks()`](https://stuartlab.org/signac/reference/callpeaks) fun
 - Calls peaks on the fragment data for each group
 - Internally runs MACS2 to identify accessible chromatin regions
 
-
 ```{r call-peaks, echo=TRUE}
 # Now call peaks on the Seurat object
 peaks <- CallPeaks(
   object = seurat_obj,
   group.by = "predicted.id")
 
-write.table(peaks, file = paste(results_dir, "/", "peaks_all.tsv", sep = ""), sep = "\t", quote = FALSE, row.names = FALSE)
+write.table(peaks, file = paste(results_dir, "/", "peaks.tsv", sep = ""), sep = "\t", quote = FALSE, row.names = FALSE)
 ```
 
 ## Interactive Table of Calling peaks by cell type
@@ -320,9 +332,6 @@ ggsave(file = name, width = 25, height = 15, device = "png")
 We aim to identify and visualize the top differentially accessible peaks (DAPs) for each cell type. To achieve this, we use the [FindAllMarkers](https://satijalab.org/seurat/reference/findallmarkers) function, which performs differential accessibility analysis across the cell types defined in the predicted.id metadata column. This allows us to highlight peaks that are specifically enriched in accessibility within each cell type compared to the others.
 
 ```{r find-markers, echo=TRUE}
-# Get unique cell types from predicted.id
-cell_types <- unique(seurat_obj$predicted.id)
-
 # Find markers 
 # Try adjusting min.pct or logfc.threshold to be less stringent - useful for cases with groups of very few cells
 markers <- FindAllMarkers(seurat_obj, group.by = "predicted.id", only.pos = TRUE,
@@ -344,7 +353,7 @@ We will filter out and keep the first 3 top markers by cell type.
 
 ```{r}
 top_markers <- markers %>% group_by(cluster) %>% top_n(n = 3, wt = avg_log2FC)
-print(top_markers)
+#print(top_markers)
 ```
 
 ```{r top-markers-interactive-table, echo=TRUE}
@@ -356,9 +365,11 @@ datatable(top_markers,
           filter = "top")
 ```
 
-## Plotting genomic regions across cell types
+## Plotting genomic regions across cell types: Overall
 
-We will loop over each cell type and generate CoveragePlot by gene and marker. We can plot the frequency of Tn5 integration across regions of the genome for cells grouped by cluster, cell type, or any other metadata stored in the object for any genomic region using the [CoveragePlot()](https://stuartlab.org/signac/reference/coverageplot) function. These plots represent pseudo-bulk chromatin accessibility, where accessibility signal from all cells in a group is aggregated and visualized as a single track (thanks to Andrew Hill for giving the inspiration for this function in his excellent [blog post](https://andrewjohnhill.com/blog/2019/04/12/streamlining-scatac-seq-visualization-and-analysis/)). Alongside these accessibility tracks we can visualize other important information including gene annotation, peak coordinates, and genomic links (if they’re stored in the object). For more information, see [Plotting genomic regions](https://stuartlab.org/signac/articles/pbmc_vignette#plotting-genomic-regions) and [Visualization vignette](https://stuartlab.org/signac/articles/visualization).
+We will loop over each cell type and generate CoveragePlot by gene and marker. We can plot the frequency of Tn5 integration across regions of the genome for cells grouped by cluster, cell type, or any other metadata stored in the object for any genomic region using the [CoveragePlot()](https://stuartlab.org/signac/reference/coverageplot) function. These plots represent pseudo-bulk chromatin accessibility, where accessibility signal from all cells in a group is aggregated and visualized as a single track (thanks to Andrew Hill for giving the inspiration for this function in his [blog post](https://andrewjohnhill.com/blog/2019/04/12/streamlining-scatac-seq-visualization-and-analysis/)). Alongside these accessibility tracks we can visualize other important information including gene annotation, peak coordinates, and genomic links (if they’re stored in the object). For more information, see [Plotting genomic regions](https://stuartlab.org/signac/articles/pbmc_vignette#plotting-genomic-regions) and [Visualization vignette](https://stuartlab.org/signac/articles/visualization).
+
+### Overall
 
 ```{r coverage-plot, fig.width = 10, fig.height = 6, fig.fullwidth = TRUE, echo=TRUE}
 for (i in seq_len(nrow(top_markers))) {
@@ -379,16 +390,48 @@ for (i in seq_len(nrow(top_markers))) {
   print(p)
   
   # Save the plot as PNG
-  plot_path <- file.path(coverage_plots_dir, paste0("CoveragePlot_", ct, "_", gene, ".png"))
+  plot_path <- file.path(coverage_plots_dir, paste0("CoveragePlot_overall_", ct, "_", gene, ".png"))
   ggsave(plot_path, plot = p, width = 10, height = 6)
   
   message("Saved plot to: ", plot_path)
 }
 ```
 
-## Plotting shared genomic regions across cell types
+### Split by ID
 
-```{r coverage-plot-shared-peaks, fig.width = 10, fig.height = 6, fig.fullwidth = TRUE, echo=TRUE}
+
+```{r coverage-plot-split-by-id, fig.width = 10, fig.height = 15, fig.fullwidth = TRUE, echo=TRUE}
+for (i in seq_len(nrow(top_markers))) {
+  gene <- top_markers$gene[i]
+  ct <- top_markers$cluster[i]
+  
+  message("Plotting ", gene, " for cell type ", ct)
+  
+  p <- CoveragePlot(
+    object = seurat_obj,
+    region = gene,
+    group.by = "predicted.id",
+    split.by = "ID",
+    ranges = peaks,
+    ranges.title = "MACS2",
+    assay = assay) 
+  
+  print(p)
+  
+  # Save the plot as PNG
+  plot_path <- file.path(coverage_plots_dir, paste0("CoveragePlot_ID_", ct, "_", gene, ".png"))
+  ggsave(plot_path, plot = p, width = 10, height = 15)
+  
+  message("Saved plot to: ", plot_path)
+}
+```
+
+
+## Plotting genomic regions across cell types: Shared
+
+### Overall
+
+```{r coverage-plot-shared-peaks-overall, fig.width = 10, fig.height = 6, fig.fullwidth = TRUE, echo=TRUE}
 # If `markers` contains DE peaks across cell types (from Signac peak assay)
 shared_peaks <- markers %>%
   group_by(gene) %>%
@@ -417,8 +460,47 @@ for (region_to_plot in top_n_peaks) {
   
   print(p)
   # Save plot
-  plot_path <- file.path(coverage_plots_dir, paste0("CoveragePlot_all_cell_types_shared_genes_", region_to_plot, ".png"))
+  plot_path <- file.path(coverage_plots_dir, paste0("CoveragePlot_all_cell_types_shared_genes_overall_", region_to_plot, ".png"))
   ggsave(plot_path, plot = p, width = 10, height = 6)
+  
+  message("Saved plot to: ", plot_path)
+}
+``` 
+
+### Split by ID
+
+```{r coverage-plot-shared-peaks-split-by-id, fig.width = 10, fig.height = 15, fig.fullwidth = TRUE, echo=TRUE}
+# If `markers` contains DE peaks across cell types (from Signac peak assay)
+shared_peaks <- markers %>%
+  group_by(gene) %>%
+  summarize(n_groups = n_distinct(cluster)) %>%
+  filter(n_groups > 1) %>%
+  arrange(desc(n_groups))
+
+region_to_plot <- shared_peaks$gene[1]
+
+# Step 2: Select top N shared peaks (e.g., top 3)
+top_n_peaks <- head(shared_peaks$gene, 3)
+
+# Step 3: Loop over each shared peak and generate a CoveragePlot
+for (region_to_plot in top_n_peaks) {
+  
+  message("Plotting shared peak: ", region_to_plot)
+  
+  p <- CoveragePlot(
+    object = seurat_obj,
+    region = region_to_plot,
+    group.by = "predicted.id",  # show all groups in same plot
+    split.by = "ID",
+    ranges = peaks,
+    ranges.title = "MACS2",
+    assay = assay  
+  )
+  
+  print(p)
+  # Save plot
+  plot_path <- file.path(coverage_plots_dir, paste0("CoveragePlot_all_cell_types_shared_genes_ID_", region_to_plot, ".png"))
+  ggsave(plot_path, plot = p, width = 10, height = 15)
   
   message("Saved plot to: ", plot_path)
 }
