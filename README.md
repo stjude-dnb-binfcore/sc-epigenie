@@ -140,6 +140,7 @@ Important Considerations:
 
 ```
 ├── analyses
+|  ├── building-trajectories-monocle
 |  ├── cellranger-analysis
 |  ├── cluster-cell-calling
 |  ├── fastqc-analysis

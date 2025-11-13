@@ -118,6 +118,13 @@ reference_dir_annotation_module: "./sc-rna-seq-snap/analyses/cell-types-annotati
 reference_file_name_annotation_module: "seurat_obj_cell_types_annotations_all.rds" # File name with the object that contains the cell type annotation. It needs to be in `rds` format.
 celltype_reference_module: "predicted.cell.signature.ident" # Column name from the reference object to be used to transfer labels
 
+# `./analyses/building-trajectories-monocle`
+lineage1_value_module: "Rods" # Specify name of lineage 1
+lineage1_value_vector_module: "Rods" # Specify vector of cell types for lineage 1
+lineage2_value_module: "Non_Rods" # Specify name of lineage 2
+lineage2_value_vector_module: [RPE, Muller Glia, Bipolar, Cones] # Specify vector of cell types for lineage 2
+
+
 # `./analyses/project-updates`
 results_filepath: "./" # Absolute path to the dir where local fork repo lives
 mac_results_filepath: "./" # Absolute path to the dir where local fork repo lives
