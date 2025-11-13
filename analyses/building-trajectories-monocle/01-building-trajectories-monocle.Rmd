@@ -1,0 +1,299 @@
+---
+title: "Building trajectories with Monocle 3 for sc-ATAC-Seq Analysis in 10X Genomics data"
+author: "Antonia Chroni for SJCRH DNB_BINF_Core"
+papersize: a4
+fontsize: 11pt
+links-as-notes: true
+output:
+  html_document:
+    toc: TRUE
+    toc_float: TRUE
+    df_print: paged
+    code_folding: hide
+    toc_depth: 2
+    highlight: tango
+    number_sections: TRUE
+  pdf_document:
+    toc: TRUE
+    highlight: tango
+    number_sections: TRUE
+    latex_engine: lualatex
+    keep_tex: FALSE
+    fig_caption: yes
+    fig_crop: no
+    fig_height: 2
+    fig_width: 3
+    toc_depth: 2
+always_allow_html: TRUE
+urlcolor: blue
+linkcolor: black
+citecolor: blue
+geometry: margin=1in
+header-includes: 
+  - \usepackage{titling}
+  - \usepackage{fancyhdr}
+  - \usepackage{graphicx}
+  - \usepackage{float}
+params:
+  assay: '.'
+  lineage1_value: '.'
+  lineage1_value_vector: '.'
+  lineage2_value: '.'
+  lineage2_value_vector: '.'
+  root_dir: './'
+  PROJECT_NAME: '.'
+  PI_NAME: '.'
+  TASK_ID: '.'
+  PROJECT_LEAD_NAME: '.'
+  DEPARTMENT: '.'
+  LEAD_ANALYSTS: '.'
+  GROUP_LEAD: '.'
+  CONTACT_EMAIL: '.'
+  PIPELINE: '.'
+  START_DATE: '.'
+  COMPLETION_DATE: '.'
+---
+
+```{r logo-file, echo=FALSE}
+attach(params)
+# Insert logo on the top of the html report 
+logo_file <- file.path(root_dir, "figures", "img", "DNB-BINF-Core-logo.png")
+htmltools::img(src = knitr::image_uri(logo_file), alt = "logo", style = "position:absolute; top:0; left:0; padding:0px; height:120px;")
+detach(params)
+```
+
+\addtolength{\headheight}{2.0cm} 
+\fancypagestyle{plain}{} 
+\thispagestyle{fancy}
+\fancyhead[L]{\includegraphics[height=120px]{`r logo_file`}}
+\renewcommand{\headrulewidth}{0pt}
+
+<style type="text/css">
+:root {--DNB_BINF_Core_color: #00427B;}
+
+h1.title {margin-top: 130px;
+          margin-bottom: 25px;
+          font-size: 36px;}
+
+.nobullet li {list-style-type: none;}
+
+.reporthead {font-size: 20px;}
+
+body { /* Normal */
+  font-size: 16px;
+  font-style: Arial, Helvetica, sans-serif;}
+
+h1 {color: var(--DNB_BINF_Core_color);
+    font-size: 28px;
+    margin-top: 50px;}
+
+h2 {color: var(--DNB_BINF_Core_color);
+    font-size: 20px;}
+
+.list-group-item.active, .list-group-item.active:focus, .list-group-item.active:hover {
+  background-color: var(--DNB_BINF_Core_color);}
+</style>
+
+<a href="https://wiki.stjude.org/display/CAB">
+
+</a>
+
+\pagebreak
+
+<div class="reporthead"><br/>
+**PI: `r params$PI_NAME`**  
+**Project: `r params$PROJECT_NAME`**  
+Task: `r params$TASK_ID`  
+Project Lead(s): `r params$PROJECT_LEAD_NAME`  
+Department: `r params$DEPARTMENT`  
+
+<br />  
+
+DNB Bioinformatics Core Analysis Team: 
+<br />  
+
+>**Lead Analyst(s): `r params$LEAD_ANALYSTS`**  
+>Group Lead: `r params$GROUP_LEAD`  
+<br />
+>**Contact E-mail:** `r params$CONTACT_EMAIL`  
+>**DNB Bioinformatics Core Pipeline:** `r params$PIPELINE`  
+
+Date started: `r params$START_DATE`  
+Date completed:  `r params$COMPLETION_DATE`  
+Report generated: `r format(Sys.time(), '%H:%M:%S %Z %m/%d/%Y')` \
+
+Reviewed by: _____________________   Date: ____________ \
+</div>
+\pagebreak
+  
+# Information about this notebook
+
+This notebook guides users in inferring trajectories and pseudotime on single-cell ATAC-seq (scATAC-seq) data.
+
+For more information, see [Building trajectories with Monocle 3](https://stuartlab.org/signac/articles/monocle) and [Monocle 3](https://cole-trapnell-lab.github.io/monocle3/).
+
+# Set up
+
+```{r load-library, echo=TRUE}
+attach(params)
+suppressPackageStartupMessages({
+  library(Signac)
+  library(Seurat)
+  library(SeuratWrappers)
+  library(monocle3)
+  library(Matrix)
+  library(tidyverse)
+  library(patchwork)
+  library(base)
+  library(knitr)
+}) 
+```
+
+# Directories and paths to file Inputs/Outputs
+
+```{r set-dir-and-file-names, echo=TRUE}
+module_analysis_dir <- file.path(root_dir, "analyses", "building-trajectories-monocle") 
+analysis_dir <- file.path(root_dir, "analyses", "integration-with-scrna-seq-data") 
+data_dir <- file.path(analysis_dir, "results", "01_integration_with_scrna_seq_data")
+
+# Input files
+data_file <- file.path(data_dir, "seurat_obj_reference.rds")
+
+# Create plots directory
+module_plots_dir <- file.path(module_analysis_dir , "plots")
+
+plots_dir <- file.path(module_plots_dir, "01_building_trajectories_monocle") 
+if (!dir.exists(plots_dir)) {
+  dir.create(plots_dir)}
+
+# Source functions
+source(paste0(module_analysis_dir, "/util/monocle3_updated.R"))
+```
+
+```{r echo=FALSE, warning=FALSE}
+opts_chunk$set(fig.align='center',
+               external=TRUE,
+               echo=FALSE,
+               warning=FALSE,
+               fig.pos='H')
+a4width <- 8.3
+a4height <- 11.7
+```
+
+# Read seurat object
+
+First, we will use the seurat object as generated from the pipeline in the `integration-with-scrna-seq-data` module. 
+
+```{r read-object, fig.width = 6, fig.height = 5, fig.fullwidth = TRUE, echo=TRUE}
+seurat_obj <- readRDS(data_file)
+DefaultAssay(seurat_obj) <- assay
+
+name <- paste0(plots_dir, "/", glue::glue("DimPlot-clusters.png"), sep = "")
+print(DimPlot(seurat_obj, label = TRUE) + NoLegend())
+ggsave(file = name, width = 6, height = 5, device = "png")
+```
+
+Assign each cluster to the most common cell type based on the previous predicted annotations from the `./integration-with-scrna-seq-data/01-integration-with-scrna-seq-data.Rmd` step.
+
+```{r assign-celltypes, fig.width = 6, fig.height = 5, fig.fullwidth = TRUE, echo=TRUE}
+for(i in levels(seurat_obj)) {
+  cells_to_reid <- WhichCells(seurat_obj, idents = i)
+  newid <- names(sort(table(seurat_obj$predicted.id[cells_to_reid]),decreasing=TRUE))[1]
+  Idents(seurat_obj, cells = cells_to_reid) <- newid
+}
+seurat_obj$assigned_celltype <- Idents(seurat_obj)
+
+name <- paste0(plots_dir, "/", glue::glue("DimPlot-assigned-celltype.png"), sep = "")
+print(DimPlot(seurat_obj, label = TRUE))
+ggsave(file = name, width = 6, height = 5, device = "png")
+```
+
+Next we can subset the different lineages and create a trajectory for each lineage. Another way to build the trajectories is to use the whole dataset and build separate pseudotime trajectories for the different cell partitions found by Monocle 3.
+
+```{r subset-celltypes, echo=TRUE}
+lineage1 <- seurat_obj[,  seurat_obj$assigned_celltype %in% lineage1_value_vector]
+lineage2 <- seurat_obj[, seurat_obj$assigned_celltype %in% lineage2_value_vector]
+```
+
+# Building trajectories with Monocle 3
+
+We can convert the Seurat object to a CellDataSet object using the as.cell_data_set() function from [SeuratWrappers](https://github.com/satijalab/seurat-wrappers) and build the trajectories using Monocle 3. We’ll do this separately for each lineage, but you could explore other strategies building a trajectory for all lineages together.
+
+```{r trajectories-each-lineage, echo=TRUE}
+# We need to add this helper function at the top of our script to mimic the Seurat v4 internal function that is missing in the current version:
+AssociatedDimReducs <- function(object, assay = NULL) {
+  assay <- assay %||% DefaultAssay(object)
+  reduc.names <- names(Filter(function(x) {
+    x@assay.used == assay
+  }, object@reductions))
+  return(reduc.names)
+}
+
+set.seed(2025)
+
+lineage1.cds <- as.cell_data_set(lineage1)
+lineage1.cds <- cluster_cells(cds = lineage1.cds, reduction_method = "UMAP")
+lineage1.cds <- learn_graph(lineage1.cds, use_partition = TRUE)
+
+lineage2.cds <- as.cell_data_set(lineage2)
+lineage2.cds <- cluster_cells(cds = lineage2.cds, reduction_method = "UMAP")
+lineage2.cds <- learn_graph(lineage2.cds, use_partition = TRUE)
+```
+
+To compute pseudotime estimates for each trajectory we need to decide what the start of each trajectory is. 
+
+Monocle 3 includes an interactive function to select cells as the root nodes in the graph. This function will be launched if calling [order_cells()](https://rdrr.io/pkg/monocle3/man/order_cells.html) without specifying the root_cells parameter.
+
+```{r plot-trajectories, fig.width = 6, fig.height = 5, fig.fullwidth = TRUE, echo=TRUE}
+set.seed(2025)
+
+# order cells
+# Find barcodes for lineage1 cells
+lineage1_cells <- colnames(lineage1.cds)[colData(lineage1.cds)$assigned_celltype == lineage1_value_vector]
+# Use the first lineage1 cell as the root (or a vector of root cells)
+lineage1.cds <- order_cells(lineage1.cds, reduction_method = "UMAP", root_cells = lineage1_cells[1])
+
+# Find barcodes for lineage2 cells
+lineage2_cells <- colnames(lineage2.cds)[colData(lineage2.cds)$assigned_celltype == lineage2_value_vector]
+# Use the first lineage2 cell as the root (or a vector of root cells)
+lineage2.cds <- order_cells(lineage2.cds, reduction_method = "UMAP", root_cells = lineage2_cells[1])
+
+
+# Plot trajectories colored by pseudotime
+name <- paste0(plots_dir, "/", glue::glue("Plot-trajectory-lineage1.png"), sep = "")
+print(plot_cells(cds = lineage1.cds, color_cells_by = "pseudotime", show_trajectory_graph = TRUE))
+ggsave(file = name, width = 6, height = 5, device = "png")
+
+name <- paste0(plots_dir, "/", glue::glue("Plot-trajectory-lineage2.png"), sep = "")
+print(plot_cells(cds = lineage2.cds, color_cells_by = "pseudotime", show_trajectory_graph = TRUE))
+ggsave(file = name, width = 6, height = 5, device = "png")
+```
+
+Extract the pseudotime values and add to the Seurat object:
+
+```{r extract-pseudotime, fig.width = 10, fig.height = 5, fig.fullwidth = TRUE, echo=TRUE}
+seurat_obj <- AddMetaData(object = seurat_obj,
+                          metadata = lineage1.cds@principal_graph_aux@listData$UMAP$pseudotime,
+                          col.name = lineage1_value)
+
+seurat_obj <- AddMetaData(object = seurat_obj,
+                          metadata = lineage2.cds@principal_graph_aux@listData$UMAP$pseudotime,
+                          col.name = lineage2_value)
+
+name <- paste0(plots_dir, "/", glue::glue("Plot-pseudotime.png"), sep = "")
+print(FeaturePlot(seurat_obj, c(lineage1_value, lineage2_value), pt.size = 0.1) & scale_color_viridis_c())
+ggsave(file = name, width = 10, height = 5, device = "png")
+```
+
+
+```{r echo=FALSE}
+detach(params)
+```
+
+\pagebreak
+
+# Session Info
+
+```{r echo=FALSE}
+sessionInfo()
+```
