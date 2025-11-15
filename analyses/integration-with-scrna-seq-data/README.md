@@ -37,7 +37,7 @@ This folder contains a script tasked to perform a data transfer method in the co
 
 There are also scripts:
    (1) to perform peak calling and gene ontology analysis per cell type and 
-   (2) to predict regions of the genome that are more likely to be in physical proximity in the nucleus [Cicero’s co-accessibility analysis](https://cole-trapnell-lab.github.io/cicero-release/docs_m3/).
+   (2) to predict regions of the genome that are more likely to be in physical proximity in the nucleus, i.e., [Cicero’s co-accessibility analysis](https://cole-trapnell-lab.github.io/cicero-release/docs_m3/).
 
 
 ## Folder structure 
