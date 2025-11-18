@@ -5,4 +5,4 @@
 #BSUB -R "rusage[mem=64GB] span[hosts=1]"
 #BSUB -cwd "."
 
-singularity exec ../../singlecell-r4.4-seurat4.4-signac1.14_latest.sif bash run-building-trajectories-monocle.sh
+singularity exec ../../singlecell-r4.4-seurat4.4-signac1.16_latest.sif bash run-building-trajectories-monocle.sh
