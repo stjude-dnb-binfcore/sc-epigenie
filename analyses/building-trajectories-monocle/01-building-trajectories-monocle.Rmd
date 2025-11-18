@@ -147,6 +147,7 @@ suppressPackageStartupMessages({
   library(patchwork)
   library(base)
   library(knitr)
+  library(scooter)
 }) 
 ```
 
@@ -166,6 +167,15 @@ module_plots_dir <- file.path(module_analysis_dir , "plots")
 plots_dir <- file.path(module_plots_dir, "01_building_trajectories_monocle") 
 if (!dir.exists(plots_dir)) {
   dir.create(plots_dir)}
+
+# Create results directory
+module_results_dir <- file.path(module_analysis_dir , "results")
+if (!dir.exists(module_results_dir)) {
+  dir.create(module_results_dir)}
+
+results_dir <- file.path(module_results_dir, "01_building_trajectories_monocle") 
+if (!dir.exists(results_dir)) {
+  dir.create(results_dir)}
 
 # Source functions
 source(paste0(module_analysis_dir, "/util/monocle3_updated.R"))
@@ -213,6 +223,7 @@ for(i in levels(seurat_obj)) {
   newid <- names(sort(table(seurat_obj$predicted.id[cells_to_reid]),decreasing=TRUE))[1]
   Idents(seurat_obj, cells = cells_to_reid) <- newid
 }
+
 seurat_obj$assigned_celltype <- Idents(seurat_obj)
 
 name <- paste0(plots_dir, "/", glue::glue("DimPlot-assigned-celltype.png"), sep = "")
@@ -286,17 +297,29 @@ Extract the pseudotime values and add to the Seurat object:
 ```{r extract-pseudotime, fig.width = 10, fig.height = 5, fig.fullwidth = TRUE, echo=TRUE}
 seurat_obj <- AddMetaData(object = seurat_obj,
                           metadata = lineage1.cds@principal_graph_aux@listData$UMAP$pseudotime,
-                          col.name = lineage1_value)
-
+                          col.name = glue::glue("{lineage1_value}_pseudotime"))
+ 
 seurat_obj <- AddMetaData(object = seurat_obj,
                           metadata = lineage2.cds@principal_graph_aux@listData$UMAP$pseudotime,
-                          col.name = lineage2_value)
+                          col.name = glue::glue("{lineage2_value}_pseudotime"))
+head(seurat_obj@meta.data)
+
 
 name <- paste0(plots_dir, "/", glue::glue("Plot-pseudotime.png"), sep = "")
 print(FeaturePlot(seurat_obj, c(lineage1_value, lineage2_value), pt.size = 0.1) & scale_color_viridis_c())
 ggsave(file = name, width = 10, height = 5, device = "png")
 ```
 
+# Save output files
+
+```{r save_seurat, echo=TRUE}
+# Save metadata
+metadata <- as_data_frame_seurat(seurat_obj, metadata = TRUE)
+write_tsv(metadata, file = paste0(results_dir, "/", glue::glue("metadata.tsv"))) # Save metadata
+  
+# Save object
+saveRDS(seurat_obj, file = paste0(results_dir, "/", "seurat_obj_pseudotime.rds"))
+```
 
 ```{r echo=FALSE}
 detach(params)
