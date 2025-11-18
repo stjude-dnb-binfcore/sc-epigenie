@@ -36,6 +36,7 @@ header-includes:
   - \usepackage{float}
 params:
   assay: '.'
+  resolution_list: '.'
   lineage1_value: '.'
   lineage1_value_vector: '.'
   lineage2_value: '.'
@@ -187,6 +188,17 @@ First, we will use the seurat object as generated from the pipeline in the `inte
 ```{r read-object, fig.width = 6, fig.height = 5, fig.fullwidth = TRUE, echo=TRUE}
 seurat_obj <- readRDS(data_file)
 DefaultAssay(seurat_obj) <- assay
+
+# Set the identity of your cells to the column with the desired resolution
+use_res_col <- glue::glue("{assay}_snn_res.{resolution_list}")
+
+# Set identity classes to an existing column in meta data
+Idents(object = seurat_obj) <- use_res_col
+
+# View cell identities, get summary table
+#Idents(seurat_obj)
+table(Idents(seurat_obj))
+
 
 name <- paste0(plots_dir, "/", glue::glue("DimPlot-clusters.png"), sep = "")
 print(DimPlot(seurat_obj, label = TRUE) + NoLegend())
