@@ -41,6 +41,7 @@ params:
   lineage1_value_vector: '.'
   lineage2_value: '.'
   lineage2_value_vector: '.'
+  lineage_value: '.'
   root_dir: './'
   PROJECT_NAME: '.'
   PI_NAME: '.'
@@ -292,9 +293,42 @@ print(plot_cells(cds = lineage2.cds, color_cells_by = "pseudotime", show_traject
 ggsave(file = name, width = 6, height = 5, device = "png")
 ```
 
+# How to Programmatically Root Cells in a Trajectory Analysis
+
+For exploratory trajectory analysis, it is often useful to root cells based on a specific cluster or cell type. In this example, we root the trajectory using cells from a cluster defined by the `predicted.id` column in the metadata, with the lineage of interest specified by the `r lineage_value` as defined in parameters.
+
+For more information, see the [Monocle3 issue](https://github.com/cole-trapnell-lab/monocle3/issues/328).
+
+```{r programmatically-root-cells, echo=TRUE}
+cds <- as.cell_data_set(seurat_obj) # Convert your Seurat object to a Monocle3 cell_data_set.
+cds <- cluster_cells(cds = cds, reduction_method = "UMAP") # Cluster cells and learn the principal graph using Monocle3.
+cds <- learn_graph(cds, use_partition = TRUE) # to choose more than one node
+#cds <- learn_graph(cds, use_partition = FALSE) # to choose only one node
+
+# Define a function to programmatically select the root node:
+# The function identifies cells with the specified lineage.
+# It finds the principal graph node most frequently associated with these cells.
+# This node is used as the root for ordering cells in pseudotime.
+get_earliest_principal_node <- function(cds, predicted.id = lineage_value){
+  cell_ids <- which(colData(cds)[, "predicted.id"] == lineage_value)
+
+  closest_vertex <-
+  cds@principal_graph_aux[["UMAP"]]$pr_graph_cell_proj_closest_vertex
+  closest_vertex <- as.matrix(closest_vertex[colnames(cds), ])
+  root_pr_nodes <-
+    igraph::V(principal_graph(cds)[["UMAP"]])$name[as.numeric(names
+   (which.max(table(closest_vertex[cell_ids,]))))]
+
+  root_pr_nodes
+}
+
+# Order cells in the trajectory with the selected root node.
+cds <- order_cells(cds, root_pr_nodes=get_earliest_principal_node(cds))
+```
+
 Extract the pseudotime values and add to the Seurat object:
 
-```{r extract-pseudotime, fig.width = 10, fig.height = 5, fig.fullwidth = TRUE, echo=TRUE}
+```{r extract-pseudotime, fig.width = 15, fig.height = 5, fig.fullwidth = TRUE, echo=TRUE}
 seurat_obj <- AddMetaData(object = seurat_obj,
                           metadata = lineage1.cds@principal_graph_aux@listData$UMAP$pseudotime,
                           col.name = glue::glue("{lineage1_value}_pseudotime"))
@@ -302,10 +336,22 @@ seurat_obj <- AddMetaData(object = seurat_obj,
 seurat_obj <- AddMetaData(object = seurat_obj,
                           metadata = lineage2.cds@principal_graph_aux@listData$UMAP$pseudotime,
                           col.name = glue::glue("{lineage2_value}_pseudotime"))
+seurat_obj <- AddMetaData(object = seurat_obj,
+                          metadata = cds@principal_graph_aux@listData$UMAP$pseudotime,
+                          col.name = glue::glue("{lineage_value}_pseudotime_programmatically"))
+
 
 name <- paste0(plots_dir, "/", glue::glue("Plot-pseudotime.png"), sep = "")
-print(FeaturePlot(seurat_obj, c(lineage1_value, lineage2_value), pt.size = 0.1) & scale_color_viridis_c())
-ggsave(file = name, width = 10, height = 5, device = "png")
+#print(FeaturePlot(seurat_obj, c(lineage1_value, lineage2_value), pt.size = 0.1) & scale_color_viridis_c())
+# Create the three FeaturePlots
+p1 <- FeaturePlot(seurat_obj, glue::glue("{lineage1_value}_pseudotime"), pt.size = 0.1) + scale_color_viridis_c()
+p2 <- FeaturePlot(seurat_obj, glue::glue("{lineage2_value}_pseudotime"), pt.size = 0.1) + scale_color_viridis_c()
+p3 <- FeaturePlot(seurat_obj, glue::glue("{lineage_value}_pseudotime_programmatically"), pt.size = 0.1) + scale_color_viridis_c()
+
+# Combine them in a single row
+combined_plot <- p1 | p2 | p3  # patchwork syntax for horizontal layout
+print(combined_plot)
+ggsave(file = name, width = 15, height = 5, device = "png")
 ```
 
 # Save output files

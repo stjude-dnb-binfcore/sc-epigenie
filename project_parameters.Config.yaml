@@ -123,6 +123,7 @@ lineage1_value_module: "Rods" # Specify name of lineage 1
 lineage1_value_vector_module: "Rods" # Specify vector of cell types for lineage 1
 lineage2_value_module: "Non_Rods" # Specify name of lineage 2
 lineage2_value_vector_module: [RPE, Muller Glia, Bipolar, Cones] # Specify vector of cell types for lineage 2
+lineage_value_module: "Rods" # Specify name of lineage to choose root cells programmatically
 
 
 # `./analyses/project-updates`

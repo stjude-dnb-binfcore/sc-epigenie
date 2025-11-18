@@ -41,7 +41,8 @@ rmarkdown::render('01-building-trajectories-monocle.Rmd', clean = TRUE,
                                 lineage1_value_vector = yaml$lineage1_value_vector_module,
                                 lineage2_value = yaml$lineage2_value_module,
                                 lineage2_value_vector = yaml$lineage2_value_vector_module,
-
+                                lineage_value = yaml$lineage_value_module,
+                                
                                 root_dir = yaml$root_dir,
                                 PROJECT_NAME = yaml$PROJECT_NAME,
                                 PI_NAME = yaml$PI_NAME,
