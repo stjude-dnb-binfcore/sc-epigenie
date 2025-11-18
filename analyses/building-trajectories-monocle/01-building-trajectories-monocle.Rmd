@@ -37,11 +37,13 @@ header-includes:
 params:
   assay: '.'
   resolution_list: '.'
+  cell_type_name: '.'
+  lineage_number_value: '.'
+  lineage_value: '.'
   lineage1_value: '.'
   lineage1_value_vector: '.'
   lineage2_value: '.'
   lineage2_value_vector: '.'
-  lineage_value: '.'
   root_dir: './'
   PROJECT_NAME: '.'
   PI_NAME: '.'
@@ -221,7 +223,7 @@ Assign each cluster to the most common cell type based on the previous predicted
 ```{r assign-celltypes, fig.width = 6, fig.height = 5, fig.fullwidth = TRUE, echo=TRUE}
 for(i in levels(seurat_obj)) {
   cells_to_reid <- WhichCells(seurat_obj, idents = i)
-  newid <- names(sort(table(seurat_obj$predicted.id[cells_to_reid]),decreasing=TRUE))[1]
+  newid <- names(sort(table(seurat_obj@meta.data[cells_to_reid, cell_type_name]),decreasing=TRUE))[1]
   Idents(seurat_obj, cells = cells_to_reid) <- newid
 }
 

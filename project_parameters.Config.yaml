@@ -119,6 +119,7 @@ reference_file_name_annotation_module: "seurat_obj_cell_types_annotations_all.rd
 celltype_reference_module: "predicted.cell.signature.ident" # Column name from the reference object to be used to transfer labels
 
 # `./analyses/building-trajectories-monocle`
+cell_type_name_module: "predicted.id"  # Column name with the cell type annotation to be used
 lineage1_value_module: "Rods" # Specify name of lineage 1
 lineage1_value_vector_module: "Rods" # Specify vector of cell types for lineage 1
 lineage2_value_module: "Non_Rods" # Specify name of lineage 2
