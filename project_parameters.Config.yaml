@@ -120,6 +120,12 @@ celltype_reference_module: "predicted.cell.signature.ident" # Column name from t
 
 n_value_plot_cicero_module: 5 # Number of top links to explore in the `03-finding-co-accessible-networks-cicero.Rmd` script (adjust number as needed). 
 
+# `./analyses/building-trajectories-monocle`
+lineage1_value_module: "Rods" # Specify name of lineage 1
+lineage1_value_vector_module: "Rods" # Specify vector of cell types for lineage 1
+lineage2_value_module: "Non_Rods" # Specify name of lineage 2
+lineage2_value_vector_module: [RPE, Muller Glia, Bipolar, Cones] # Specify vector of cell types for lineage 2
+
 # `./analyses/project-updates`
 results_filepath: "./" # Absolute path to the dir where local fork repo lives
 mac_results_filepath: "./" # Absolute path to the dir where local fork repo lives
