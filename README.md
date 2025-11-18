@@ -123,7 +123,7 @@ Finally, `git pull` to get the most updated changes and code in your project rep
 git pull
 ```
 
-### Requesting CPU and Memory Resources
+### Requesting Resources from the HPCF Cluster
 
 While we provide estimates for the computational resources required (based on 4 samples with approximately 80,000 cells), users may need to adjust memory settings based on cohort size and analysis requirements.
 
@@ -140,6 +140,7 @@ Important Considerations:
 
 ```
 ├── analyses
+|  ├── building-trajectories-monocle
 |  ├── cellranger-analysis
 |  ├── cluster-cell-calling
 |  ├── fastqc-analysis
