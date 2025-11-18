@@ -120,11 +120,23 @@ celltype_reference_module: "predicted.cell.signature.ident" # Column name from t
 
 # `./analyses/building-trajectories-monocle`
 cell_type_name_module: "predicted.id"  # Column name with the cell type annotation to be used
-lineage1_value_module: "Rods" # Specify name of lineage 1
-lineage1_value_vector_module: "Rods" # Specify vector of cell types for lineage 1
-lineage2_value_module: "Non_Rods" # Specify name of lineage 2
-lineage2_value_vector_module: [RPE, Muller Glia, Bipolar, Cones] # Specify vector of cell types for lineage 2
-lineage_value_module: "Rods" # Specify name of lineage to choose root cells programmatically
+lineage_number_value_module: NULL # Options:
+                             # - NULL: Only root cells programmatically (default).
+                             # - "1": Specify a single lineage to use.
+                             # - "2": Specify two lineages to use (maximum supported).
+                             # 
+                             # To specify lineages, also set:
+                             #   - lineage1_value_module
+                             #   - lineage1_value_vector_module
+                             #   - lineage2_value_module
+                             #   - lineage2_value_vector_module
+
+lineage_value_module: "Rods" # Name of the lineage to use for programmatic root cell selection.
+                             # Used when lineage_number_module is NULL or "1".
+lineage1_value_module: "Rods" # Specify name of lineage 1. Ignore if lineage_number_value_module: NULL.
+lineage1_value_vector_module: "Rods" # Specify vector of cell types for lineage 1. Ignore if lineage_number_value_module: NULL.
+lineage2_value_module: "Non_Rods" # Specify name of lineage 2. Ignore if lineage_number_value_module: NULL.
+lineage2_value_vector_module: [RPE, Muller Glia, Bipolar, Cones] # Specify vector of cell types for lineage 2. Ignore if lineage_number_value_module: NULL.
 
 
 # `./analyses/project-updates`

@@ -182,6 +182,7 @@ if (!dir.exists(results_dir)) {
 
 # Source functions
 source(paste0(module_analysis_dir, "/util/monocle3_updated.R"))
+source(paste0(module_analysis_dir, "/util/function-predict-trajectories.R"))
 ```
 
 ```{r echo=FALSE, warning=FALSE}
@@ -209,9 +210,7 @@ use_res_col <- glue::glue("{assay}_snn_res.{resolution_list}")
 Idents(object = seurat_obj) <- use_res_col
 
 # View cell identities, get summary table
-#Idents(seurat_obj)
 table(Idents(seurat_obj))
-
 
 name <- paste0(plots_dir, "/", glue::glue("DimPlot-clusters.png"), sep = "")
 print(DimPlot(seurat_obj, label = TRUE) + NoLegend())
@@ -234,137 +233,155 @@ print(DimPlot(seurat_obj, label = TRUE))
 ggsave(file = name, width = 6, height = 5, device = "png")
 ```
 
-Next we can subset the different lineages and create a trajectory for each lineage. Another way to build the trajectories is to use the whole dataset and build separate pseudotime trajectories for the different cell partitions found by Monocle 3.
+# Predicting trajectories with Monocle 3
 
-```{r subset-celltypes, echo=TRUE}
-lineage1 <- seurat_obj[,  seurat_obj$assigned_celltype %in% lineage1_value_vector]
-lineage2 <- seurat_obj[, seurat_obj$assigned_celltype %in% lineage2_value_vector]
-```
+We convert the Seurat object to a Monocle 3 cell_data_set using as.cell_data_set() from [SeuratWrappers](https://github.com/satijalab/seurat-wrappers) and build trajectories with Monocle 3.
 
-# Building trajectories with Monocle 3
+By default, our pipeline roots cells programmatically—automatically selecting starting cells based on a specified cluster or cell type (for example, using the `r cell_type_name` column and the `r lineage_value`  parameter). This approach is useful for exploratory analyses or when the user does not wish to predefine lineages. For more details on this topic, see [Monocle3 issue](https://github.com/cole-trapnell-lab/monocle3/issues/328).
 
-We can convert the Seurat object to a CellDataSet object using the as.cell_data_set() function from [SeuratWrappers](https://github.com/satijalab/seurat-wrappers) and build the trajectories using Monocle 3. We’ll do this separately for each lineage, but you could explore other strategies building a trajectory for all lineages together.
+If the user prefers, they can specify one or two lineages in the parameters. The pipeline will then subset the data and build a separate trajectory for each specified lineage (up to two). Alternatively, the user can build a trajectory for the entire dataset, letting Monocle 3 identify cell partitions and generate distinct pseudotime trajectories for each.
 
-```{r trajectories-each-lineage, echo=TRUE}
-# We need to add this helper function at the top of our script to mimic the Seurat v4 internal function that is missing in the current version:
-AssociatedDimReducs <- function(object, assay = NULL) {
-  assay <- assay %||% DefaultAssay(object)
-  reduc.names <- names(Filter(function(x) {
-    x@assay.used == assay
-  }, object@reductions))
-  return(reduc.names)
-}
+To compute pseudotime estimates,the user needs to decide where each trajectory should start. Monocle 3 provides an interactive function to select root cells in the trajectory graph—this will launch automatically if the user calls [order_cells()](https://rdrr.io/pkg/monocle3/man/order_cells.html) without specifying the root_cells parameter.
 
+
+```{r trajectories-each-lineage, fig.width = 15, fig.height = 5, fig.fullwidth = TRUE, echo=TRUE}
 set.seed(2025)
 
-lineage1.cds <- as.cell_data_set(lineage1)
-lineage1.cds <- cluster_cells(cds = lineage1.cds, reduction_method = "UMAP")
-lineage1.cds <- learn_graph(lineage1.cds, use_partition = TRUE)
+if (is.null(lineage_number_value)) {
+  
+  cat("We will Programmatically Root Cells in a Trajectory Analysis\n")
+  trajectories_result <- predict_trajectories(seurat_obj = seurat_obj, cell_type_name =  cell_type_name, lineage_value = lineage_value, plots_dir = plots_dir)
+  cat("Programmatically Root Cells in a Trajectory Analysis: Done\n")
 
-lineage2.cds <- as.cell_data_set(lineage2)
-lineage2.cds <- cluster_cells(cds = lineage2.cds, reduction_method = "UMAP")
-lineage2.cds <- learn_graph(lineage2.cds, use_partition = TRUE)
-```
+  # Extract the Seurat object
+  seurat_obj <- trajectories_result$seurat_obj
+  cds <- trajectories_result$cds
 
-To compute pseudotime estimates for each trajectory we need to decide what the start of each trajectory is. 
+  } else if (lineage_number_value == "1") {
+    
+    cat("We will Programmatically Root Cells in a Trajectory Analysis\n")
+    trajectories_result <- predict_trajectories(seurat_obj = seurat_obj, cell_type_name =  cell_type_name, lineage_value = lineage_value, plots_dir = plots_dir)
+    
+    # Extract the Seurat object
+    seurat_obj <- trajectories_result$seurat_obj
+    cds <- trajectories_result$cds
+    cat("Programmatically Root Cells in a Trajectory Analysis: Done\n")
 
-Monocle 3 includes an interactive function to select cells as the root nodes in the graph. This function will be launched if calling [order_cells()](https://rdrr.io/pkg/monocle3/man/order_cells.html) without specifying the root_cells parameter.
+    # Case: One lineage specified
+    cat("We will define one lineage in a Trajectory Analysis\n")
+    lineage1 <- seurat_obj[,  seurat_obj$assigned_celltype %in% lineage1_value_vector]
+    lineage1.cds <- as.cell_data_set(lineage1)
+    lineage1.cds <- cluster_cells(cds = lineage1.cds, reduction_method = "UMAP")
+    lineage1.cds <- learn_graph(lineage1.cds, use_partition = TRUE)
 
-```{r plot-trajectories, fig.width = 6, fig.height = 5, fig.fullwidth = TRUE, echo=TRUE}
-set.seed(2025)
+    # Order cells
+    # Find barcodes for lineage1 cells
+    lineage1_cells <- colnames(lineage1.cds)[colData(lineage1.cds)$assigned_celltype == lineage1_value_vector]
+    # Use the first lineage1 cell as the root (or a vector of root cells)
+    lineage1.cds <- order_cells(lineage1.cds, reduction_method = "UMAP", root_cells = lineage1_cells[1])
 
-# order cells
-# Find barcodes for lineage1 cells
-lineage1_cells <- colnames(lineage1.cds)[colData(lineage1.cds)$assigned_celltype == lineage1_value_vector]
-# Use the first lineage1 cell as the root (or a vector of root cells)
-lineage1.cds <- order_cells(lineage1.cds, reduction_method = "UMAP", root_cells = lineage1_cells[1])
+    # Plot trajectories colored by pseudotime
+    name <- paste0(plots_dir, "/", glue::glue("Plot-trajectory-lineage1.png"), sep = "")
+    print(plot_cells(cds = lineage1.cds, color_cells_by = "pseudotime", show_trajectory_graph = TRUE))
+    ggsave(file = name, width = 6, height = 5, device = "png")
+    
+    cat("Use One Lineage to Root Cells in a Trajectory Analysis: Done\n")
 
-# Find barcodes for lineage2 cells
-lineage2_cells <- colnames(lineage2.cds)[colData(lineage2.cds)$assigned_celltype == lineage2_value_vector]
-# Use the first lineage2 cell as the root (or a vector of root cells)
-lineage2.cds <- order_cells(lineage2.cds, reduction_method = "UMAP", root_cells = lineage2_cells[1])
-
-
-# Plot trajectories colored by pseudotime
-name <- paste0(plots_dir, "/", glue::glue("Plot-trajectory-lineage1.png"), sep = "")
-print(plot_cells(cds = lineage1.cds, color_cells_by = "pseudotime", show_trajectory_graph = TRUE))
-ggsave(file = name, width = 6, height = 5, device = "png")
-
-name <- paste0(plots_dir, "/", glue::glue("Plot-trajectory-lineage2.png"), sep = "")
-print(plot_cells(cds = lineage2.cds, color_cells_by = "pseudotime", show_trajectory_graph = TRUE))
-ggsave(file = name, width = 6, height = 5, device = "png")
-```
-
-# How to Programmatically Root Cells in a Trajectory Analysis
-
-For exploratory trajectory analysis, it is often useful to root cells based on a specific cluster or cell type. In this example, we root the trajectory using cells from a cluster defined by the `predicted.id` column in the metadata, with the lineage of interest specified by the `r lineage_value` as defined in parameters.
-
-For more information, see the [Monocle3 issue](https://github.com/cole-trapnell-lab/monocle3/issues/328).
-
-```{r programmatically-root-cells, echo=TRUE}
-cds <- as.cell_data_set(seurat_obj) # Convert your Seurat object to a Monocle3 cell_data_set.
-cds <- cluster_cells(cds = cds, reduction_method = "UMAP") # Cluster cells and learn the principal graph using Monocle3.
-cds <- learn_graph(cds, use_partition = TRUE) # to choose more than one node
-#cds <- learn_graph(cds, use_partition = FALSE) # to choose only one node
-
-# Define a function to programmatically select the root node:
-# The function identifies cells with the specified lineage.
-# It finds the principal graph node most frequently associated with these cells.
-# This node is used as the root for ordering cells in pseudotime.
-get_earliest_principal_node <- function(cds, predicted.id = lineage_value){
-  cell_ids <- which(colData(cds)[, "predicted.id"] == lineage_value)
-
-  closest_vertex <-
-  cds@principal_graph_aux[["UMAP"]]$pr_graph_cell_proj_closest_vertex
-  closest_vertex <- as.matrix(closest_vertex[colnames(cds), ])
-  root_pr_nodes <-
-    igraph::V(principal_graph(cds)[["UMAP"]])$name[as.numeric(names
-   (which.max(table(closest_vertex[cell_ids,]))))]
-
-  root_pr_nodes
-}
-
-# Order cells in the trajectory with the selected root node.
-cds <- order_cells(cds, root_pr_nodes=get_earliest_principal_node(cds))
-```
-
-Extract the pseudotime values and add to the Seurat object:
-
-```{r extract-pseudotime, fig.width = 15, fig.height = 5, fig.fullwidth = TRUE, echo=TRUE}
-seurat_obj <- AddMetaData(object = seurat_obj,
+    # Extract the pseudotime values and add to the Seurat object:
+    seurat_obj <- AddMetaData(object = seurat_obj,
                           metadata = lineage1.cds@principal_graph_aux@listData$UMAP$pseudotime,
                           col.name = glue::glue("{lineage1_value}_pseudotime"))
- 
-seurat_obj <- AddMetaData(object = seurat_obj,
-                          metadata = lineage2.cds@principal_graph_aux@listData$UMAP$pseudotime,
-                          col.name = glue::glue("{lineage2_value}_pseudotime"))
-seurat_obj <- AddMetaData(object = seurat_obj,
+
+    seurat_obj <- AddMetaData(object = seurat_obj,
                           metadata = cds@principal_graph_aux@listData$UMAP$pseudotime,
                           col.name = glue::glue("{lineage_value}_pseudotime_programmatically"))
+      
+    name <- paste0(plots_dir, "/", glue::glue("Plot-pseudotime.png"), sep = "")
+    # Create the three FeaturePlots
+    p1 <- FeaturePlot(seurat_obj, glue::glue("{lineage1_value}_pseudotime"), pt.size = 0.1) + scale_color_viridis_c()
+    p3 <- FeaturePlot(seurat_obj, glue::glue("{lineage_value}_pseudotime_programmatically"), pt.size = 0.1) + scale_color_viridis_c()
+      
+    # Combine them in a single row
+    combined_plot <- p1 | p3  # patchwork syntax for horizontal layout
+    print(combined_plot)
+    ggsave(file = name, width = 10, height = 5, device = "png")
+  
+    } else if (lineage_number_value == "2") {
+      
+      cat("We will Programmatically Root Cells in a Trajectory Analysis\n")
+      trajectories_result <- predict_trajectories(seurat_obj = seurat_obj, cell_type_name =  cell_type_name, lineage_value = lineage_value, plots_dir = plots_dir)
+      
+      # Extract the Seurat object
+      seurat_obj <- trajectories_result$seurat_obj
+      cds <- trajectories_result$cds
+      cat("Programmatically Root Cells in a Trajectory Analysis: Done\n")
 
+      # Case: Two lineages specified
+      cat("We will define two lineages in a Trajectory Analysis\n")
+      # Lineage 1
+      lineage1 <- seurat_obj[,  seurat_obj$assigned_celltype %in% lineage1_value_vector]
+      lineage1.cds <- as.cell_data_set(lineage1)
+      lineage1.cds <- cluster_cells(cds = lineage1.cds, reduction_method = "UMAP")
+      lineage1.cds <- learn_graph(lineage1.cds, use_partition = TRUE)
+      # Lineage 2
+      lineage2 <- seurat_obj[, seurat_obj$assigned_celltype %in% lineage2_value_vector]
+      lineage2.cds <- as.cell_data_set(lineage2)
+      lineage2.cds <- cluster_cells(cds = lineage2.cds, reduction_method = "UMAP")
+      lineage2.cds <- learn_graph(lineage2.cds, use_partition = TRUE)
+      
+      # Order cells
+      # Find barcodes for lineage1 cells
+      lineage1_cells <- colnames(lineage1.cds)[colData(lineage1.cds)$assigned_celltype == lineage1_value_vector]
+      # Use the first lineage1 cell as the root (or a vector of root cells)
+      lineage1.cds <- order_cells(lineage1.cds, reduction_method = "UMAP", root_cells = lineage1_cells[1])
 
-name <- paste0(plots_dir, "/", glue::glue("Plot-pseudotime.png"), sep = "")
-#print(FeaturePlot(seurat_obj, c(lineage1_value, lineage2_value), pt.size = 0.1) & scale_color_viridis_c())
-# Create the three FeaturePlots
-p1 <- FeaturePlot(seurat_obj, glue::glue("{lineage1_value}_pseudotime"), pt.size = 0.1) + scale_color_viridis_c()
-p2 <- FeaturePlot(seurat_obj, glue::glue("{lineage2_value}_pseudotime"), pt.size = 0.1) + scale_color_viridis_c()
-p3 <- FeaturePlot(seurat_obj, glue::glue("{lineage_value}_pseudotime_programmatically"), pt.size = 0.1) + scale_color_viridis_c()
+      # Find barcodes for lineage2 cells
+      lineage2_cells <- colnames(lineage2.cds)[colData(lineage2.cds)$assigned_celltype == lineage2_value_vector]
+      # Use the first lineage2 cell as the root (or a vector of root cells)
+      lineage2.cds <- order_cells(lineage2.cds, reduction_method = "UMAP", root_cells = lineage2_cells[1])
 
-# Combine them in a single row
-combined_plot <- p1 | p2 | p3  # patchwork syntax for horizontal layout
-print(combined_plot)
-ggsave(file = name, width = 15, height = 5, device = "png")
+      # Plot trajectories colored by pseudotime
+      name <- paste0(plots_dir, "/", glue::glue("Plot-trajectory-lineage1.png"), sep = "")
+      print(plot_cells(cds = lineage1.cds, color_cells_by = "pseudotime", show_trajectory_graph = TRUE))
+      ggsave(file = name, width = 6, height = 5, device = "png")
+
+      name <- paste0(plots_dir, "/", glue::glue("Plot-trajectory-lineage2.png"), sep = "")
+      print(plot_cells(cds = lineage2.cds, color_cells_by = "pseudotime", show_trajectory_graph = TRUE))
+      ggsave(file = name, width = 6, height = 5, device = "png")
+      
+      cat("Use Two Lineages to Root Cells in a Trajectory Analysis: Done\n")
+
+      # Extract the pseudotime values and add to the Seurat object:
+      seurat_obj <- AddMetaData(object = seurat_obj,
+                          metadata = lineage1.cds@principal_graph_aux@listData$UMAP$pseudotime,
+                          col.name = glue::glue("{lineage1_value}_pseudotime"))
+
+      seurat_obj <- AddMetaData(object = seurat_obj,
+                          metadata = lineage2.cds@principal_graph_aux@listData$UMAP$pseudotime,
+                          col.name = glue::glue("{lineage2_value}_pseudotime"))
+      seurat_obj <- AddMetaData(object = seurat_obj,
+                          metadata = cds@principal_graph_aux@listData$UMAP$pseudotime,
+                          col.name = glue::glue("{lineage_value}_pseudotime_programmatically"))
+      
+      name <- paste0(plots_dir, "/", glue::glue("Plot-pseudotime.png"), sep = "")
+      # Create the three FeaturePlots
+      p1 <- FeaturePlot(seurat_obj, glue::glue("{lineage1_value}_pseudotime"), pt.size = 0.1) + scale_color_viridis_c()
+      p2 <- FeaturePlot(seurat_obj, glue::glue("{lineage2_value}_pseudotime"), pt.size = 0.1) + scale_color_viridis_c()
+      p3 <- FeaturePlot(seurat_obj, glue::glue("{lineage_value}_pseudotime_programmatically"), pt.size = 0.1) + scale_color_viridis_c()
+      
+      # Combine them in a single row
+      combined_plot <- p1 | p2 | p3  # patchwork syntax for horizontal layout
+      print(combined_plot)
+      ggsave(file = name, width = 15, height = 5, device = "png")
+}
 ```
 
 # Save output files
 
 ```{r save_seurat, echo=TRUE}
-# Save metadata
 metadata <- as_data_frame_seurat(seurat_obj, metadata = TRUE)
 write_tsv(metadata, file = paste0(results_dir, "/", glue::glue("metadata.tsv"))) # Save metadata
-  
-# Save object
-saveRDS(seurat_obj, file = paste0(results_dir, "/", "seurat_obj_pseudotime.rds"))
+saveRDS(seurat_obj, file = paste0(results_dir, "/", "seurat_obj_pseudotime.rds")) # Save object
 ```
 
 ```{r echo=FALSE}
