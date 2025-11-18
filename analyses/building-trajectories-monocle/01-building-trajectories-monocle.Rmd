@@ -302,8 +302,6 @@ seurat_obj <- AddMetaData(object = seurat_obj,
 seurat_obj <- AddMetaData(object = seurat_obj,
                           metadata = lineage2.cds@principal_graph_aux@listData$UMAP$pseudotime,
                           col.name = glue::glue("{lineage2_value}_pseudotime"))
-head(seurat_obj@meta.data)
-
 
 name <- paste0(plots_dir, "/", glue::glue("Plot-pseudotime.png"), sep = "")
 print(FeaturePlot(seurat_obj, c(lineage1_value, lineage2_value), pt.size = 0.1) & scale_color_viridis_c())
