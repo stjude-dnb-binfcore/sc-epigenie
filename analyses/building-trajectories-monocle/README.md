@@ -28,6 +28,10 @@ bsub < lsf-script.txt
 
 This folder contains a script tasked to infer trajectories and pseudotime on single-cell ATAC-seq (scATAC-seq) data.
 
+We build trajectories with Monocle 3. By default, our pipeline roots cells programmatically—automatically selecting starting cells based on a specified cluster or cell type (for example, using the `cell_type_name` column and the `lineage_value`  parameter). This approach is useful for exploratory analyses or when the user does not wish to predefine lineages. For more details on this topic, see [Monocle3 issue](https://github.com/cole-trapnell-lab/monocle3/issues/328).
+
+If the user prefers, they can specify one or two lineages in the parameters. The pipeline will then subset the data and build a separate trajectory for each specified lineage (up to two). 
+
 For more information, see [Building trajectories with Monocle 3](https://stuartlab.org/signac/articles/monocle) and [Monocle 3](https://cole-trapnell-lab.github.io/monocle3/).
 
 
@@ -46,6 +50,7 @@ The structure of this folder is as follows:
 ├── run-building-trajectories-monocle.R
 ├── run-building-trajectories-monocle.sh
 └── util
+|   ├── function-predict-trajectories.R
 |___└── monocle3_updated.R
 ```
 
