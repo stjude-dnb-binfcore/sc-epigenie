@@ -239,7 +239,7 @@ We convert the Seurat object to a Monocle 3 cell_data_set using as.cell_data_set
 
 By default, our pipeline roots cells programmatically—automatically selecting starting cells based on a specified cluster or cell type (for example, using the `r cell_type_name` column and the `r lineage_value`  parameter). This approach is useful for exploratory analyses or when the user does not wish to predefine lineages. For more details on this topic, see [Monocle3 issue](https://github.com/cole-trapnell-lab/monocle3/issues/328).
 
-If the user prefers, they can specify one or two lineages in the parameters. The pipeline will then subset the data and build a separate trajectory for each specified lineage (up to two). Alternatively, the user can build a trajectory for the entire dataset, letting Monocle 3 identify cell partitions and generate distinct pseudotime trajectories for each.
+If the user prefers, they can specify one or two lineages in the parameters. The pipeline will then subset the data and build a separate trajectory for each specified lineage (up to two). 
 
 To compute pseudotime estimates,the user needs to decide where each trajectory should start. Monocle 3 provides an interactive function to select root cells in the trajectory graph—this will launch automatically if the user calls [order_cells()](https://rdrr.io/pkg/monocle3/man/order_cells.html) without specifying the root_cells parameter.
 
