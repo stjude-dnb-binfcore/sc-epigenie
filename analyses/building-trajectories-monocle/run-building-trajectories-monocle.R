@@ -36,11 +36,16 @@ rmarkdown::render('01-building-trajectories-monocle.Rmd', clean = TRUE,
                   output_file = c(paste('Report-', 'building-trajectories-monocle', '-', Sys.Date(), sep = '')),
                   output_format = 'all',
                   params = list(assay = yaml$assay_annotation_module,
+                                resolution_list = yaml$resolution_list_find_markers, 
+                                
+                                cell_type_name = yaml$cell_type_name_module,
+                                lineage_number_value = yaml$lineage_number_value_module,
+                                lineage_value = yaml$lineage_value_module,
                                 lineage1_value = yaml$lineage1_value_module,
                                 lineage1_value_vector = yaml$lineage1_value_vector_module,
                                 lineage2_value = yaml$lineage2_value_module,
                                 lineage2_value_vector = yaml$lineage2_value_vector_module,
-
+                                
                                 root_dir = yaml$root_dir,
                                 PROJECT_NAME = yaml$PROJECT_NAME,
                                 PI_NAME = yaml$PI_NAME,
