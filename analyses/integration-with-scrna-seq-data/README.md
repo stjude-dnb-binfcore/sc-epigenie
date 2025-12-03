@@ -35,7 +35,9 @@ This folder contains a script tasked to perform a data transfer method in the co
 - Classify cells measured with scATAC-seq based on clustering results from scRNA-seq
 - Co-embed scATAC-seq and scRNA-seq data
 
-There is also a script to perform peak calling and gene ontology analysis per cell type.
+There are also scripts:
+   (1) to perform peak calling and gene ontology analysis per cell type and 
+   (2) to predict regions of the genome that are more likely to be in physical proximity in the nucleus, i.e., [Cicero’s co-accessibility analysis](https://cole-trapnell-lab.github.io/cicero-release/docs_m3/).
 
 
 ## Folder structure 
@@ -45,6 +47,7 @@ The structure of this folder is as follows:
 ```
 ├── 01-integration-with-scrna-seq-data.Rmd
 ├── 02-peak-calling.Rmd
+├── 03-finding-co-accessible-networks-cicero.Rmd
 ├── lsf_script.txt
 ├── plots
 ├── README.md

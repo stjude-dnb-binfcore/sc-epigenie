@@ -1,0 +1,387 @@
+---
+title: "Finding co-accessible networks with Cicero for sc-ATAC-Seq Analysis in 10X Genomics data"
+author: "Antonia Chroni for SJCRH DNB_BINF_Core"
+papersize: a4
+fontsize: 11pt
+links-as-notes: true
+output:
+  html_document:
+    toc: TRUE
+    toc_float: TRUE
+    df_print: paged
+    code_folding: hide
+    toc_depth: 2
+    highlight: tango
+    number_sections: TRUE
+  pdf_document:
+    toc: TRUE
+    highlight: tango
+    number_sections: TRUE
+    latex_engine: lualatex
+    keep_tex: FALSE
+    fig_caption: yes
+    fig_crop: no
+    fig_height: 2
+    fig_width: 3
+    toc_depth: 2
+always_allow_html: TRUE
+urlcolor: blue
+linkcolor: black
+citecolor: blue
+geometry: margin=1in
+header-includes: 
+  - \usepackage{titling}
+  - \usepackage{fancyhdr}
+  - \usepackage{graphicx}
+  - \usepackage{float}
+params:
+  assay: '.'
+  n_value_plot_cicero: '.'
+  root_dir: './'
+  PROJECT_NAME: '.'
+  PI_NAME: '.'
+  TASK_ID: '.'
+  PROJECT_LEAD_NAME: '.'
+  DEPARTMENT: '.'
+  LEAD_ANALYSTS: '.'
+  GROUP_LEAD: '.'
+  CONTACT_EMAIL: '.'
+  PIPELINE: '.'
+  START_DATE: '.'
+  COMPLETION_DATE: '.'
+---
+
+```{r logo-file, echo=FALSE}
+attach(params)
+# Insert logo on the top of the html report 
+logo_file <- file.path(root_dir, "figures", "img", "DNB-BINF-Core-logo.png")
+htmltools::img(src = knitr::image_uri(logo_file), alt = "logo", style = "position:absolute; top:0; left:0; padding:0px; height:120px;")
+detach(params)
+```
+
+\addtolength{\headheight}{2.0cm} 
+\fancypagestyle{plain}{} 
+\thispagestyle{fancy}
+\fancyhead[L]{\includegraphics[height=120px]{`r logo_file`}}
+\renewcommand{\headrulewidth}{0pt}
+
+<style type="text/css">
+:root {--DNB_BINF_Core_color: #00427B;}
+
+h1.title {margin-top: 130px;
+          margin-bottom: 25px;
+          font-size: 36px;}
+
+.nobullet li {list-style-type: none;}
+
+.reporthead {font-size: 20px;}
+
+body { /* Normal */
+  font-size: 16px;
+  font-style: Arial, Helvetica, sans-serif;}
+
+h1 {color: var(--DNB_BINF_Core_color);
+    font-size: 28px;
+    margin-top: 50px;}
+
+h2 {color: var(--DNB_BINF_Core_color);
+    font-size: 20px;}
+
+.list-group-item.active, .list-group-item.active:focus, .list-group-item.active:hover {
+  background-color: var(--DNB_BINF_Core_color);}
+</style>
+
+<a href="https://wiki.stjude.org/display/CAB">
+
+</a>
+
+\pagebreak
+
+<div class="reporthead"><br/>
+**PI: `r params$PI_NAME`**  
+**Project: `r params$PROJECT_NAME`**  
+Task: `r params$TASK_ID`  
+Project Lead(s): `r params$PROJECT_LEAD_NAME`  
+Department: `r params$DEPARTMENT`  
+
+<br />  
+
+DNB Bioinformatics Core Analysis Team: 
+<br />  
+
+>**Lead Analyst(s): `r params$LEAD_ANALYSTS`**  
+>Group Lead: `r params$GROUP_LEAD`  
+<br />
+>**Contact E-mail:** `r params$CONTACT_EMAIL`  
+>**DNB Bioinformatics Core Pipeline:** `r params$PIPELINE`  
+
+Date started: `r params$START_DATE`  
+Date completed:  `r params$COMPLETION_DATE`  
+Report generated: `r format(Sys.time(), '%H:%M:%S %Z %m/%d/%Y')` \
+
+Reviewed by: _____________________   Date: ____________ \
+</div>
+\pagebreak
+  
+# Information about this notebook
+
+This notebook guides users in running [Cicero’s co-accessibility analysis](https://cole-trapnell-lab.github.io/cicero-release/docs_m3/) on single-cell ATAC-seq (scATAC-seq) data.
+
+Cicero is an R package that provides tools for analyzing single-cell chromatin accessibility experiments. The main function of Cicero is to use single-cell chromatin accessibility data to predict cis-regulatory interactions (such as those between enhancers and promoters) in the genome by examining co-accessibility. 
+
+The main purpose of Cicero is to use single-cell chromatin accessibility data to predict regions of the genome that are more likely to be in physical proximity in the nucleus. This can be used to identify putative enhancer-promoter pairs, and to get a sense of the overall structure of the cis-architecture of a genomic region. Because of the sparsity of single-cell data, cells must be aggregated by similarity to allow robust correction for various technical factors in the data.
+
+Ultimately, Cicero provides a "Cicero co-accessibility" score between -1 and 1 between each pair of accessible peaks within a user defined distance where a higher number indicates higher co-accessibility.
+
+Cicero analysis is typically performed before or alongside downstream regulatory network or gene expression analyses. For a detailed walk through, see the [Finding co-accessible networks with Cicero](https://stuartlab.org/signac/articles/cicero) vignette.
+
+## Why Perform Cicero Co-accessibility Analysis?
+
+- **Identify regulatory connections**: Link distal enhancers to gene promoters by finding co-accessible chromatin regions.
+- **Build cis-regulatory networks**: Reveal potential regulatory relationships that underlie gene expression patterns in specific cell types or states.
+- **Understand regulatory architecture**: Gain insight into cell-type-specific chromatin organization and gene regulation in your scATAC-seq data.
+
+
+# Set up
+
+```{r load-library, echo=TRUE}
+attach(params)
+suppressPackageStartupMessages({
+  library(Signac)
+  library(Seurat)
+  library(SeuratWrappers)
+  library(monocle3)
+  library(cicero)
+  library(Matrix)
+  library(tidyverse)
+  library(patchwork)
+  library(base)
+  library(knitr)
+  library(DT)
+  library(data.table)
+}) 
+```
+
+# Directories and paths to file Inputs/Outputs
+
+```{r set-dir-and-file-names, echo=TRUE}
+analysis_dir <- file.path(root_dir, "analyses", "integration-with-scrna-seq-data") 
+data_dir <- file.path(root_dir, "analyses", "integration-with-scrna-seq-data", "results", "01_integration_with_scrna_seq_data")
+module_results_dir <- file.path(analysis_dir, "results")
+module_plots_dir <- file.path(analysis_dir, "plots")
+util_dir <- file.path(root_dir, "analyses", "building-trajectories-monocle") 
+
+# Input files
+data_file <- file.path(data_dir, "seurat_obj_reference.rds")
+
+# Create results_dir
+results_dir <- file.path(module_results_dir, "03_co_accessible_networks_cicero")
+if (!dir.exists(results_dir)) {
+  dir.create(results_dir)}
+
+# Create plots directory
+plots_dir <- file.path(module_plots_dir, "03_co_accessible_networks_cicero") 
+if (!dir.exists(plots_dir)) {
+  dir.create(plots_dir)}
+
+# Source functions
+source(paste0(util_dir, "/util/monocle3_updated.R"))
+```
+
+```{r echo=FALSE, warning=FALSE}
+opts_chunk$set(fig.align='center',
+               external=TRUE,
+               echo=FALSE,
+               warning=FALSE,
+               fig.pos='H')
+a4width <- 8.3
+a4height <- 11.7
+```
+
+# Read seurat object
+
+First, we will use the seurat object as generated from the pipeline in the `integration-with-scrna-seq-data` module. 
+
+```{r read-object, echo=TRUE}
+seurat_obj <- readRDS(data_file)
+DefaultAssay(seurat_obj) <- assay
+```
+
+```{r read-project-metadata, echo=TRUE}
+metadata_dir <- yaml$metadata_dir
+metadata_file <- yaml$metadata_file
+project_metadata_file <- file.path(metadata_dir, metadata_file) # metadata input file
+
+project_metadata <- read.csv(project_metadata_file, sep = "\t", header = TRUE)
+sample_name <- unique(as.character(project_metadata$ID))
+sample_name <- sort(sample_name, decreasing = FALSE)
+print(sample_name)
+```
+
+We need to attach the fragments files to the seurat object before any conversion and Cicero steps.
+
+```{r create-fragment-list, echo=TRUE}
+# Attach appropriate fragments files to use for plotting later
+fragment_paths <- file.path(yaml$data_dir, sample_name, "outs", "fragments.tsv.gz")
+
+fragment_list <- mapply(function(sample, frag_path) {
+  if (!file.exists(frag_path)) {
+    warning("Fragment file not found for sample: ", sample)
+    return(NULL)
+  }
+  matching_cells <- paste0(
+    str_remove(grep(paste0("^", sample, ":"), colnames(seurat_obj), value = TRUE), pattern = paste0(sample, ":")),
+    "-1"
+  )
+  names(matching_cells) <- grep(paste0("^", sample, ":"), colnames(seurat_obj), value = TRUE)
+  
+  tryCatch({
+    CreateFragmentObject(path = frag_path, cells = matching_cells)
+  }, error = function(e) {
+    warning("Failed to create fragment object for sample: ", sample, " (", e$message, ")")
+    return(NULL)
+  })
+}, sample_name, fragment_paths, SIMPLIFY = FALSE)
+
+# Remove any NULL entries in case of failure
+fragment_list <- Filter(Negate(is.null), fragment_list)
+seurat_obj[[assay]]@fragments <- fragment_list
+# Fragments(seurat_obj)
+```
+
+# Create the Cicero object
+
+We can find cis-co-accessible networks (CCANs) using [Cicero](https://cole-trapnell-lab.github.io/cicero-release/docs_m3/).
+
+```{r create-cds-object, echo=TRUE}
+# We need to add this helper function at the top of our script to mimic the Seurat v4 internal function that is missing in the current version:
+AssociatedDimReducs <- function(object, assay = NULL) {
+  assay <- assay %||% DefaultAssay(object)
+  reduc.names <- names(Filter(function(x) {
+    x@assay.used == assay
+  }, object@reductions))
+  return(reduc.names)
+}
+
+set.seed(2025)
+
+# convert to CellDataSet format and make the cicero object
+seurat_obj.cds <- as.cell_data_set(x = seurat_obj)
+#seurat_obj.cds <- cluster_cells(cds = seurat_obj.cds, reduction_method = "UMAP")
+#seurat_obj.cds <- learn_graph(seurat_obj.cds, use_partition = TRUE)
+seurat_obj.cicero <- make_cicero_cds(seurat_obj.cds, reduced_coordinates = reducedDims(seurat_obj.cds)$UMAP)
+```
+
+# Find Cicero connections
+
+Here we demonstrate the most basic workflow for running Cicero. This workflow can be broken down into several steps, each with parameters that can be changed from their defaults to fine-tune the Cicero algorithm depending on your data. We highly recommend that you explore the Cicero [website](https://cole-trapnell-lab.github.io/cicero-release/docs_m3/), [paper](https://doi.org/10.1016/j.molcel.2018.06.044), and [documentation](https://rdrr.io/bioc/cicero/) for more information.
+
+
+```{r find-cicero-connections, echo=TRUE}
+# get the chromosome sizes from the Seurat object
+genome <- seqlengths(seurat_obj)
+
+# omit this step to run on the whole genome
+# We’ll demonstrate running Cicero here using just one chromosome to save some time, but the same workflow can be applied to find CCANs for the whole genome.
+# Do NOT subset to genome[1]; keep all chromosomes
+# genome <- genome[1]
+
+# convert chromosome sizes to a dataframe
+genome.df <- data.frame("chr" = names(genome), "length" = genome)
+
+# run cicero
+conns <- run_cicero(seurat_obj.cicero, genomic_coords = genome.df, sample_num = 100)
+print(head(conns))
+```
+
+# Finding cis-co-accessible networks (CCANs)
+
+Now that we’ve found pairwise co-accessibility scores for each peak, we can now group these pairwise connections into larger co-accessible networks using the [generate_ccans()](https://rdrr.io/bioc/cicero/man/generate_ccans.html) function from Cicero.
+
+In addition to pairwise co-accessibility scores, Cicero also has a function to find Cis-Co-accessibility Networks (CCANs), which are modules of sites that are highly co-accessible with one another. We use the Louvain community detection algorithm (Blondel et al., 2008) to find clusters of sites that tended to be co-accessible. The function `generate_ccans` takes as input a connection data frame and outputs a data frame with CCAN assignments for each input peak. Sites not included in the output data frame were not assigned a CCAN.
+
+```{r find-ccans, echo=TRUE}
+ccans <- generate_ccans(conns)
+print(head(ccans))
+```
+
+# Add links to a Seurat object
+
+We can add the co-accessible links found by Cicero to the ChromatinAssay object in Seurat. Using the [ConnectionsToLinks()](https://stuartlab.org/signac/reference/connectionstolinks) function in Signac we can convert the outputs of Cicero to the format needed to store in the links slot in the ChromatinAssay, and add this to the object using the `Links()` assignment function.
+
+```{r add-links, echo=TRUE}
+links <- ConnectionsToLinks(conns = conns, ccans = ccans)
+Links(seurat_obj) <- links
+
+# Convert links to a data frame for easy handling
+links_df <- as.data.frame(links) %>%
+  #mutate(gene = paste0(seqnames, "-", start, "-", end))
+  arrange(desc(score))
+
+write.table(links_df, file = paste(results_dir, "/", "links.tsv", sep = ""), sep = "\t", quote = FALSE, row.names = FALSE)
+```
+
+## Interactive Table of Links
+
+In Cicero/Signac, the score column for links typically represents the co-accessibility score.  Higher scores usually indicate more confident (stronger) links. The best (most confident) links are those with the highest score values.
+
+```{r links-interactive-table, echo=TRUE}
+# Interactive Table
+datatable(links_df, 
+          options = list(pageLength = 5, 
+                         autoWidth = TRUE, 
+                         server = TRUE), 
+          filter = "top")
+```
+
+We will create region strings in the format expected by CoveragePlot and get unique regions for plotting connections.
+
+```{r create-links-list, echo=TRUE}
+# Create region strings in the format expected by CoveragePlot (e.g., "chr1-40189344-40252549")
+regions_for_plot <- paste0(links_df$seqnames, "-",links_df$start, "-", links_df$end)
+
+# Get unique regions (if desired)
+regions_for_plot <- unique(regions_for_plot)
+```
+
+# Plotting connections across cell types
+
+## Overall
+
+```{r connections-plot-overall, fig.width = 10, fig.height = 6, fig.fullwidth = TRUE, echo=TRUE}
+for (region in head(regions_for_plot, n_value_plot_cicero)) { 
+  message("Plotting region: ", region)
+  p <- CoveragePlot(seurat_obj, region = region, group.by = "predicted.id")
+  print(p)
+  plot_path <- file.path(plots_dir, paste0("CoveragePlot_links_overall_", region, ".png"))
+  ggsave(plot_path, plot = p, width = 10, height = 6)
+  message("Saved plot to: ", plot_path)
+}
+```
+
+## Split by ID
+
+```{r connections-plot-by-id, fig.width = 10, fig.height = 15, fig.fullwidth = TRUE, echo=TRUE}
+for (region in head(regions_for_plot, n_value_plot_cicero)) { 
+  message("Plotting region: ", region)
+  p <- CoveragePlot(seurat_obj, region = region, group.by = "predicted.id", split.by = "ID")
+  print(p)
+  plot_path <- file.path(plots_dir, paste0("CoveragePlot_links_ID_", region, ".png"))
+  ggsave(plot_path, plot = p, width = 10, height = 15)
+  message("Saved plot to: ", plot_path)
+}
+```
+
+
+```{r echo=FALSE}
+detach(params)
+```
+
+\pagebreak
+
+# Session Info
+
+```{r echo=FALSE}
+sessionInfo()
+```
+

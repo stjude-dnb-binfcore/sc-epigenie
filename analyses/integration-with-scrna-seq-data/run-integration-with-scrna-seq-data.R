@@ -105,4 +105,25 @@ rmarkdown::render('02-peak-calling.Rmd', clean = TRUE,
                                 START_DATE = yaml$START_DATE,
                                 COMPLETION_DATE = yaml$COMPLETION_DATE))
 ################################################################################################################
+assay = yaml$assay_annotation_module
 
+rmarkdown::render('03-finding-co-accessible-networks-cicero.Rmd', clean = TRUE,
+                  output_dir = file.path(module_plots_dir),
+                  output_file = c(paste('Report-', 'finding-co-accessible-networks-cicero', '-', Sys.Date(), sep = '')),
+                  output_format = 'all',
+                  params = list(assay = yaml$assay_annotation_module,
+                                n_value_plot_cicero = yaml$n_value_plot_cicero_module,
+
+                                root_dir = yaml$root_dir,
+                                PROJECT_NAME = yaml$PROJECT_NAME,
+                                PI_NAME = yaml$PI_NAME,
+                                TASK_ID = yaml$TASK_ID,
+                                PROJECT_LEAD_NAME = yaml$PROJECT_LEAD_NAME,
+                                DEPARTMENT = yaml$DEPARTMENT,
+                                LEAD_ANALYSTS = yaml$LEAD_ANALYSTS,
+                                GROUP_LEAD = yaml$GROUP_LEAD,
+                                CONTACT_EMAIL = yaml$CONTACT_EMAIL,
+                                PIPELINE = yaml$PIPELINE, 
+                                START_DATE = yaml$START_DATE,
+                                COMPLETION_DATE = yaml$COMPLETION_DATE))
+################################################################################################################                                

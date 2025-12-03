@@ -118,6 +118,8 @@ reference_dir_annotation_module: "./sc-rna-seq-snap/analyses/cell-types-annotati
 reference_file_name_annotation_module: "seurat_obj_cell_types_annotations_all.rds" # File name with the object that contains the cell type annotation. It needs to be in `rds` format.
 celltype_reference_module: "predicted.cell.signature.ident" # Column name from the reference object to be used to transfer labels
 
+n_value_plot_cicero_module: 5 # Number of top links to explore in the `03-finding-co-accessible-networks-cicero.Rmd` script (adjust number as needed). 
+
 # `./analyses/building-trajectories-monocle`
 cell_type_name_module: "predicted.id"  # Column name with the cell type annotation to be used
 lineage_number_value_module: NULL # Options:
@@ -137,7 +139,6 @@ lineage1_value_module: "Rods" # Specify name of lineage 1. Ignore if lineage_num
 lineage1_value_vector_module: "Rods" # Specify vector of cell types for lineage 1. Ignore if lineage_number_value_module: NULL.
 lineage2_value_module: "Non_Rods" # Specify name of lineage 2. Ignore if lineage_number_value_module: NULL.
 lineage2_value_vector_module: [RPE, Muller Glia, Bipolar, Cones] # Specify vector of cell types for lineage 2. Ignore if lineage_number_value_module: NULL.
-
 
 # `./analyses/project-updates`
 results_filepath: "./" # Absolute path to the dir where local fork repo lives
