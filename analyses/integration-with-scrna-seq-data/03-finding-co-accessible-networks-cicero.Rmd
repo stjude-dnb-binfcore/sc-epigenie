@@ -129,7 +129,7 @@ This notebook guides users in running [Cicero’s co-accessibility analysis](htt
 
 Cicero is an R package that provides tools for analyzing single-cell chromatin accessibility experiments. The main function of Cicero is to use single-cell chromatin accessibility data to predict cis-regulatory interactions (such as those between enhancers and promoters) in the genome by examining co-accessibility. 
 
-The main purpose of Cicero is to use single-cell chromatin accessibility data to predict regions of the genome that are more likely to be in physical proximity in the nucleus. This can be used to identify putative enhancer-promoter pairs, and to get a sense of the overall structure of the cis-architecture of a genomic region. Because of the sparsity of single-cell data, cell must be aggregated by similarity to allow robust correction for various technical factors in the data.
+The main purpose of Cicero is to use single-cell chromatin accessibility data to predict regions of the genome that are more likely to be in physical proximity in the nucleus. This can be used to identify putative enhancer-promoter pairs, and to get a sense of the overall structure of the cis-architecture of a genomic region. Because of the sparsity of single-cell data, cells must be aggregated by similarity to allow robust correction for various technical factors in the data.
 
 Ultimately, Cicero provides a "Cicero co-accessibility" score between -1 and 1 between each pair of accessible peaks within a user defined distance where a higher number indicates higher co-accessibility.
 
@@ -274,7 +274,8 @@ seurat_obj.cicero <- make_cicero_cds(seurat_obj.cds, reduced_coordinates = reduc
 
 # Find Cicero connections
 
-Here we demonstrate the most basic workflow for running Cicero. This workflow can be broken down into several steps, each with parameters that can be changed from their defaults to fine-tune the Cicero algorithm depending on your data. We highly recommend that you explore the Cicero website, paper, and documentation for more information.
+Here we demonstrate the most basic workflow for running Cicero. This workflow can be broken down into several steps, each with parameters that can be changed from their defaults to fine-tune the Cicero algorithm depending on your data. We highly recommend that you explore the Cicero [website](https://cole-trapnell-lab.github.io/cicero-release/docs_m3/), [paper](https://doi.org/10.1016/j.molcel.2018.06.044), and [documentation](https://rdrr.io/bioc/cicero/) for more information.
+
 
 ```{r find-cicero-connections, echo=TRUE}
 # get the chromosome sizes from the Seurat object
@@ -297,7 +298,7 @@ print(head(conns))
 
 Now that we’ve found pairwise co-accessibility scores for each peak, we can now group these pairwise connections into larger co-accessible networks using the [generate_ccans()](https://rdrr.io/bioc/cicero/man/generate_ccans.html) function from Cicero.
 
-In addition to pairwise co-accessibility scores, Cicero also has a function to find Cis-Co-accessibility Networks (CCANs), which are modules of sites that are highly co-accessible with one another. We use the Louvain community detection algorithm (Blondel et al., 2008) to find clusters of sites that tended to be co-accessible. The function generate_ccans takes as input a connection data frame and outputs a data frame with CCAN assignments for each input peak. Sites not included in the output data frame were not assigned a CCAN.
+In addition to pairwise co-accessibility scores, Cicero also has a function to find Cis-Co-accessibility Networks (CCANs), which are modules of sites that are highly co-accessible with one another. We use the Louvain community detection algorithm (Blondel et al., 2008) to find clusters of sites that tended to be co-accessible. The function `generate_ccans` takes as input a connection data frame and outputs a data frame with CCAN assignments for each input peak. Sites not included in the output data frame were not assigned a CCAN.
 
 ```{r find-ccans, echo=TRUE}
 ccans <- generate_ccans(conns)
@@ -306,7 +307,7 @@ print(head(ccans))
 
 # Add links to a Seurat object
 
-We can add the co-accessible links found by Cicero to the ChromatinAssay object in Seurat. Using the [ConnectionsToLinks()](https://stuartlab.org/signac/reference/connectionstolinks) function in Signac we can convert the outputs of Cicero to the format needed to store in the links slot in the ChromatinAssay, and add this to the object using the Links<- assignment function.
+We can add the co-accessible links found by Cicero to the ChromatinAssay object in Seurat. Using the [ConnectionsToLinks()](https://stuartlab.org/signac/reference/connectionstolinks) function in Signac we can convert the outputs of Cicero to the format needed to store in the links slot in the ChromatinAssay, and add this to the object using the `Links()` assignment function.
 
 ```{r add-links, echo=TRUE}
 links <- ConnectionsToLinks(conns = conns, ccans = ccans)
@@ -370,6 +371,7 @@ for (region in head(regions_for_plot, n_value_plot_cicero)) {
   message("Saved plot to: ", plot_path)
 }
 ```
+
 
 ```{r echo=FALSE}
 detach(params)
