@@ -116,7 +116,7 @@ group_by_variable_module: "seq_technology_assay" # Set column name from metadata
 
 reference_dir_annotation_module: "./sc-rna-seq-snap/analyses/cell-types-annotation/results/cell_types_annotations_all" # absolute path to the directory from the sc-rna-seq project analysis (e.g., sc-rna-seq-snap) that contains the results from the cell type annotation module.
 reference_file_name_annotation_module: "seurat_obj_cell_types_annotations_all.rds" # File name with the object that contains the cell type annotation. It needs to be in `rds` format.
-celltype_reference_module: "predicted.cell.signature.ident" # Column name from the reference object to be used to transfer labels
+celltype_reference_module: "predicted.cell.signature.ident" # Column name from the reference object to be used to transfer labels.
 
 n_value_plot_cicero_module: 5 # Number of top links to explore in the `03-finding-co-accessible-networks-cicero.Rmd` script (adjust number as needed). 
 
@@ -140,8 +140,18 @@ lineage1_value_vector_module: "Rods" # Specify vector of cell types for lineage 
 lineage2_value_module: "Non_Rods" # Specify name of lineage 2. Ignore if lineage_number_value_module: NULL.
 lineage2_value_vector_module: [RPE, Muller Glia, Bipolar, Cones] # Specify vector of cell types for lineage 2. Ignore if lineage_number_value_module: NULL.
 
+# `./analyses/motif-footprint-analysis`
+data_dir_motif_module: "./sc-epigenie/analyses/building-trajectories-monocle/results/01_building_trajectories_monocle" # Absolute path to data dir of the last module run.
+data_file_motif_module: "seurat_obj_pseudotime.rds" # Seurat object name located at the data dir of the last module run.
+min.cutoff_value_motif_module: "q10" # Default.
+max.cutoff_value_motif_module: "q90" # Default.
+top_n_value_motifs_module: 1 # Number of top motifs per cluster to plot. Start with top_n_value = 1 to quickly generate results and check if the plots look good. If you want deeper analysis and have time/resources, increase to 3 or more. Often 3 is a good balance between thoroughness and efficiency - top_n_value = 3 (or higher) means you plot more peaks per cluster.
+top_da_peak_names_motifs_module: 500 # Motif plot: Aim for at least 200–500 peaks for motif enrichment. Avoid going too high (>5000), as it dilutes signal and increases computation.
+top_n_value_footprinting_module: 6 # Number of top motifs to footprint (default).
+
+
 # `./analyses/project-updates`
-results_filepath: "./" # Absolute path to the dir where local fork repo lives
-mac_results_filepath: "./" # Absolute path to the dir where local fork repo lives
-cohort_value: "/NAME_OF_FORK_REPO>"  # Name of the local fork repo
+results_filepath: "./" # Absolute path to the dir where local fork repo lives.
+mac_results_filepath: "./" # Absolute path to the dir where local fork repo lives.
+cohort_value: "/NAME_OF_FORK_REPO>"  # Name of the local fork repo.
 
