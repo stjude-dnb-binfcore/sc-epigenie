@@ -1,0 +1,365 @@
+---
+title: "Motif footprinting analysis with Signac for sc-ATAC-Seq Analysis in 10X Genomics data"
+author: "Antonia Chroni for SJCRH DNB_BINF_Core"
+papersize: a4
+fontsize: 11pt
+links-as-notes: true
+output:
+  html_document:
+    toc: TRUE
+    toc_float: TRUE
+    df_print: paged
+    code_folding: hide
+    toc_depth: 2
+    highlight: tango
+    number_sections: TRUE
+  pdf_document:
+    toc: TRUE
+    highlight: tango
+    number_sections: TRUE
+    latex_engine: lualatex
+    keep_tex: FALSE
+    fig_caption: yes
+    fig_crop: no
+    fig_height: 2
+    fig_width: 3
+    toc_depth: 2
+always_allow_html: TRUE
+urlcolor: blue
+linkcolor: black
+citecolor: blue
+geometry: margin=1in
+header-includes: 
+  - \usepackage{titling}
+  - \usepackage{fancyhdr}
+  - \usepackage{graphicx}
+  - \usepackage{float}
+params:
+  data_dir_motif: '.'
+  data_file_motif: '.'
+  assay: '.'
+  genome: '.'
+  top_n_value_footprinting: '.'
+  cell_type_name: '.'
+  condition_value1: '.'
+  condition_value2: '.'
+  condition_value3: '.'
+  root_dir: './'
+  PROJECT_NAME: '.'
+  PI_NAME: '.'
+  TASK_ID: '.'
+  PROJECT_LEAD_NAME: '.'
+  DEPARTMENT: '.'
+  LEAD_ANALYSTS: '.'
+  GROUP_LEAD: '.'
+  CONTACT_EMAIL: '.'
+  PIPELINE: '.'
+  START_DATE: '.'
+  COMPLETION_DATE: '.'
+---
+
+```{r logo-file, echo=FALSE}
+attach(params)
+# Insert logo on the top of the html report 
+logo_file <- file.path(root_dir, "figures", "img", "DNB-BINF-Core-logo.png")
+htmltools::img(src = knitr::image_uri(logo_file), alt = "logo", style = "position:absolute; top:0; left:0; padding:0px; height:120px;")
+detach(params)
+```
+
+\addtolength{\headheight}{2.0cm} 
+\fancypagestyle{plain}{} 
+\thispagestyle{fancy}
+\fancyhead[L]{\includegraphics[height=120px]{`r logo_file`}}
+\renewcommand{\headrulewidth}{0pt}
+
+<style type="text/css">
+:root {--DNB_BINF_Core_color: #00427B;}
+
+h1.title {margin-top: 130px;
+          margin-bottom: 25px;
+          font-size: 36px;}
+
+.nobullet li {list-style-type: none;}
+
+.reporthead {font-size: 20px;}
+
+body { /* Normal */
+  font-size: 16px;
+  font-style: Arial, Helvetica, sans-serif;}
+
+h1 {color: var(--DNB_BINF_Core_color);
+    font-size: 28px;
+    margin-top: 50px;}
+
+h2 {color: var(--DNB_BINF_Core_color);
+    font-size: 20px;}
+
+.list-group-item.active, .list-group-item.active:focus, .list-group-item.active:hover {
+  background-color: var(--DNB_BINF_Core_color);}
+</style>
+
+<a href="https://wiki.stjude.org/display/CAB">
+
+</a>
+
+\pagebreak
+
+<div class="reporthead"><br/>
+**PI: `r params$PI_NAME`**  
+**Project: `r params$PROJECT_NAME`**  
+Task: `r params$TASK_ID`  
+Project Lead(s): `r params$PROJECT_LEAD_NAME`  
+Department: `r params$DEPARTMENT`  
+
+<br />  
+
+DNB Bioinformatics Core Analysis Team: 
+<br />  
+
+>**Lead Analyst(s): `r params$LEAD_ANALYSTS`**  
+>Group Lead: `r params$GROUP_LEAD`  
+<br />
+>**Contact E-mail:** `r params$CONTACT_EMAIL`  
+>**DNB Bioinformatics Core Pipeline:** `r params$PIPELINE`  
+
+Date started: `r params$START_DATE`  
+Date completed:  `r params$COMPLETION_DATE`  
+Report generated: `r format(Sys.time(), '%H:%M:%S %Z %m/%d/%Y')` \
+
+Reviewed by: _____________________   Date: ____________ \
+</div>
+\pagebreak
+  
+# Information about this notebook
+
+This notebook guides users in performing [footprinting](https://stuartlab.org/signac/articles/footprint) any motif that have positional information for. By default, this includes every instance of the motif in the genome. We can instead use the `in.peaks = TRUE` parameter to include only those motifs that fall inside a peak in the assay. 
+
+The [Footprint()](https://stuartlab.org/signac/reference/footprint) function gathers all the required data and stores it in the assay. We can then plot the footprinted motifs using the [PlotFootprint()](https://stuartlab.org/signac/reference/plotfootprint) function.
+
+## Why perform footprinting analysis?
+
+Footprinting analysis helps identify transcription factor (TF) binding activity by examining the pattern of Tn5 insertions around motif sites in accessible chromatin regions. When a TF binds DNA, it protects the binding site from transposase cutting, creating a “footprint”—a local depletion of insertions flanked by enrichment on either side. Detecting these footprints provides evidence of active TF binding, beyond just motif presence. This is valuable because:
+
+- Motif presence ≠ binding: A motif may exist in the genome but not be actively bound. Footprinting adds functional context.
+- Cell-type specificity: Comparing footprints across conditions or cell types reveals regulatory differences.
+- Integration with accessibility: Confirms whether observed accessibility changes are driven by TF binding.
+
+## Best practices
+
+- Use enough regions (hundreds to thousands) for stable profiles.
+- Restrict to motifs in peaks for meaningful biological interpretation.
+- Compare footprints across conditions or cell types to identify regulatory changes.
+
+
+# Set up
+
+```{r load-library, echo=TRUE}
+attach(params)
+suppressPackageStartupMessages({
+  library(Signac)
+  library(Seurat)
+  library(patchwork)
+  library(tidyverse)
+  library(JASPAR2020)
+  library(TFBSTools)
+  library(knitr)
+  library(motifmatchr)
+  library(GenomeInfoDb) #translation between chromosome names
+  library(BSgenome)
+  library(BSgenome.Mmusculus.UCSC.mm10)
+  library(BSgenome.Hsapiens.UCSC.hg38)
+  
+  library(BSgenome.Mmusculus.UCSC.mm39)
+  library(ggseqlogo)
+}) 
+```
+
+# Directories and paths to file Inputs/Outputs
+
+```{r set-dir-and-file-names, echo=TRUE}
+module_analysis_dir <- file.path(root_dir, "analyses", "motif-footprint-analysis") 
+
+# Input files
+data_file <- file.path(data_dir_motif, data_file_motif)
+
+# Create plots directory
+module_plots_dir <- file.path(module_analysis_dir , "plots")
+
+Footprinting_plots_dir <- file.path(module_plots_dir, "02_footprinting_analysis") 
+if (!dir.exists(Footprinting_plots_dir)) {
+  dir.create(Footprinting_plots_dir)}
+
+# Create results directory
+module_results_dir <- file.path(module_analysis_dir , "results")
+
+results_dir <- file.path(module_results_dir, "02_footprinting_analysis") 
+if (!dir.exists(results_dir)) {
+  dir.create(results_dir)}
+
+# Source functions
+source(paste0(module_analysis_dir, "/util/function-add-footprinting.R"))
+```
+
+```{r echo=FALSE, warning=FALSE}
+opts_chunk$set(fig.align='center',
+               external=TRUE,
+               echo=FALSE,
+               warning=FALSE,
+               fig.pos='H')
+a4width <- 8.3
+a4height <- 11.7
+```
+
+# Read seurat object
+
+First, we will use the seurat object as generated from the pipeline in the `r data_dir_motif` directory. 
+
+```{r read-object, fig.width = 6, fig.height = 5, fig.fullwidth = TRUE, echo=TRUE}
+seurat_obj <- readRDS(data_file)
+DefaultAssay(seurat_obj) <- assay
+
+# Set identity classes to an existing column in meta data
+Idents(seurat_obj) <- seurat_obj@meta.data[[cell_type_name]]
+
+# View cell identities, get summary table
+table(Idents(seurat_obj))
+```
+
+# Motif footprinting
+
+Now we can [footprint](https://stuartlab.org/signac/articles/footprint) any motif that we have positional information for. 
+
+```{r footprint-analysis, echo=TRUE}
+footprinting_result <- add_footprinting(seurat_obj = seurat_obj, 
+                                        assay = assay, 
+                                        genome = genome, 
+                                        pwn = pwn, 
+                                        cell_type_name = cell_type_name, 
+                                        top_n_value_footprinting = top_n_value_footprinting) 
+seurat_obj <- footprinting_result$seurat_obj # Extract the objects
+saveRDS(seurat_obj, file = paste0(results_dir, "/", "seurat_obj_motifs_footprinting.rds")) # Save object
+
+motif_obj <- footprinting_result$motif_obj # Extract the objects
+saveRDS(motif_obj, file = paste0(results_dir, "/", "motif_obj_footprinting.rds")) 
+
+motifs_to_fp <- footprinting_result$motifs_to_fp
+```
+
+# Plot Footprint
+
+## Overall
+
+```{r plot-footprint-overall, fig.width = 25, fig.height = 10, fig.fullwidth = TRUE, echo=TRUE}
+# If you want curves per group (e.g., cluster or predicted.id), set identities here:
+# Idents(seurat_obj) <- seurat_obj$cluster
+Idents(seurat_obj) <- seurat_obj@meta.data[[cell_type_name]]
+
+# --- a) Plot ALL selected motifs together ---
+p_all <- print(PlotFootprint(seurat_obj, features = motifs_to_fp))
+ggsave(file.path(Footprinting_plots_dir, "Footprint_top_motifs.png"), plot = p_all, width = 25, height = 10)
+```
+
+## Overall split by motif
+
+We will group the footprint signal by aggregating all cells together. This will produce a single footprint profile per motif across the entire dataset.
+It is useful for a global view of motif accessibility without subgroup differences.
+
+```{r plot-footprint-per-motif, fig.width = 8, fig.height = 5, fig.fullwidth = TRUE, echo=TRUE}
+# --- b) Or loop and save one plot per motif ---
+for (motif_nm in motifs_to_fp) {
+    message("Plotting footprint for motif: ", motif_nm)
+    p <- print(PlotFootprint(seurat_obj, features = motif_nm))
+    out_path <- file.path(Footprinting_plots_dir, paste0("Footprint_", motif_nm, ".png"))
+    ggsave(out_path, plot = p, width = 8, height = 5)
+    message("Plotting footprint for motif: Complete", motif_nm)
+}
+```
+
+## Cell type
+
+We will group the footprint signal by the `r cell_type_name` metadata column. Each line in the plot represents a different cell type group, e.g., T cells, B cells.
+It is useful for comparing motif accessibility patterns across biological annotations or clusters.
+
+```{r plot-footprint-celltype, fig.width = 25, fig.height = 10, fig.fullwidth = TRUE, echo=TRUE}
+# --- c) Plot selected motifs together per cell type ---
+p_celltype <- print(PlotFootprint(seurat_obj, features = motifs_to_fp, group.by = cell_type_name))
+ggsave(file.path(Footprinting_plots_dir, "Footprint_top_motifs_celltype.png"), plot = p_celltype, width = 25, height = 10)
+```
+
+## Split by ID
+
+We will group the footprint signal by the `ID` metadata column. 
+
+```{r plot-footprint-ID, fig.width = 25, fig.height = 15, fig.fullwidth = TRUE, echo=TRUE}
+# --- c) Plot selected motifs together per cell type ---
+p_celltype <- print(PlotFootprint(seurat_obj, features = motifs_to_fp, group.by = cell_type_name, 
+                            split.by = "ID"))
+ggsave(file.path(Footprinting_plots_dir, "Footprint_top_motifs_celltype_ID.png"), plot = p_celltype, width = 25, height = 15)
+```
+
+## Split by `r condition_value1`
+
+We will group the footprint signal by the `r condition_value1` metadata column. 
+
+```{r plot-footprint-condition-value1, fig.width = 35, fig.height = 10, fig.fullwidth = TRUE, echo=TRUE}
+stopifnot(is.character(condition_value1), length(condition_value1) == 1)
+stopifnot(condition_value1 %in% colnames(seurat_obj@meta.data))
+
+p <- print(PlotFootprint(
+  seurat_obj,
+  features = motifs_to_fp,
+  group.by = cell_type_name,  # this must also be a column name string
+  split.by = condition_value1))
+
+ggsave(file.path(Footprinting_plots_dir, "Footprint_top_motifs_celltype_condition_value1.png"), plot = p, width = 35, height = 10)
+```
+
+## Split by `r condition_value2`
+
+We will group the footprint signal by the `r condition_value2` metadata column. 
+
+```{r plot-footprint-condition-value2, fig.width = 35, fig.height = 10, fig.fullwidth = TRUE, echo=TRUE}
+if (!is.null(condition_value2)) {
+  stopifnot(is.character(condition_value2), length(condition_value2) == 1)
+  stopifnot(condition_value2 %in% colnames(seurat_obj@meta.data))
+
+  p <- print(PlotFootprint(
+    seurat_obj,
+    features = motifs_to_fp,
+    group.by = cell_type_name,  # this must also be a column name string
+    split.by = condition_value2))
+  
+  ggsave(file.path(Footprinting_plots_dir, "Footprint_top_motifs_celltype_condition_value2.png"), plot = p, width = 35, height = 10)
+}
+```
+
+## Split by `r condition_value3`
+
+We will group the footprint signal by the `r condition_value3` metadata column. 
+
+```{r plot-footprint-condition-value3, fig.width = 35, fig.height = 10, fig.fullwidth = TRUE, echo=TRUE}
+if (!is.null(condition_value3)) {
+  stopifnot(is.character(condition_value3), length(condition_value3) == 1)
+  stopifnot(condition_value3 %in% colnames(seurat_obj@meta.data))
+
+  p <- print(PlotFootprint(
+    seurat_obj,
+    features = motifs_to_fp,
+    group.by = cell_type_name,  # this must also be a column name string
+    split.by = condition_value3))
+  
+  ggsave(file.path(Footprinting_plots_dir, "Footprint_top_motifs_celltype_condition_value3.png"), plot = p, width = 35, height = 10)
+}
+```
+
+```{r echo=FALSE}
+detach(params)
+```
+
+\pagebreak
+
+# Session Info
+
+```{r echo=FALSE}
+sessionInfo()
+```
