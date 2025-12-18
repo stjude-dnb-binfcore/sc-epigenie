@@ -213,7 +213,7 @@ seurat_obj <- readRDS(data_file)
 DefaultAssay(seurat_obj) <- assay
 
 # Set identity classes to an existing column in meta data
-Idents(object = seurat_obj) <- "predicted.id"
+Idents(seurat_obj) <- seurat_obj@meta.data[[cell_type_name]]
 
 # View cell identities, get summary table
 table(Idents(seurat_obj))
