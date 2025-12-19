@@ -131,4 +131,10 @@ suppressPackageStartupMessages({
   library(biovizBase)
   library(clusterProfiler)
   ####################################################
+  
+  # `motif-footprint-analysis` module
+  library(BSgenome.Mmusculus.UCSC.mm39)
+  library(chromVAR)
+  library(ggseqlogo)
 })
+

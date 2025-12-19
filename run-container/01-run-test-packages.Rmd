@@ -140,6 +140,10 @@ suppressPackageStartupMessages({
   library(motifmatchr)
   ####################################################
   
+  # `motif-footprint-analysis` module
+  library(BSgenome.Mmusculus.UCSC.mm39)
+  library(chromVAR)
+  library(ggseqlogo)
 })
 ```
 

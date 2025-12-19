@@ -138,9 +138,14 @@ RUN Rscript -e 'BiocManager::install(c( \
 RUN Rscript -e 'BiocManager::install("TFBSTools", ask=FALSE, update=FALSE, verbose=TRUE)'
 RUN Rscript -e 'BiocManager::install("motifmatchr", ask=FALSE, update=FALSE, verbose=TRUE)'
 
+RUN Rscript -e 'BiocManager::install("BSgenome.Mmusculus.UCSC.mm39", ask=FALSE, update=FALSE, verbose=TRUE)'
+RUN Rscript -e 'BiocManager::install("chromVAR", ask=FALSE, update=FALSE, verbose=TRUE)'
+
 # Double-check after installation
 RUN Rscript -e 'if (!requireNamespace("TFBSTools", quietly = TRUE)) stop("TFBSTools not installed!")'
 RUN Rscript -e 'if (!requireNamespace("motifmatchr", quietly = TRUE)) stop("motifmatchr not installed!")'
+RUN Rscript -e 'if (!requireNamespace("chromVAR", quietly = TRUE)) stop("chromVAR not installed!")'
+RUN Rscript -e 'if (!requireNamespace("BSgenome.Mmusculus.UCSC.mm39", quietly = TRUE)) stop("BSgenome.Mmusculus.UCSC.mm39 not installed!")'
 
 
 # -------------------------------------------------------------------
@@ -151,6 +156,8 @@ RUN Rscript -e 'remotes::install_github("satijalab/seurat-wrappers@community-vig
     Rscript -e 'remotes::install_version("Seurat", version="4.4.0", upgrade="never")'
 RUN Rscript -e 'remotes::install_github("cole-trapnell-lab/monocle3", upgrade="never")' && \
     Rscript -e 'remotes::install_github("cole-trapnell-lab/cicero-release", ref="monocle3", upgrade="never")'
+
+
 #
 #
 # -------------------------------------------------------------------
@@ -197,6 +204,10 @@ RUN Rscript -e 'install.packages("flextable", repos="https://packagemanager.posi
 RUN Rscript -e 'if (!requireNamespace("flextable", quietly = TRUE)) stop("flextable not installed!")'
 
 
+# https://github.com/omarwagih/ggseqlogo
+RUN Rscript -e 'devtools::install_github("omarwagih/ggseqlogo", ref="master", upgrade="never")'
+RUN Rscript -e 'if (!requireNamespace("ggseqlogo", quietly = TRUE)) stop("ggseqlogo not installed!")'
+   
 #
 #
 # ------------------------------------------------------------------------------------------------------------------------------------------------------------------
