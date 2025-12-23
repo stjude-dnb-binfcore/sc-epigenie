@@ -45,6 +45,9 @@ params:
   top_n_value_motifs: '.'
   top_da_peak_names_motifs: '.'
   cell_type_name: '.'
+  condition_value1: '.'
+  condition_value2: '.'
+  condition_value3: '.'
   root_dir: './'
   PROJECT_NAME: '.'
   PI_NAME: '.'
@@ -133,9 +136,68 @@ Reviewed by: _____________________   Date: ____________ \
   
 # Information about this notebook
 
-This notebook guides users in performing DNA sequence motif analysis in Signac. We will explore two complementary options for performing motif analysis: one by finding overrepresented motifs in a set of differentially accessible peaks, one method performing differential motif activity analysis between groups of cells.
+This notebook guides users in performing DNA sequence motif analysis in Signac. We will explore two complementary options for performing motif analysis: one by finding over-represented motifs in a set of differentially accessible peaks, one method performing differential motif activity analysis between groups of cells.
 
 For more information, see [Motif analysis with Signac](https://stuartlab.org/signac/articles/motif_vignette).
+
+## What are motifs?
+
+- **A motif is a short, recurring DNA sequence pattern** that is statistically enriched in regulatory regions (like promoters or enhancers) and has biological meaning.
+- Motifs can be found in DNA, RNA, and proteins.
+- They are often involved in the regulation of gene expression, protein folding, and other biological processes.
+- Motifs represent the binding preference of transcription factors (TFs). For example, a TF might recognize a specific 6–10 bp motif.
+
+## What are transcription factors (TF)?
+
+- **A transcription factor is a protein that binds to DNA at specific sites (often motifs) to regulate gene expression.**
+- TFs are proteins that bind to specific DNA sequences (often called motifs) to regulate the transcription of genetic information from DNA to RNA.
+- TFs are proteins that control the rate of transcription of genetic information from DNA to messenger RNA (mRNA).
+- Can be either DNA- or RNA-binding proteins.
+- Bind to specific sequences of DNA called promoter sequences.
+- The binding to promoter sequences can either stimulate or repress transcription.
+- Essential for regulating gene expression, which is the process by which genes are turned on and off.
+- Can be activated by a variety of signals, including hormones, growth factors, and environmental cues.
+- Can be regulated by post-transnational modifications, such as phosphorylation and acetylation.
+
+Based on their structure or function, some of the most common types of TFs include:
+
+- **Activators**: Stimulate transcription by binding to promoter sequences and recruiting RNA polymerase.
+- **Repressors**: Repress transcription by binding to promoter sequences and preventing RNA polymerase from binding.
+- **Coactivators**: Work with activators to stimulate transcription.
+- **Corepressors**: Work with repressors to repress transcription.
+
+## What research questions does Motif analysis help to answer?
+
+**(1) Motif Discovery**
+
+- What are the binding preferences of transcription factors (TFs)?
+Identify sequence patterns that TFs recognize in DNA.
+
+- How do transcription factors regulate gene expression?
+Understand how TF binding influences transcriptional activation or repression.
+
+- How does DNA sequence variation affect TF binding?
+Explore the impact of SNPs or mutations on regulatory element function.
+
+**(2) Motif Enrichment**
+
+- Which genes are regulated by a particular transcription factor?
+Link motif presence to target gene networks.
+
+- How do motifs contribute to gene regulation across cell types or conditions?
+Compare motif activity in different tissues, developmental stages, or disease states.
+
+- What role do motifs play in disease development?
+Investigate how altered motif accessibility or binding drives pathogenesis.
+
+- Can transcription factors be targeted for therapeutic intervention?
+Assess motif-driven regulatory pathways as potential drug targets.
+
+## References
+
+- [Carels, N. (2015). A History of Genomic Structures: The Big Picture. In: Bahadur, B., Venkat Rajam, M., Sahijram, L., Krishnamurthy, K. (eds) Plant Biology and Biotechnology. Springer, New Delhi.](https://doi.org/10.1007/978-81-322-2283-5_7)
+- [Introduction to Motif Discovery and Transcription Factor Binding Site Analysis](https://www.youtube.com/watch?v=dWvkSFeQg9Q&t=2905s)
+
 
 # Set up
 
@@ -169,6 +231,7 @@ module_analysis_dir <- file.path(root_dir, "analyses", "motif-footprint-analysis
 
 # Input files
 data_file <- file.path(data_dir_motif, data_file_motif)
+gradient_palette_file <- file.path(root_dir, "figures", "palettes", "gradient_color_palette.tsv")
 
 # Create plots directory
 module_plots_dir <- file.path(module_analysis_dir , "plots")
@@ -192,6 +255,8 @@ if (!dir.exists(results_dir)) {
 
 # Source functions
 source(paste0(module_analysis_dir, "/util/function-add-motif.R"))
+source(paste0(module_analysis_dir, "/util/function-create-FeaturePlot.R"))
+source(paste0(root_dir, "/figures/scripts/theme_plot.R"))
 ```
 
 ```{r echo=FALSE, warning=FALSE}
@@ -218,14 +283,23 @@ Idents(seurat_obj) <- seurat_obj@meta.data[[cell_type_name]]
 # View cell identities, get summary table
 table(Idents(seurat_obj))
 
+# Plot cell types
 name <- paste0(plots_dir, "/", glue::glue("DimPlot-cell-types.png"), sep = "")
 p1 <- print(DimPlot(seurat_obj, label = TRUE, pt.size = 0.1) + NoLegend())
 ggsave(file = name, width = 6, height = 5, device = "png")
 ```
 
+```{r read-palette, echo=TRUE}
+gradient_palette_df <- readr::read_tsv(gradient_palette_file, guess_max = 100000, show_col_types = FALSE) 
+```
+
 # Adding motif information to the Seurat object
 
-To add the DNA sequence motif information required for motif analyses, we can run the [AddMotifs()](https://stuartlab.org/signac/reference/addmotifs) function:
+We will run the [AddMotifs()](https://stuartlab.org/signac/reference/addmotifs) function to add the DNA sequence motif information required for motif analyses.
+
+To facilitate motif analysis in Signac, there is the Motif class to store all the required information, including a list of position weight matrices (PWMs) or position frequency matrices (PFMs) and a motif occurrence matrix. 
+
+Here, the [AddMotifs()](https://stuartlab.org/signac/reference/addmotifs) function constructs a Motif object and adds it to the dataset, along with other information such as the base composition of each peak. A motif object can be added to any Seurat assay using the [SetAssayData()](https://satijalab.github.io/seurat-object/reference/AssayData.html) function. See the [object interaction vignette](https://stuartlab.org/signac/articles/data_structures) for more information.
 
 ```{r add-motif, echo=TRUE}
 motifs_result <- add_motifs(seurat_obj = seurat_obj, assay = assay, genome = genome, pfm = pfm) 
@@ -235,14 +309,12 @@ seurat_obj <- motifs_result$seurat_obj
 motif_obj <- motifs_result$motif_obj
 ```
 
-To facilitate motif analysis in Signac, we have created the Motif class to store all the required information, including a list of position weight matrices (PWMs) or position frequency matrices (PFMs) and a motif occurrence matrix. Here, the [AddMotifs()](https://stuartlab.org/signac/reference/addmotifs) function constructs a Motif object and adds it to our dataset, along with other information such as the base composition of each peak. A motif object can be added to any Seurat assay using the [SetAssayData()](https://satijalab.github.io/seurat-object/reference/AssayData.html) function. See the [object interaction vignette](https://stuartlab.org/signac/articles/data_structures) for more information.
-
 # Finding overrepresented motifs
 
 To identify potentially important cell-type-specific regulatory sequences, we can search for DNA motifs that are overrepresented in a set of peaks that are differentially accessible between cell types.
 
 ```{r da-peaks, echo=TRUE}
-set.seed(2025)
+set.seed(1234)
 
 #da_peaks <- FindMarkers(
 da_peaks <- FindAllMarkers(object = seurat_obj,
@@ -257,7 +329,7 @@ da_peaks <- FindAllMarkers(object = seurat_obj,
 write_tsv(da_peaks, file = paste0(results_dir, "/", "da_peaks_all.tsv")) 
 
 # Consider multiple testing correction
-# Use p_val_adj instead of raw p_val for more robust filtering
+# We will use the p_val_adj instead of raw p_val for more robust filtering
 top_da_peaks <- da_peaks %>%
   filter(p_val_adj < 0.05, pct.1 > 0.2) %>%
   arrange(p_val) %>%
@@ -275,7 +347,7 @@ datatable(da_peaks,
           filter = "top")
 ```
 
-### Optional: choosing a set of background peaks
+### Optional: choosing a set of background peaks - Motif Enrichment
 
 We will select the top `r top_da_peak_names_motifs` and we will plot the position weight matrices for the motifs, so we can visualize the different motif sequences.
 
@@ -283,9 +355,7 @@ We will select the top `r top_da_peak_names_motifs` and we will plot the positio
 # Perform a hypergeometric test to test the probability of observing the motif at the given frequency by chance, comparing with a background set of peaks matched for GC content.
 # Extract peak names (features) as a character vector
 top_da_peak_names <- rownames(top_da_peaks)
-#top_da_peak_names
 
-# test enrichment
 # Take the first three features from top_da_peak_names
 enriched.motifs <- FindMotifs(object = seurat_obj,
                               features = top_da_peak_names[1:top_da_peak_names_motifs])    #features = top_da_peak_names
@@ -308,65 +378,75 @@ datatable(enriched.motifs,
           filter = "top")
 ```
 
-# Computing motif activities
+# Computing motif activities per cell
 
 We can compute per-cell motif activity scores using [chromVAR](https://greenleaflab.github.io/chromVAR/index.html). This allows us to visualize motif activities per cell, and also provides an alternative method of identifying differentially-active motifs between cell types. ChromVAR identifies motifs associated with variability in chromatin accessibility between cells. See the [chromVAR paper](https://www.nature.com/articles/nmeth.4401) for a complete description of the method.
 
 ```{r RunChromVAR, echo=TRUE}
 seurat_obj <- RunChromVAR(object = seurat_obj, genome = genome)
 DefaultAssay(seurat_obj) <- 'chromvar'
+saveRDS(seurat_obj, file = paste0(results_dir, "/", "seurat_chromvar.rds"))  # Save object
+
+# Sanity checks:Inspect the assay
+seurat_obj[["chromvar"]]             # should show features = motifs, slot names: counts/data/scale.data
+head(rownames(seurat_obj[["chromvar"]]))  # motif names
+#summary(seurat_obj[["chromvar"]]@data[])   # distribution of deviation Z-scores
 ```
 
 ## Plotting motif activities across cell types
 
-We will select the top `r top_n_value_motifs` differentially accessible peaks per cluster for plotting motif activities.
+We will select the **top `r top_n_value_motifs`** differentially accessible peaks per cluster for plotting motif activities.
 
-```{r top-da-peaks-select, echo=TRUE}
-top_da_peaks <- top_da_peaks %>%
-  group_by(cluster) %>% 
-  top_n(n = top_n_value_motifs, wt = avg_log2FC)
+```{r top-motifs-select, echo=TRUE}
+chromvar_mat <- seurat_obj[["chromvar"]]@data # Get the chromVAR deviation matrix
+avg_scores <- rowMeans(chromvar_mat) # Compute average deviation Z-score per motif across all cells
+
+# Sort and pick the top motifs
+top_motifs <- sort(avg_scores, decreasing = TRUE)[1:top_n_value_motifs] 
+print(top_motifs) # Display as a named vector
 ```
 
 ### Overall
 
-```{r plot-RunChromVAR-overall, fig.width = 25, fig.height = 5, fig.fullwidth = TRUE, echo=TRUE}
-for (i in seq_len(nrow(top_da_peaks))) {
-  gene <- top_da_peaks$gene[i]
-  ct <- top_da_peaks$cluster[i]
-  
-  message("Plotting ", gene, " for cell type ", ct)
-  p2 <- FeaturePlot(object = seurat_obj,
-                  features = gene,
-                  min.cutoff = min.cutoff_value,
-                  max.cutoff = max.cutoff_value,
-                  pt.size = 0.1)
-  p <- print(p1 + p2)
-  # Save the plot as PNG
-  plot_path <- file.path(ChromVAR_plots_dir, paste0("ChromVAR_da_peaks_top_overall_", ct, "_", gene, ".png"))
-  ggsave(plot_path, plot = p, width = 15, height = 5)
-  message("Plotting ", gene, " for cell type ", ct, ": Complete")
-}
+```{r plot-RunChromVAR-overall, fig.width = 15, fig.height = 5, fig.fullwidth = TRUE, echo=TRUE}
+plot_RunChromVAR_variable_overall <- create_featureplot_variable_v1(seurat_obj = seurat_obj, palette = gradient_palette_df, min.cutoff = min.cutoff_value, max.cutoff = max.cutoff_value, ChromVAR_plots_dir = ChromVAR_plots_dir, split_variable = NULL)
 ```
 
 ### Split by ID
 
-```{r plot-RunChromVAR-ID, fig.width = 25, fig.height = 5, fig.fullwidth = TRUE, echo=TRUE}
-for (i in seq_len(nrow(top_da_peaks))) {
-  gene <- top_da_peaks$gene[i]
-  ct <- top_da_peaks$cluster[i]
-  
-  message("Plotting ", gene, " for cell type ", ct)
-  p2 <- FeaturePlot(object = seurat_obj,
-                  features = gene,
-                  split.by = "ID",
-                  min.cutoff = min.cutoff_value,
-                  max.cutoff = max.cutoff_value,
-                  pt.size = 0.1)
-  p <- print(p1 + p2)
-  # Save the plot as PNG
-  plot_path <- file.path(ChromVAR_plots_dir, paste0("ChromVAR_da_peaks_top_ID_", ct, "_", gene, ".png"))
-  ggsave(plot_path, plot = p, width = 25, height = 5)
-  message("Plotting ", gene, " for cell type ", ct, ": Complete")
+```{r plot-RunChromVAR-ID, fig.width = 15, fig.height = 5, fig.fullwidth = TRUE, echo=TRUE}
+plot_RunChromVAR_variable_ID <- create_featureplot_variable_v1(seurat_obj = seurat_obj, palette = gradient_palette_df, min.cutoff = min.cutoff_value, max.cutoff = max.cutoff_value, ChromVAR_plots_dir = ChromVAR_plots_dir, split_variable = "ID")
+```
+
+## Split by `r condition_value1`
+
+We will group the motif activities by the **`r condition_value1`** metadata column. 
+
+```{r plot-RunChromVAR-condition-value1, fig.width = 15, fig.height = 5, fig.fullwidth = TRUE, echo=TRUE}
+plot_RunChromVAR_variable_value1 <- create_featureplot_variable_v1(seurat_obj = seurat_obj, palette = gradient_palette_df, min.cutoff = min.cutoff_value, max.cutoff = max.cutoff_value, ChromVAR_plots_dir = ChromVAR_plots_dir, split_variable = condition_value1) 
+```
+
+## Split by `r condition_value2`
+
+We will group the motif activities by the **`r condition_value2`** metadata column. 
+
+```{r plot-RunChromVAR-condition-value2, fig.width = 15, fig.height = 5, fig.fullwidth = TRUE, echo=TRUE}
+if (!is.null(condition_value2)) {
+  stopifnot(is.character(condition_value2), length(condition_value2) == 1)
+  stopifnot(condition_value2 %in% colnames(seurat_obj@meta.data))
+  plot_RunChromVAR_variable_value2 <- create_featureplot_variable_v1(seurat_obj = seurat_obj, palette = gradient_palette_df, min.cutoff = min.cutoff_value, max.cutoff = max.cutoff_value, ChromVAR_plots_dir = ChromVAR_plots_dir, split_variable = condition_value2)
+}
+```
+
+## Split by `r condition_value3`
+
+We will group the motif activities by the **`r condition_value3`** metadata column. 
+
+```{r plot-RunChromVAR-condition-value3, fig.width = 15, fig.height = 5, fig.fullwidth = TRUE, echo=TRUE}
+if (!is.null(condition_value3)) {
+  stopifnot(is.character(condition_value3), length(condition_value3) == 1)
+  stopifnot(condition_value3 %in% colnames(seurat_obj@meta.data))
+  plot_RunChromVAR_variable_value3 <- create_featureplot_variable_v1(seurat_obj = seurat_obj, palette = gradient_palette_df, min.cutoff = min.cutoff_value, max.cutoff = max.cutoff_value, ChromVAR_plots_dir = ChromVAR_plots_dir, split_variable = condition_value3)
 }
 ```
 
