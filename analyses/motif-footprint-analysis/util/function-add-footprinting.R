@@ -1,5 +1,5 @@
 #############################################################################################
-#' Helper: Get JASPAR motif position weight matrices (PWMs)
+#' Get JASPAR motif position weight matrices (PWMs)
 #'
 #' Retrieve motif position **frequency** matrices (PFMs) from the JASPAR database
 #' and convert them to **position weight matrices** (PWMs) for downstream scoring,
@@ -20,6 +20,8 @@ pwm <- getMatrixSet(x = JASPAR2020,
 
 
 #############################################################################################
+#
+
 #' Add transcription factor footprint analysis to a Seurat object (Signac)
 #'
 #' Perform motif-centric footprinting by aggregating Tn5 insertion signal
@@ -53,11 +55,11 @@ pwm <- getMatrixSet(x = JASPAR2020,
 #'
 #'
 
-add_footprinting <- function(seurat_obj, assay, genome, pwn, cell_type_name, top_n_value_footprinting) {
+add_footprinting <- function(seurat_obj, assay, genome, pfm, cell_type_name, top_n_value_footprinting) {
   
   ########################################################################################
   # (Step 1): Add motif information by using JASPAR motif position weight matrices (PWMs)
-  DefaultAssay(seurat_obj) <- assay
+  # DefaultAssay(seurat_obj) <- assay
 
   # add motif information
   seurat_obj <- AddMotifs(seurat_obj, genome = genome, pfm = pwm)
