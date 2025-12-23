@@ -233,13 +233,15 @@ Now we can [footprint](https://stuartlab.org/signac/articles/footprint) any moti
 footprinting_result <- add_footprinting(seurat_obj = seurat_obj, 
                                         assay = assay, 
                                         genome = genome, 
-                                        pwn = pwn, 
+                                        pfm = pwm, 
                                         cell_type_name = cell_type_name, 
                                         top_n_value_footprinting = top_n_value_footprinting) 
-seurat_obj <- footprinting_result$seurat_obj # Extract the objects
+
+# Extract the objects
+seurat_obj <- footprinting_result$seurat_obj 
 saveRDS(seurat_obj, file = paste0(results_dir, "/", "seurat_obj_motifs_footprinting.rds")) # Save object
 
-motif_obj <- footprinting_result$motif_obj # Extract the objects
+motif_obj <- footprinting_result$motif_obj 
 saveRDS(motif_obj, file = paste0(results_dir, "/", "motif_obj_footprinting.rds")) 
 
 motifs_to_fp <- footprinting_result$motifs_to_fp
@@ -251,7 +253,6 @@ motifs_to_fp <- footprinting_result$motifs_to_fp
 
 ```{r plot-footprint-overall, fig.width = 25, fig.height = 10, fig.fullwidth = TRUE, echo=TRUE}
 # If you want curves per group (e.g., cluster or predicted.id), set identities here:
-# Idents(seurat_obj) <- seurat_obj$cluster
 Idents(seurat_obj) <- seurat_obj@meta.data[[cell_type_name]]
 
 # --- a) Plot ALL selected motifs together ---
