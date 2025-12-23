@@ -237,7 +237,7 @@ footprinting_result <- add_footprinting(seurat_obj = seurat_obj,
                                         cell_type_name = cell_type_name, 
                                         top_n_value_footprinting = top_n_value_footprinting) 
 
-# Extract the objects
+# Extract and Save the objects
 seurat_obj <- footprinting_result$seurat_obj 
 saveRDS(seurat_obj, file = paste0(results_dir, "/", "seurat_obj_motifs_footprinting.rds")) # Save object
 
