@@ -409,13 +409,13 @@ print(top_motifs) # Display as a named vector
 ### Overall
 
 ```{r plot-RunChromVAR-overall, fig.width = 15, fig.height = 5, fig.fullwidth = TRUE, echo=TRUE}
-plot_RunChromVAR_variable_overall <- create_featureplot_variable_v1(seurat_obj = seurat_obj, palette = gradient_palette_df, min.cutoff = min.cutoff_value, max.cutoff = max.cutoff_value, ChromVAR_plots_dir = ChromVAR_plots_dir, split_variable = NULL)
+plot_RunChromVAR_variable_overall <- create_featureplot_variable(seurat_obj = seurat_obj, palette = gradient_palette_df, min.cutoff = min.cutoff_value, max.cutoff = max.cutoff_value, ChromVAR_plots_dir = ChromVAR_plots_dir, split_variable = NULL)
 ```
 
 ### Split by ID
 
 ```{r plot-RunChromVAR-ID, fig.width = 15, fig.height = 5, fig.fullwidth = TRUE, echo=TRUE}
-plot_RunChromVAR_variable_ID <- create_featureplot_variable_v1(seurat_obj = seurat_obj, palette = gradient_palette_df, min.cutoff = min.cutoff_value, max.cutoff = max.cutoff_value, ChromVAR_plots_dir = ChromVAR_plots_dir, split_variable = "ID")
+plot_RunChromVAR_variable_ID <- create_featureplot_variable(seurat_obj = seurat_obj, palette = gradient_palette_df, min.cutoff = min.cutoff_value, max.cutoff = max.cutoff_value, ChromVAR_plots_dir = ChromVAR_plots_dir, split_variable = "ID")
 ```
 
 ## Split by `r condition_value1`
@@ -423,7 +423,7 @@ plot_RunChromVAR_variable_ID <- create_featureplot_variable_v1(seurat_obj = seur
 We will group the motif activities by the **`r condition_value1`** metadata column. 
 
 ```{r plot-RunChromVAR-condition-value1, fig.width = 15, fig.height = 5, fig.fullwidth = TRUE, echo=TRUE}
-plot_RunChromVAR_variable_value1 <- create_featureplot_variable_v1(seurat_obj = seurat_obj, palette = gradient_palette_df, min.cutoff = min.cutoff_value, max.cutoff = max.cutoff_value, ChromVAR_plots_dir = ChromVAR_plots_dir, split_variable = condition_value1) 
+plot_RunChromVAR_variable_value1 <- create_featureplot_variable(seurat_obj = seurat_obj, palette = gradient_palette_df, min.cutoff = min.cutoff_value, max.cutoff = max.cutoff_value, ChromVAR_plots_dir = ChromVAR_plots_dir, split_variable = condition_value1) 
 ```
 
 ## Split by `r condition_value2`
@@ -434,7 +434,7 @@ We will group the motif activities by the **`r condition_value2`** metadata colu
 if (!is.null(condition_value2)) {
   stopifnot(is.character(condition_value2), length(condition_value2) == 1)
   stopifnot(condition_value2 %in% colnames(seurat_obj@meta.data))
-  plot_RunChromVAR_variable_value2 <- create_featureplot_variable_v1(seurat_obj = seurat_obj, palette = gradient_palette_df, min.cutoff = min.cutoff_value, max.cutoff = max.cutoff_value, ChromVAR_plots_dir = ChromVAR_plots_dir, split_variable = condition_value2)
+  plot_RunChromVAR_variable_value2 <- create_featureplot_variable(seurat_obj = seurat_obj, palette = gradient_palette_df, min.cutoff = min.cutoff_value, max.cutoff = max.cutoff_value, ChromVAR_plots_dir = ChromVAR_plots_dir, split_variable = condition_value2)
 }
 ```
 
@@ -446,7 +446,7 @@ We will group the motif activities by the **`r condition_value3`** metadata colu
 if (!is.null(condition_value3)) {
   stopifnot(is.character(condition_value3), length(condition_value3) == 1)
   stopifnot(condition_value3 %in% colnames(seurat_obj@meta.data))
-  plot_RunChromVAR_variable_value3 <- create_featureplot_variable_v1(seurat_obj = seurat_obj, palette = gradient_palette_df, min.cutoff = min.cutoff_value, max.cutoff = max.cutoff_value, ChromVAR_plots_dir = ChromVAR_plots_dir, split_variable = condition_value3)
+  plot_RunChromVAR_variable_value3 <- create_featureplot_variable(seurat_obj = seurat_obj, palette = gradient_palette_df, min.cutoff = min.cutoff_value, max.cutoff = max.cutoff_value, ChromVAR_plots_dir = ChromVAR_plots_dir, split_variable = condition_value3)
 }
 ```
 
