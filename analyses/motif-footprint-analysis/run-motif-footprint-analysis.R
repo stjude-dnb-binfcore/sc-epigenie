@@ -54,6 +54,9 @@ rmarkdown::render('01-motif-analysis.Rmd', clean = TRUE,
                                 top_n_value_motifs = yaml$top_n_value_motifs_module,
                                 top_da_peak_names_motifs = yaml$top_da_peak_names_motifs_module,
                                 cell_type_name = yaml$cell_type_name_module,
+                                condition_value1 = yaml$condition_value1,
+                                condition_value2 = yaml$condition_value2,
+                                condition_value3 = yaml$condition_value3,
 
                                 root_dir = yaml$root_dir,
                                 PROJECT_NAME = yaml$PROJECT_NAME,
@@ -103,5 +106,3 @@ rmarkdown::render('02-motif-footprinting-analysis.Rmd', clean = TRUE,
                                 START_DATE = yaml$START_DATE,
                                 COMPLETION_DATE = yaml$COMPLETION_DATE))
 ################################################################################################################
-
-                                

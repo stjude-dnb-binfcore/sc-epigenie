@@ -35,7 +35,13 @@ This folder contains scripts tasked to performing:
 - DNA sequence motif analysis in Signac and
 - footprinting any motif that have positional information for.
 
-For more information, see [Motif analysis with Signac](https://stuartlab.org/signac/articles/motif_vignette) and [Motif footprinting](https://stuartlab.org/signac/articles/footprint) .
+For more information, see:
+
+ - [Motif analysis with Signac](https://stuartlab.org/signac/articles/motif_vignette)
+ - [Motif footprinting](https://stuartlab.org/signac/articles/footprint)
+ - [Introduction to Motif Discovery and Transcription Factor Binding Site Analysis](https://www.youtube.com/watch?v=dWvkSFeQg9Q&t=2905s)
+ - [Carels, N. (2015). A History of Genomic Structures: The Big Picture. In: Bahadur, B., Venkat Rajam, M., Sahijram, L., Krishnamurthy, K. (eds) Plant Biology and Biotechnology. Springer, New Delhi.](https://doi.org/10.1007/978-81-322-2283-5_7)
+ 
 
 
 ## Folder structure 
@@ -61,6 +67,7 @@ The structure of this folder is as follows:
 ├── run-motif-footprint-analysis.sh
 └── util
 |   ├── function-add-footprinting.R
-|___└── function-add-motif.R
+|   ├── function-add-motif.R
+|___└── function-create-FeaturePlot.R
 ```
 

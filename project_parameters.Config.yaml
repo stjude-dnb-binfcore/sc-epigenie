@@ -145,9 +145,9 @@ data_dir_motif_module: "./sc-epigenie/analyses/building-trajectories-monocle/res
 data_file_motif_module: "seurat_obj_pseudotime.rds" # Seurat object name located at the data dir of the last module run.
 min.cutoff_value_motif_module: "q10" # Default.
 max.cutoff_value_motif_module: "q90" # Default.
-top_n_value_motifs_module: 1 # Number of top motifs per cluster to plot. Start with top_n_value = 1 to quickly generate results and check if the plots look good. If you want deeper analysis and have time/resources, increase to 3 or more. Often 3 is a good balance between thoroughness and efficiency - top_n_value = 3 (or higher) means you plot more peaks per cluster.
-top_da_peak_names_motifs_module: 500 # Motif plot: Aim for at least 200–500 peaks for motif enrichment. Avoid going too high (>5000), as it dilutes signal and increases computation.
-top_n_value_footprinting_module: 6 # Number of top motifs to footprint (default).
+top_n_value_motifs_module: "5" # Number of top motifs per cluster to plot. Start with a low value to quickly generate results and check if the plots look good. If you want deeper analysis and have time/resources, increase to 3 or more. Often 3 is a good balance between thoroughness and efficiency - top_n_value = 3 (or higher) means you plot more peaks per cluster.
+top_da_peak_names_motifs_module: "500" # Motif plot: Aim for at least 200–500 peaks for motif enrichment. Avoid going too high (>5000), as it dilutes signal and increases computation.
+top_n_value_footprinting_module: "5" # Number of top motifs to footprint (default).
 
 
 # `./analyses/project-updates`
