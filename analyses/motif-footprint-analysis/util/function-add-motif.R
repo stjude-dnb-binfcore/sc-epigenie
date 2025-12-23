@@ -1,4 +1,4 @@
-#############################################################################################
+#########################################################################################################
 #' Helper: Get a list of motif position frequency matrices from the JASPAR database
 #' 
 #' Get JASPAR motif position frequency matrices (PFMs)
@@ -16,8 +16,10 @@
 #'
 pfm <- getMatrixSet(x = JASPAR2020,
                     opts = list(collection = "CORE", tax_group = 'vertebrates', all_versions = FALSE))
+#########################################################################################################
 
-#############################################################################################
+
+#########################################################################################################
 #
 #' Add motif analysis to a Seurat object (Signac)
 #'
@@ -51,7 +53,7 @@ add_motifs <- function(seurat_obj, assay, genome, pfm) {
   # (1)  Identify the chromatin assay and get its ranges & counts
   # Find the first assay that is a ChromatinAssay (adjust if you have more than one)
   chrom_assays <- names(seurat_obj)[sapply(names(seurat_obj), function(a) inherits(seurat_obj[[a]], "ChromatinAssay"))]
-
+  
   # Extract current ranges and counts
   old_atac <- seurat_obj[[assay]]
   gr       <- granges(old_atac)
@@ -63,39 +65,39 @@ add_motifs <- function(seurat_obj, assay, genome, pfm) {
   # UCSC style on both objects
   seqlevelsStyle(gr)     <- "UCSC"
   seqlevelsStyle(genome) <- "UCSC"
-
+  
   # Drop seqlevels not present in both; optionally keep only standard chromosomes
   common <- intersect(seqlevels(gr), seqlevels(genome))
   gr <- keepSeqlevels(gr, common, pruning.mode = "coarse")
   gr <- keepStandardChromosomes(gr, pruning.mode = "coarse")
-
+  
   # Create canonical peak name strings from GRanges using the detected separator style
   peak.names <- GRangesToString(gr, sep = sep)        # e.g., "chr1:100-200" or "chr1-100-200"
   # Ensure uniqueness (rare but can happen after pruning)
   if (anyDuplicated(peak.names) > 0) peak.names <- make.unique(peak.names)
   names(gr) <- peak.names
-
+  
   ############################################################
   # (3) Subset & reorder the counts to exactly match gr
   # Peaks present in both objects, preserving counts' order
   shared <- rownames(counts)[ rownames(counts) %in% names(gr) ]
-
+  
   # Build aligned objects
   counts_new <- counts[shared, , drop = FALSE]       # same order as 'shared'
   idx        <- match(shared, names(gr))             # numeric indices into gr
   gr_new     <- gr[idx]
-
+  
   # Final alignment check
   stopifnot(identical(rownames(counts_new), names(gr_new)))
-
+  
   ############################################################
   # (4) Recreate the ChromatinAssay (safer than slot editing)
   frag <- try(Fragments(old_atac), silent = TRUE)
-
+  
   new_atac <- CreateChromatinAssay(counts = counts_new, ranges = gr_new, fragments = if (inherits(frag, "try-error")) NULL else frag)
   seurat_obj[[assay]] <- new_atac
   DefaultAssay(seurat_obj) <- assay
-
+  
   ############################################################
   # (5) Run AddMotifs with the genome object)
   seurat_obj <- AddMotifs(object = seurat_obj,
@@ -119,7 +121,8 @@ add_motifs <- function(seurat_obj, assay, genome, pfm) {
   saveRDS(motif_obj, file = paste0(results_dir, "/", "motif_obj.rds")) 
   
   #################################################################
+  #return(seurat_obj)
   return(list(seurat_obj = seurat_obj, motif_obj = motif_obj))
 }
-##############################################################################################
+#########################################################################################################
 
