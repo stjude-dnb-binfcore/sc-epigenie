@@ -457,7 +457,7 @@ knitr::include_graphics(p)
 [FastQC](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/) is a quality control tool for high throughput sequence data.
 
 **Signac Vignette**\
-[Signac_1.16.0](https://stuartlab.org/signac/articles/pbmc_vignette) is an R package designed for QC, analysis, and exploration of single-cell ATAC-seq data.
+[Signac_1.16.9](https://stuartlab.org/signac/articles/pbmc_vignette) is an R package designed for QC, analysis, and exploration of single-cell ATAC-seq data.
 
 **ScDblFinder Vignette**\
 [ScDblFinder](https://bioconductor.org/packages/devel/bioc/vignettes/scDblFinder/inst/doc/scATAC.html) is an R package designed for identifying doublets in single-cell RNA-seq data.
