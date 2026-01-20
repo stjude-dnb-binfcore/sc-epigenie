@@ -140,6 +140,11 @@ lineage1_value_vector_module: "Rods" # Specify vector of cell types for lineage 
 lineage2_value_module: "Non_Rods" # Specify name of lineage 2. Ignore if lineage_number_value_module: NULL.
 lineage2_value_vector_module: [RPE, Muller Glia, Bipolar, Cones] # Specify vector of cell types for lineage 2. Ignore if lineage_number_value_module: NULL.
 
+# `rshiny-app`
+annotations_dir_rshiny_app: "01_integration_with_scrna_seq_data" # Options: to update based on the folder with the desired annotations to use for the R shiny app from the `integration-with-scrna-seq-data` module
+annotations_filename_rshiny_app: "seurat_obj_reference.rds" # Options: to update based on the object with the desired annotations to use for the R shiny app from the `integration-with-scrna-seq-data` module
+
+
 # `./analyses/project-updates`
 results_filepath: "./" # Absolute path to the dir where local fork repo lives
 mac_results_filepath: "./" # Absolute path to the dir where local fork repo lives
