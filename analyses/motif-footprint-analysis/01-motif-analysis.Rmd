@@ -347,7 +347,7 @@ datatable(da_peaks,
           filter = "top")
 ```
 
-### Optional: choosing a set of background peaks - Motif Enrichment
+### Motif Enrichment
 
 We will select the top `r top_da_peak_names_motifs` and we will plot the position weight matrices for the motifs, so we can visualize the different motif sequences.
 
@@ -395,7 +395,7 @@ head(rownames(seurat_obj[["chromvar"]]))  # motif names
 
 ## Plotting motif activities across cell types
 
-We will select the **top `r top_n_value_motifs`** differentially accessible peaks per cluster for plotting motif activities.
+We will select the **top `r top_n_value_motifs`** differentially accessible peaks per cluster, based on the ChromVAR z-scores, for plotting motif activities.
 
 ```{r top-motifs-select, echo=TRUE}
 chromvar_mat <- seurat_obj[["chromvar"]]@data # Get the chromVAR deviation matrix
