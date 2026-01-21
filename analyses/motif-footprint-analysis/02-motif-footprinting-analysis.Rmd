@@ -251,6 +251,9 @@ motifs_to_fp <- footprinting_result$motifs_to_fp
 
 ## Overall
 
+We will group the footprint signal by aggregating all cells together. Each line in the plot represents a single footprint profile per motif for all cell type groups, e.g., T cells, B cells.
+It is useful for a global view of motif accessibility without subgroup differences.
+
 ```{r plot-footprint-overall, fig.width = 25, fig.height = 10, fig.fullwidth = TRUE, echo=TRUE}
 # If you want curves per group (e.g., cluster or predicted.id), set identities here:
 Idents(seurat_obj) <- seurat_obj@meta.data[[cell_type_name]]
@@ -260,12 +263,7 @@ p_all <- print(PlotFootprint(seurat_obj, features = motifs_to_fp))
 ggsave(file.path(Footprinting_plots_dir, "Footprint_top_motifs.png"), plot = p_all, width = 25, height = 10)
 ```
 
-## Overall split by motif
-
-We will group the footprint signal by aggregating all cells together. This will produce a single footprint profile per motif across the entire dataset.
-It is useful for a global view of motif accessibility without subgroup differences.
-
-```{r plot-footprint-per-motif, fig.width = 8, fig.height = 5, fig.fullwidth = TRUE, echo=TRUE}
+```{r plot-footprint-per-motif, fig.width = 8, fig.height = 5, fig.fullwidth = TRUE, echo=FALSE, eval=FALSE}
 # --- b) Or loop and save one plot per motif ---
 for (motif_nm in motifs_to_fp) {
     message("Plotting footprint for motif: ", motif_nm)
