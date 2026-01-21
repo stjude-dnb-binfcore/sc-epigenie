@@ -146,12 +146,16 @@ data_file_motif_module: "seurat_obj_pseudotime.rds" # Seurat object name located
 min.cutoff_value_motif_module: "q10" # Default.
 max.cutoff_value_motif_module: "q90" # Default.
 top_n_value_motifs_module: "5" # Number of top motifs per cluster to plot. Start with a low value to quickly generate results and check if the plots look good. If you want deeper analysis and have time/resources, increase to 3 or more. Often 3 is a good balance between thoroughness and efficiency - top_n_value = 3 (or higher) means you plot more peaks per cluster.
-top_da_peak_names_motifs_module: "500" # Motif plot: Aim for at least 200–500 peaks for motif enrichment. Avoid going too high (>5000), as it dilutes signal and increases computation.
+top_da_peak_names_motifs_module: "500" # Motif plot: Aim for at least 200 to 500 peaks for motif enrichment. Avoid going too high (>5000), as it dilutes signal and increases computation.
 top_n_value_footprinting_module: "5" # Number of top motifs to footprint (default).
+
+# `rshiny-app`
+annotations_dir_rshiny_app: "01_integration_with_scrna_seq_data" # Options: to update based on the folder with the desired annotations to use for the R shiny app from the `integration-with-scrna-seq-data` module
+annotations_filename_rshiny_app: "seurat_obj_reference.rds" # Options: to update based on the object with the desired annotations to use for the R shiny app from the `integration-with-scrna-seq-data` module
 
 
 # `./analyses/project-updates`
-results_filepath: "./" # Absolute path to the dir where local fork repo lives.
-mac_results_filepath: "./" # Absolute path to the dir where local fork repo lives.
-cohort_value: "/NAME_OF_FORK_REPO>"  # Name of the local fork repo.
+results_filepath: "./" # Absolute path to the dir where local fork repo lives
+mac_results_filepath: "./" # Absolute path to the dir where local fork repo lives
+cohort_value: "/NAME_OF_FORK_REPO>"  # Name of the local fork repo
 
