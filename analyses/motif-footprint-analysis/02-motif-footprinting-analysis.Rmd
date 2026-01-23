@@ -35,8 +35,6 @@ header-includes:
   - \usepackage{graphicx}
   - \usepackage{float}
 params:
-  data_dir_motif: '.'
-  data_file_motif: '.'
   assay: '.'
   genome: '.'
   top_n_value_footprinting: '.'
@@ -44,6 +42,7 @@ params:
   condition_value1: '.'
   condition_value2: '.'
   condition_value3: '.'
+  motifs_to_fp_module_list: '.'
   root_dir: './'
   PROJECT_NAME: '.'
   PI_NAME: '.'
@@ -150,7 +149,6 @@ Footprinting analysis helps identify transcription factor (TF) binding activity 
 - Restrict to motifs in peaks for meaningful biological interpretation.
 - Compare footprints across conditions or cell types to identify regulatory changes.
 
-
 # Set up
 
 ```{r load-library, echo=TRUE}
@@ -168,7 +166,6 @@ suppressPackageStartupMessages({
   library(BSgenome)
   library(BSgenome.Mmusculus.UCSC.mm10)
   library(BSgenome.Hsapiens.UCSC.hg38)
-  
   library(BSgenome.Mmusculus.UCSC.mm39)
   library(ggseqlogo)
 }) 
@@ -178,9 +175,10 @@ suppressPackageStartupMessages({
 
 ```{r set-dir-and-file-names, echo=TRUE}
 module_analysis_dir <- file.path(root_dir, "analyses", "motif-footprint-analysis") 
+data_dir <- file.path(module_analysis_dir, "results", "01_motif_analysis") 
 
 # Input files
-data_file <- file.path(data_dir_motif, data_file_motif)
+data_file <- file.path(data_dir, "seurat_chromvar.rds")
 
 # Create plots directory
 module_plots_dir <- file.path(module_analysis_dir , "plots")
@@ -212,14 +210,15 @@ a4height <- 11.7
 
 # Read seurat object
 
-First, we will use the seurat object as generated from the pipeline in the `r data_dir_motif` directory. 
+First, we will use the seurat object as generated from the pipeline in the `r data_dir` directory. 
 
 ```{r read-object, fig.width = 6, fig.height = 5, fig.fullwidth = TRUE, echo=TRUE}
 seurat_obj <- readRDS(data_file)
 DefaultAssay(seurat_obj) <- assay
 
 # Set identity classes to an existing column in meta data
-Idents(seurat_obj) <- seurat_obj@meta.data[[cell_type_name]]
+Idents(seurat_obj) <- seurat_obj@meta.data[["project"]]
+# Idents(seurat_obj) <- seurat_obj@meta.data[[cell_type_name]]
 
 # View cell identities, get summary table
 table(Idents(seurat_obj))
@@ -235,7 +234,8 @@ footprinting_result <- add_footprinting(seurat_obj = seurat_obj,
                                         genome = genome, 
                                         pfm = pwm, 
                                         cell_type_name = cell_type_name, 
-                                        top_n_value_footprinting = top_n_value_footprinting) 
+                                        top_n_value_footprinting = top_n_value_footprinting,
+                                        motifs_to_fp_module_list = motifs_to_fp_module_list) 
 
 # Extract and Save the objects
 seurat_obj <- footprinting_result$seurat_obj 
@@ -251,16 +251,14 @@ motifs_to_fp <- footprinting_result$motifs_to_fp
 
 ## Overall
 
-We will group the footprint signal by aggregating all cells together. Each line in the plot represents a single footprint profile per motif for all cell type groups, e.g., T cells, B cells.
-It is useful for a global view of motif accessibility without subgroup differences.
+We will group the footprint signal by aggregating accessibility across all cells in the dataset. We will plot shows the global footprint signal for each motif.
+Each line in the plot represents one aggregated footprint curve per motif, providing a dataset‑wide view of motif accessibility. It is useful for a global view of motif accessibility without subgroup differences.
 
-```{r plot-footprint-overall, fig.width = 25, fig.height = 10, fig.fullwidth = TRUE, echo=TRUE}
-# If you want curves per group (e.g., cluster or predicted.id), set identities here:
-Idents(seurat_obj) <- seurat_obj@meta.data[[cell_type_name]]
-
+```{r plot-footprint-overall, fig.width = 35, fig.height = 20, fig.fullwidth = TRUE, echo=TRUE}
+# No grouping by cell type, cluster, or metadata should be applied here.
 # --- a) Plot ALL selected motifs together ---
 p_all <- print(PlotFootprint(seurat_obj, features = motifs_to_fp))
-ggsave(file.path(Footprinting_plots_dir, "Footprint_top_motifs.png"), plot = p_all, width = 25, height = 10)
+ggsave(file.path(Footprinting_plots_dir, "Footprint_top_motifs.png"), plot = p_all, width = 35, height = 20)
 ```
 
 ```{r plot-footprint-per-motif, fig.width = 8, fig.height = 5, fig.fullwidth = TRUE, echo=FALSE, eval=FALSE}
@@ -279,28 +277,34 @@ for (motif_nm in motifs_to_fp) {
 We will group the footprint signal by the `r cell_type_name` metadata column. Each line in the plot represents a different cell type group, e.g., T cells, B cells.
 It is useful for comparing motif accessibility patterns across biological annotations or clusters.
 
-```{r plot-footprint-celltype, fig.width = 25, fig.height = 10, fig.fullwidth = TRUE, echo=TRUE}
+```{r plot-footprint-celltype, fig.width = 35, fig.height = 20, fig.fullwidth = TRUE, echo=TRUE}
+# If you want curves per group (e.g., cluster or predicted.id), set identities here:
+#Idents(seurat_obj) <- seurat_obj@meta.data[[cell_type_name]]
+
+# View cell identities, get summary table
+# table(Idents(seurat_obj))
+
 # --- c) Plot selected motifs together per cell type ---
 p_celltype <- print(PlotFootprint(seurat_obj, features = motifs_to_fp, group.by = cell_type_name))
-ggsave(file.path(Footprinting_plots_dir, "Footprint_top_motifs_celltype.png"), plot = p_celltype, width = 25, height = 10)
+ggsave(file.path(Footprinting_plots_dir, "Footprint_top_motifs_celltype.png"), plot = p_celltype, width = 35, height = 20)
 ```
 
 ## Split by ID
 
 We will group the footprint signal by the `ID` metadata column. 
 
-```{r plot-footprint-ID, fig.width = 25, fig.height = 15, fig.fullwidth = TRUE, echo=TRUE}
+```{r plot-footprint-ID, fig.width = 35, fig.height = 25, fig.fullwidth = TRUE, echo=TRUE}
 # --- c) Plot selected motifs together per cell type ---
 p_celltype <- print(PlotFootprint(seurat_obj, features = motifs_to_fp, group.by = cell_type_name, 
                             split.by = "ID"))
-ggsave(file.path(Footprinting_plots_dir, "Footprint_top_motifs_celltype_ID.png"), plot = p_celltype, width = 25, height = 15)
+ggsave(file.path(Footprinting_plots_dir, "Footprint_top_motifs_celltype_ID.png"), plot = p_celltype, width = 35, height = 25)
 ```
 
 ## Split by `r condition_value1`
 
 We will group the footprint signal by the `r condition_value1` metadata column. 
 
-```{r plot-footprint-condition-value1, fig.width = 35, fig.height = 10, fig.fullwidth = TRUE, echo=TRUE}
+```{r plot-footprint-condition-value1, fig.width = 35, fig.height = 20, fig.fullwidth = TRUE, echo=TRUE}
 stopifnot(is.character(condition_value1), length(condition_value1) == 1)
 stopifnot(condition_value1 %in% colnames(seurat_obj@meta.data))
 
@@ -310,14 +314,14 @@ p <- print(PlotFootprint(
   group.by = cell_type_name,  # this must also be a column name string
   split.by = condition_value1))
 
-ggsave(file.path(Footprinting_plots_dir, "Footprint_top_motifs_celltype_condition_value1.png"), plot = p, width = 35, height = 10)
+ggsave(file.path(Footprinting_plots_dir, "Footprint_top_motifs_celltype_condition_value1.png"), plot = p, width = 35, height = 20)
 ```
 
 ## Split by `r condition_value2`
 
 We will group the footprint signal by the `r condition_value2` metadata column. 
 
-```{r plot-footprint-condition-value2, fig.width = 35, fig.height = 10, fig.fullwidth = TRUE, echo=TRUE}
+```{r plot-footprint-condition-value2, fig.width = 35, fig.height = 20, fig.fullwidth = TRUE, echo=TRUE}
 if (!is.null(condition_value2)) {
   stopifnot(is.character(condition_value2), length(condition_value2) == 1)
   stopifnot(condition_value2 %in% colnames(seurat_obj@meta.data))
@@ -328,7 +332,7 @@ if (!is.null(condition_value2)) {
     group.by = cell_type_name,  # this must also be a column name string
     split.by = condition_value2))
   
-  ggsave(file.path(Footprinting_plots_dir, "Footprint_top_motifs_celltype_condition_value2.png"), plot = p, width = 35, height = 10)
+  ggsave(file.path(Footprinting_plots_dir, "Footprint_top_motifs_celltype_condition_value2.png"), plot = p, width = 35, height = 20)
 }
 ```
 
@@ -336,7 +340,7 @@ if (!is.null(condition_value2)) {
 
 We will group the footprint signal by the `r condition_value3` metadata column. 
 
-```{r plot-footprint-condition-value3, fig.width = 35, fig.height = 10, fig.fullwidth = TRUE, echo=TRUE}
+```{r plot-footprint-condition-value3, fig.width = 35, fig.height = 20, fig.fullwidth = TRUE, echo=TRUE}
 if (!is.null(condition_value3)) {
   stopifnot(is.character(condition_value3), length(condition_value3) == 1)
   stopifnot(condition_value3 %in% colnames(seurat_obj@meta.data))
@@ -347,7 +351,7 @@ if (!is.null(condition_value3)) {
     group.by = cell_type_name,  # this must also be a column name string
     split.by = condition_value3))
   
-  ggsave(file.path(Footprinting_plots_dir, "Footprint_top_motifs_celltype_condition_value3.png"), plot = p, width = 35, height = 10)
+  ggsave(file.path(Footprinting_plots_dir, "Footprint_top_motifs_celltype_condition_value3.png"), plot = p, width = 35, height = 20)
 }
 ```
 
