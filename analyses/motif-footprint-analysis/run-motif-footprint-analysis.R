@@ -90,7 +90,8 @@ rmarkdown::render('02-motif-footprinting-analysis.Rmd', clean = TRUE,
                                 condition_value1 = yaml$condition_value1,
                                 condition_value2 = yaml$condition_value2,
                                 condition_value3 = yaml$condition_value3,
-                                
+                                motifs_to_fp_module_list = yaml$motifs_to_fp_module_list_value,
+
                                 root_dir = yaml$root_dir,
                                 PROJECT_NAME = yaml$PROJECT_NAME,
                                 PI_NAME = yaml$PI_NAME,
