@@ -13,8 +13,9 @@ Each module is self-contained and can be executed independently or as part of a 
 5. `cluster-cell-calling` module (description="Pipeline for cluster cell calling and differentially accessible peaks analysis.", required=True)
 6. `integration-with-scrna-seq-data` module (description="Pipeline for Peak calling per cell type following integration with scRNA-seq data for sc-ATAC-Seq Analysis.", required=True)
 7. `building-trajectories-monocle` module (description="Pipeline for Building trajectories with Monocle 3 for sc-ATAC-Seq Analysis.", required=False)
-8. `rshiny-app` module (description="Pipeline for generating an R shiny app for the project.", required=False)
-9. `project-updates` module (description="Pipeline for summarizing results from all modules and generating project reports.", required=False)
+8. `motif-footprint-analysis` module (description="Pipeline for Performing DNA sequence motif and motif footprinting analysis for sc-ATAC-Seq Analysis.", required=False)
+9. `rshiny-app` module (description="Pipeline for generating an R shiny app for the project.", required=False)
+10. `project-updates` module (description="Pipeline for summarizing results from all modules and generating project reports.", required=False)
 
 
 ## Contact

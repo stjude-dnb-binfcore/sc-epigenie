@@ -278,12 +278,6 @@ We will group the footprint signal by the `r cell_type_name` metadata column. Ea
 It is useful for comparing motif accessibility patterns across biological annotations or clusters.
 
 ```{r plot-footprint-celltype, fig.width = 35, fig.height = 20, fig.fullwidth = TRUE, echo=TRUE}
-# If you want curves per group (e.g., cluster or predicted.id), set identities here:
-#Idents(seurat_obj) <- seurat_obj@meta.data[[cell_type_name]]
-
-# View cell identities, get summary table
-# table(Idents(seurat_obj))
-
 # --- c) Plot selected motifs together per cell type ---
 p_celltype <- print(PlotFootprint(seurat_obj, features = motifs_to_fp, group.by = cell_type_name))
 ggsave(file.path(Footprinting_plots_dir, "Footprint_top_motifs_celltype.png"), plot = p_celltype, width = 35, height = 20)

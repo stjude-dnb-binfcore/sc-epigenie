@@ -146,6 +146,7 @@ Important Considerations:
 |  ├── fastqc-analysis
 |  ├── integration-with-scrna-seq-data
 |  ├── integrative-analysis
+|  ├── motif-footprint-analysis
 |  ├── project-updates
 |  ├── README.md
 |  ├── rshiny-app
