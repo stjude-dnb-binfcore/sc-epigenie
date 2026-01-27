@@ -146,7 +146,7 @@ RUN Rscript -e 'BiocManager::install(c( \
   "BSgenome.Hsapiens.UCSC.hg19","EnsDb.Hsapiens.v75", \
   "BSgenome.Hsapiens.UCSC.hg38","EnsDb.Hsapiens.v86", \
   "BSgenome.Mmusculus.UCSC.mm10","EnsDb.Mmusculus.v79", \
-  "JASPAR2018", "JASPAR2020", "JASPAR2024"), ask=FALSE, update=FALSE, verbose=TRUE)'
+  "JASPAR2018", "JASPAR2020", "JASPAR 2022", "JASPAR2024"), ask=FALSE, update=FALSE, verbose=TRUE)'
 
 RUN Rscript -e 'BiocManager::install("TFBSTools", ask=FALSE, update=FALSE, verbose=TRUE)'
 RUN Rscript -e 'BiocManager::install("motifmatchr", ask=FALSE, update=FALSE, verbose=TRUE)'
