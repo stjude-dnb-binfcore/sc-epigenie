@@ -2,8 +2,24 @@
 # Base image
 # -------------------------------------------------------------------
 FROM rocker/rstudio:4.4.0
+
+
+# -------------------------------------------------------------------
+# CRAN snapshot (Posit Package Manager) — Oct 11, 2025
+# -------------------------------------------------------------------
+# October 11, 2025 is the date of the previous one in which Seurat v4 was compatible with SeuratObject 5.0.0
+# https://hub.docker.com/usage/pulls?from=1759276800000&to=1769472000000
+ARG SNAPSHOT=2025-10-11
+ENV CRAN_REPO=https://packagemanager.posit.co/cran/__linux__/jammy/${SNAPSHOT}
+
+
+# -------------------------------------------------------------------
+# Locale (avoid malformed ENV)
+# -------------------------------------------------------------------
+ENV LC_ALL=C.UTF-8 LANG=C.UTF-8
+
 # Set default locale
-ENV LC_ALL=C
+#ENV LC_ALL=C
 
 # -------------------------------------------------------------------
 # Environment variables for R and virtualenv
@@ -62,9 +78,6 @@ RUN pip install --no-cache-dir --upgrade pip && \
       leidenalg \
       multiqc==1.25 \
       MACS2==2.2.9.1
-    
- 
-
 
 # -------------------------------------------------------------------
 # R setup
@@ -133,7 +146,7 @@ RUN Rscript -e 'BiocManager::install(c( \
   "BSgenome.Hsapiens.UCSC.hg19","EnsDb.Hsapiens.v75", \
   "BSgenome.Hsapiens.UCSC.hg38","EnsDb.Hsapiens.v86", \
   "BSgenome.Mmusculus.UCSC.mm10","EnsDb.Mmusculus.v79", \
-  "JASPAR2020"), ask=FALSE, update=FALSE, verbose=TRUE)'
+  "JASPAR2018", "JASPAR2020", "JASPAR2024"), ask=FALSE, update=FALSE, verbose=TRUE)'
 
 RUN Rscript -e 'BiocManager::install("TFBSTools", ask=FALSE, update=FALSE, verbose=TRUE)'
 RUN Rscript -e 'BiocManager::install("motifmatchr", ask=FALSE, update=FALSE, verbose=TRUE)'
@@ -152,8 +165,33 @@ RUN Rscript -e 'if (!requireNamespace("BSgenome.Mmusculus.UCSC.mm39", quietly = 
 # GitHub packages (pinned where necessary)
 # -------------------------------------------------------------------
 RUN Rscript -e 'devtools::install_github("stuart-lab/signac", ref="develop", upgrade="never")'
-RUN Rscript -e 'remotes::install_github("satijalab/seurat-wrappers@community-vignette", upgrade="never")' && \
-    Rscript -e 'remotes::install_version("Seurat", version="4.4.0", upgrade="never")'
+
+RUN Rscript -e 'remotes::install_github("satijalab/seurat-wrappers@community-vignette", upgrade="never")' #&& \
+    #Rscript -e 'remotes::install_version("Seurat", version="4.4.0", upgrade="never")'
+
+# -------------------------------------------------------------------
+# Install pak from the snapshot, then pin package versions
+# Use single quotes around the -e expression for clean quoting
+# -------------------------------------------------------------------
+RUN Rscript -e 'options(repos = c(CRAN = Sys.getenv("CRAN_REPO"))); install.packages("pak")'
+
+# Seurat 4.4.0 explicitly, with snapshot for consistent deps
+RUN Rscript -e 'options(repos = c(CRAN = Sys.getenv("CRAN_REPO"))); \
+                pak::pkg_install("Seurat@4.4.0", ask = FALSE)'
+
+# Match SeuratObject to Seurat v4 line (avoid SeuratObject 5.x here)
+RUN Rscript -e 'options(repos = c(CRAN = Sys.getenv("CRAN_REPO"))); \
+                pak::pkg_install("SeuratObject@4.1.4", ask = FALSE)'
+
+# (Optional) Extras commonly used with Seurat 4
+# RUN Rscript -e 'options(repos = c(CRAN = Sys.getenv("CRAN_REPO"))); \
+#                 pak::pkg_install(c("patchwork","uwot","Rtsne","future"), ask = FALSE)'
+
+# Prove what actually got installed
+RUN Rscript -e 'cat("Seurat=", as.character(packageVersion("Seurat")), \
+                    " SeuratObject=", as.character(packageVersion("SeuratObject")), "\n")'
+# -------------------------------------------------------------------
+                
 RUN Rscript -e 'remotes::install_github("cole-trapnell-lab/monocle3", upgrade="never")' && \
     Rscript -e 'remotes::install_github("cole-trapnell-lab/cicero-release", ref="monocle3", upgrade="never")'
 
@@ -196,7 +234,7 @@ RUN Rscript -e 'install.packages(c( \
   "clustree", "cowplot", "data.table", "flexmix", "forcats", "fs", "future", "GGally", \
   "ggh4x", "ggpmisc", "ggrepel", "ggthemes", "harmony", "igraph", "irlba", \
   "knitr", "optparse", "patchwork", "purrr", "RColorBrewer", "remotes", "reshape2", "rlist", "R.utils", \
-  "SeuratObject", "shiny", "SoupX", "stringr", "tidytext", "tidyverse", "tinytex", "yaml", \
+  "shiny", "SoupX", "stringr", "tidytext", "tidyverse", "tinytex", "yaml", \
   "shinyhelper", "DT", "ggdendro", "ragg", "pkgdown"), \
   repos="https://packagemanager.posit.co/cran/__linux__/jammy/latest", upgrade="never")'
 
