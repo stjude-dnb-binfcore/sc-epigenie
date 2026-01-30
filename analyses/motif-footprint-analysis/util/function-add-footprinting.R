@@ -47,6 +47,7 @@ pwm <- getMatrixSet(x = JASPAR2020,
 #'   (must match motif identifiers present in \code{Motifs(seurat_obj[[assay]])}).
 #' @param cell_type_name A metadata column containing the cell type name.
 #' @param top_n_value_footprinting Number of top motifs to footprint.
+#' @param motifs_to_fp_module_list
 
 #'
 #' @return The updated \code{Seurat} object with footprint data stored in the
@@ -55,7 +56,7 @@ pwm <- getMatrixSet(x = JASPAR2020,
 #'
 #'
 
-add_footprinting <- function(seurat_obj, assay, genome, pfm, cell_type_name, top_n_value_footprinting) {
+add_footprinting <- function(seurat_obj, assay, genome, pfm, cell_type_name, top_n_value_footprinting, motifs_to_fp_module_list) {
   
   ########################################################################################
   # (Step 1): Add motif information by using JASPAR motif position weight matrices (PWMs)
@@ -81,22 +82,47 @@ add_footprinting <- function(seurat_obj, assay, genome, pfm, cell_type_name, top
   # (Step 2): Choose motif information 
   motif_names <- motif_obj@motif.names          # readable names like "CEBPB", "SPI1", etc.
   motif_ids   <- rownames(motif_obj)            # IDs like "MA0062.1"
+  
+  if (is.null(motifs_to_fp_module_list)) {
+    message("Motifs for footprinting are being estimated based on the Z-scores from the chromVAR deviation matrix and we will use the top ", top_n_value_footprinting, " motifs", "\n")
+ 
+    ######################################
+    # Print best motifs for footprinting
+    chromvar_mat <- seurat_obj[["chromvar"]]@data # Get the chromVAR deviation matrix
+    avg_scores <- rowMeans(chromvar_mat) # Compute average deviation Z-score per motif across all cells
+  
+    # Sort and pick the top motifs
+    # motifs_to_fp <- sort(avg_scores, decreasing = TRUE)[1:top_n_value_footprinting] 
+    motifs_to_fp_scores <- sort(avg_scores, decreasing = TRUE)
+  
+    # Sanity check that these motifs exist in the motif_obj as well.
+    motif_ids_in_obj <- sort(names(motif_names))            # "MA0004.1", "MA0006.1", ...
+    motif_ids_fp     <- sort(names(motifs_to_fp_scores))           # "MA0060.3", "MA1644.1", ...
+    overlap_ids <- intersect(motif_ids_fp, motif_ids_in_obj)
+    #print(overlap_ids)
 
-  # Choose the motifs to footprint (examples)
-  motifs_to_fp <- head(motif_names, top_n_value_footprinting)          # or use IDs: head(motif_ids, 6)
+    # Choose the motifs to footprint (examples)
+    #top_overlap_ids <- head(overlap_ids, top_n_value_footprinting)          # or use IDs: head(motif_ids, 6)
+    #motifs_to_fp <- motif_names[top_overlap_ids]
+    
+    # Subset motifs scores to overlapping ids
+    motifs_to_fp_scores_overlap <- motifs_to_fp_scores[overlap_ids]
+    
+    # Sort by average z-scores again
+    motifs_to_fp_scores_overlap <- sort(motifs_to_fp_scores_overlap, decreasing = TRUE)
+    print(head(motifs_to_fp_scores_overlap))
+    # Get top n motifs to plot
+    motifs_to_fp <- motif_names[head(names(motifs_to_fp_scores_overlap), top_n_value_footprinting)]
 
-  #################################################################
-  # OPTIONAL: if you want the top enriched motifs instead of arbitrary top 6
-  #best6 <- enriched.motifs %>%
-  #   arrange(desc(fold.enrichment), desc(percent.observed)) %>%
-  #   slice_head(n = 6)
-  # # map enriched IDs to motif_obj (tolerate version mismatches like ".1" vs ".2")
-  #library(stringr)
-  #requested_core <- str_replace(as.character(best6$motif), "\\.\\d+$", "")
-  #avail_core     <- str_replace(motif_ids, "\\.\\d+$", "")
-  #idx            <- match(requested_core, avail_core)
-  #motifs_to_fp   <- motif_names[!is.na(idx)]  # names matched to IDs present
-  #################################################################
+    } else if (length(motifs_to_fp_module_list) > 1) {
+      message("Motifs for footprinting are being provided by the user.", "\n")
+      motifs_to_fp_names <- as.character(motifs_to_fp_module_list)
+      motifs_to_fp <- motif_names[motifs_to_fp_names]
+    }
+  
+  print(motifs_to_fp)
+  
+  ######################################
 
   ########################################################################################
   # (Step 3): We need to attach the fragments files to the seurat object before any Motif footprinting steps.
