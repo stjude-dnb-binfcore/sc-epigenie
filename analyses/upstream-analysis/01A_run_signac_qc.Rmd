@@ -219,6 +219,7 @@ source(paste0(root_dir, "/figures/scripts/theme_plot.R"))
 source(paste0(analysis_dir, "/util/function-run-QC.R"))
 source(paste0(analysis_dir, "/util/function-process-signac.R"))
 source(paste0(analysis_dir, "/util/function-create-UMAP.R"))
+source(paste0(analysis_dir, "/util/function-create-vlnplots-variable.R"))
 ```
 
 ```{r echo=FALSE, warning=FALSE}
@@ -401,19 +402,25 @@ cat("  \n\\pagebreak  \n")
 
 ```{r vln-plot-before-filtering-1, fig.width = 15, fig.height = 6, fig.fullwidth = TRUE, echo=TRUE}
 name <- paste0(plots_dir, "/", glue::glue("03-vln-plot-before-filtering-1.png"))
-p <- print(VlnPlot(object = seurat_obj, 
-              features = c("nCount_peaks", "nFeature_peaks", "TSS.enrichment", "nucleosome_signal", "blacklist_ratio"),
-              pt.size = 0.1, ncol = 5) + 
-             plot_annotation(title = glue::glue("Before-filtering: {sample_name[i]}")))
+p <- print(create_vlnplots_variable(seurat_obj   = seurat_obj,
+                                    features     = c("nCount_peaks", "nFeature_peaks", "TSS.enrichment", "nucleosome_signal", "blacklist_ratio"),
+                                    out_path     = name,
+                                    split_variable = NULL,         # or e.g., "ID" to split by sample/group
+                                    pt.size      = 0.1,
+                                    ncol         = 5,
+                                    sample_title   = glue::glue("Before-filtering: {sample_name[i]}")))  # top-left title
 ggsave(file = name, width = 15, height = 6, device = "png")
 ```
 
 ```{r vln-plot-before-filtering-2, fig.width = 25, fig.height = 6, fig.fullwidth = TRUE, echo=TRUE}
 name <- paste0(plots_dir, "/", glue::glue("04-vln-plot-before-filtering-2.png"))
-p <- print(VlnPlot(object = seurat_obj,
-                   features = c("pct_reads_in_peaks", "peak_region_fragments", "mitochondrial", "duplicate",
-                     "pct_reads_in_peaks_promoters", "pct_reads_in_peaks_enhancers"), 
-                   pt.size = 0.1, ncol = 6) + plot_annotation(title = glue::glue("Before-filtering: {sample_name[i]}")))
+p <- print(create_vlnplots_variable(seurat_obj   = seurat_obj,
+                                    features     = c("pct_reads_in_peaks", "peak_region_fragments", "mitochondrial", "duplicate", "pct_reads_in_peaks_promoters", "pct_reads_in_peaks_enhancers"),
+                                    out_path     = name,
+                                    split_variable = NULL,         # or e.g., "ID" to split by sample/group
+                                    pt.size      = 0.1,
+                                    ncol         = 6,
+                                    sample_title   = glue::glue("Before-filtering: {sample_name[i]}")))  # top-left title
 ggsave(file = name, width = 25, height = 6, device = "png")
 ```
 
@@ -453,19 +460,25 @@ cells_so_after_filter_num <- print(ncol(seurat_obj)) # Number of cells after fil
 
 ```{r vln-plot-after-filtering-1, fig.width = 15, fig.height = 6, fig.fullwidth = TRUE, echo=TRUE}
 name <- paste0(plots_dir, "/", glue::glue("05-vln-plot-after-filtering-1.png"))
-p <- print(VlnPlot(object = seurat_obj, 
-              features = c("nCount_peaks", "nFeature_peaks", "TSS.enrichment", "nucleosome_signal", "blacklist_ratio"),
-              pt.size = 0.1, ncol = 5) + 
-             plot_annotation(title = glue::glue("After-filtering: {sample_name[i]}")))
-ggsave(file = name, width = 15, height = 6, device = "png")
+p <- print(create_vlnplots_variable(seurat_obj   = seurat_obj,
+                                    features     = c("nCount_peaks", "nFeature_peaks", "TSS.enrichment", "nucleosome_signal", "blacklist_ratio"),
+                                    out_path     = name,
+                                    split_variable = NULL,         # or e.g., "ID" to split by sample/group
+                                    pt.size      = 0.1,
+                                    ncol         = 5,
+                                    sample_title   = glue::glue("After-filtering: {sample_name[i]}")))  # top-left title
+ggsave(file = name, width = 25, height = 6, device = "png")
 ```
 
 ```{r vln-plot-after-filtering-2, fig.width = 25, fig.height = 6, fig.fullwidth = TRUE, echo=TRUE}
 name <- paste0(plots_dir, "/", glue::glue("06-vln-plot-after-filtering-2.png"))
-p <- print(VlnPlot(object = seurat_obj,
-        features = c("pct_reads_in_peaks", "peak_region_fragments", "mitochondrial", "duplicate",
-                     "pct_reads_in_peaks_promoters", "pct_reads_in_peaks_enhancers"),
-        pt.size = 0.1, ncol = 6) + plot_annotation(title = glue::glue("After-filtering: {sample_name[i]}")))
+p <- print(create_vlnplots_variable(seurat_obj   = seurat_obj,
+                                    features     = c("pct_reads_in_peaks", "peak_region_fragments", "mitochondrial", "duplicate", "pct_reads_in_peaks_promoters", "pct_reads_in_peaks_enhancers"),
+                                    out_path     = name,
+                                    split_variable = NULL,         # or e.g., "ID" to split by sample/group
+                                    pt.size      = 0.1,
+                                    ncol         = 6,
+                                    sample_title   = glue::glue("After-filtering: {sample_name[i]}")))  # top-left title
 ggsave(file = name, width = 25, height = 6, device = "png")
 ```
 
