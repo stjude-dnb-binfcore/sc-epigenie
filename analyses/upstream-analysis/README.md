@@ -61,10 +61,10 @@ Moreover, only libraries with more than 500 cells will be kept for merging and i
 
 We need tp assign gene annotations from EnsDb based on the genome reference used for the cohort. For more information on the various Ensembl releases, you can refer to the [Table of Assemblies](https://useast.ensembl.org/info/website/archives/assembly.html) and [Build Notes for Reference Packages](https://www.10xgenomics.com/support/software/cell-ranger/downloads/cr-ref-build-steps#ref-2020-a).
 
-| Species | Genome Build | Ensembl Version(s)        | Annotation Package                              |
+| Species | Genome Build | Ensembl Version(s)        | Annotation Package                               |
 |---------|--------------|---------------------------|--------------------------------------------------|
-| Human   | hg19 (GRCh37) | v75                       | `EnsDb.Hsapiens.v75`                             |
-| Human   | hg38 (GRCh38) | v86 (older), v98 (newer)  | `EnsDb.Hsapiens.v86`, `EnsDb.Hsapiens.v98`       |
+| Human   | hg19 (GRCh37) | -                        |        -                     |
+| Human   | hg38 (GRCh38) | v108                     | `EnsDb.Hsapiens.v108`                            |
 | Mouse   | mm9 (NCBI37)  | —                         | *No official* `EnsDb`; use `TxDb.Mmusculus.UCSC.mm9.knownGene` |
 | Mouse   | mm10 (GRCm38) | v79                       | `EnsDb.Mmusculus.v79`                            |
 | Mouse   | mm39 (GRCm39) | v104, v105                | `EnsDb.Mmusculus.v104`, `EnsDb.Mmusculus.v105`   |
