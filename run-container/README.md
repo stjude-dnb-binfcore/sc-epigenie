@@ -44,6 +44,12 @@ singularity pull docker://achronistjude/singlecell-r4.4-seurat4.4-signac1.16:lat
 ```
 
 
+```
+singularity pull docker://achronistjude/singlecell-r4.4-seurat4.4-signac1.16-2026-01-29:latest
+```
+
+
+
 ### 4. Start the Singularity Container
 
 #### a. Running Analysis Modules via LSF
