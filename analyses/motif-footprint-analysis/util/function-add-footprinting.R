@@ -99,20 +99,25 @@ add_footprinting <- function(seurat_obj, assay, genome, pfm, cell_type_name, top
     motif_ids_in_obj <- sort(names(motif_names))            # "MA0004.1", "MA0006.1", ...
     motif_ids_fp     <- sort(names(motifs_to_fp_scores))           # "MA0060.3", "MA1644.1", ...
     overlap_ids <- intersect(motif_ids_fp, motif_ids_in_obj)
-    print(overlap_ids)
+    #print(overlap_ids)
 
     # Choose the motifs to footprint (examples)
-    top_overlap_ids <- head(overlap_ids, top_n_value_footprinting)          # or use IDs: head(motif_ids, 6)
-    motifs_to_fp <- motif_names[top_overlap_ids]
+    #top_overlap_ids <- head(overlap_ids, top_n_value_footprinting)          # or use IDs: head(motif_ids, 6)
+    #motifs_to_fp <- motif_names[top_overlap_ids]
+    
+    # Subset motifs scores to overlapping ids
+    motifs_to_fp_scores_overlap <- motifs_to_fp_scores[overlap_ids]
+    
+    # Sort by average z-scores again
+    motifs_to_fp_scores_overlap <- sort(motifs_to_fp_scores_overlap, decreasing = TRUE)
+    print(head(motifs_to_fp_scores_overlap))
+    # Get top n motifs to plot
+    motifs_to_fp <- motif_names[head(names(motifs_to_fp_scores_overlap), top_n_value_footprinting)]
 
     } else if (length(motifs_to_fp_module_list) > 1) {
       message("Motifs for footprinting are being provided by the user.", "\n")
-      motifs_to_fp <- as.character(motifs_to_fp_module_list)
-      #name_to_id  <- setNames(names(motif_names), motif_names)
-      
-      # Convert readable names to motif IDs
-      #motifs_to_fp_ids <- motif_ids[motifs_to_fp]
-      #motifs_to_fp_ids
+      motifs_to_fp_names <- as.character(motifs_to_fp_module_list)
+      motifs_to_fp <- motif_names[motifs_to_fp_names]
     }
   
   print(motifs_to_fp)
