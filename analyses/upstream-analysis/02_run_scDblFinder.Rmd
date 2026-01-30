@@ -192,6 +192,7 @@ if (!dir.exists(scDblFinder_plots_dir)) {
   dir.create(scDblFinder_plots_dir)}
 
 source(paste0(root_dir, "/figures/scripts/theme_plot.R"))
+source(paste0(analysis_dir, "/util/function-create-sce-seurat-object.R"))
 ```
 
 # Read metadata file and define `sample_name`
@@ -239,8 +240,15 @@ for (i in seq_along(sample_name)) {
     RunSVD %>%
     RunUMAP(reduction = "lsi", dims = 2:30)
 
-  sce_obj_list[[i]] <- as.SingleCellExperiment(sce_obj_list[[i]])
-  
+  #sce_obj_list[[i]] <- as.SingleCellExperiment(sce_obj_list[[i]])
+  # Build an SCE in-place (no as.SingleCellExperiment, no slot= calls):
+  sce_obj_list[[i]] <- seurat_to_sce_safe(so = sce_obj_list[[i]],
+                                          assay = assay,
+                                          counts_layer  = "counts",  # raw counts for scDblFinder
+                                          expr_layer    = "data")     # e.g., normalized matrix -> stored in 'logcounts'
+
+ 
+
   ###############################################################
   cat("Beginning to run scDblFinder for sample", sample_name[i], "\n")
   # -------------------------------------------------------------------------------------------
@@ -319,10 +327,19 @@ for (i in seq_along(sample_name)) {
   doublets_to_filter <- subset(doublets, doublets$scDblFinder.class == "doublet") 
   
   # Convert sce list into seurat list
-  seurat_obj_with_doublets_list[[i]] <- as.Seurat(sce_obj_list[[i]], 
-                                        counts = "counts", 
-                                        data = "logcounts") 
-  
+  #seurat_obj_with_doublets_list[[i]] <- as.Seurat(sce_obj_list[[i]], 
+  #                                      counts = "counts", 
+  #                                      data = "logcounts") 
+  seurat_obj_with_doublets_list[[i]] <- sce_to_seurat_safe(
+      sce            = sce_obj_list[[i]],
+      assay_name     = assay,        # e.g., "peaks"
+      data_from      = "logcounts",  # put SCE's logcounts into Seurat's "data"
+      add_reductions = TRUE)
+  umap_mat <- Seurat::Embeddings(seurat_obj_with_doublets_list[[i]], "umap")
+  reducedDim(sce_obj_list[[i]], "UMAP") <- umap_mat
+
+
+
   ########################################################################################################
   # Plot the Doublets predictions on the UMAP
   cat("Plotting doublets predictions on the UMAP for sample:", sample_name[i], "\n")
