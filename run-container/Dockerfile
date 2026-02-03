@@ -164,6 +164,7 @@ RUN Rscript -e 'if (!requireNamespace("BSgenome.Mmusculus.UCSC.mm39", quietly = 
 # GitHub packages (pinned where necessary)
 # -------------------------------------------------------------------
 RUN Rscript -e 'devtools::install_github("stuart-lab/signac", ref="develop", upgrade="never")'
+RUN Rscript -e 'if (!requireNamespace("Signac", quietly = TRUE)) stop("Signac not installed!")'
 
 # -------------------------------------------------------------------
 # Install pak from the snapshot, then pin package versions
@@ -174,7 +175,7 @@ RUN Rscript -e 'devtools::install_github("stuart-lab/signac", ref="develop", upg
 # Match SeuratObject to Seurat v4 line (avoid SeuratObject 5.x here)
 # Pin SeuratObject first (critical)
 #RUN Rscript -e 'remotes::install_version("SeuratObject", version = "4.1.4", repos = "https://cran.microsoft.com/snapshot/2023-10-01", upgrade = "never")'
-RUN Rscript -e 'install.packages("https://cran.r-project.org/src/contrib/Archive/SeuratObject/SeuratObject_4.1.4.tar.gz", repos = NULL, type = "source")'
+#RUN Rscript -e 'install.packages("https://cran.r-project.org/src/contrib/Archive/SeuratObject/SeuratObject_4.1.4.tar.gz", repos = NULL, type = "source")'
 
 # How to find the commit SHA
 # git clone https://github.com/satijalab/seurat.git
