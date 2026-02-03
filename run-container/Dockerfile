@@ -165,9 +165,6 @@ RUN Rscript -e 'if (!requireNamespace("BSgenome.Mmusculus.UCSC.mm39", quietly = 
 # -------------------------------------------------------------------
 RUN Rscript -e 'devtools::install_github("stuart-lab/signac", ref="develop", upgrade="never")'
 
-RUN Rscript -e 'remotes::install_github("satijalab/seurat-wrappers@community-vignette", upgrade="never")' #&& \
-    #Rscript -e 'remotes::install_version("Seurat", version="4.4.0", upgrade="never")'
-# 
 # -------------------------------------------------------------------
 # Install pak from the snapshot, then pin package versions
 # Use single quotes around the -e expression for clean quoting
@@ -175,27 +172,25 @@ RUN Rscript -e 'remotes::install_github("satijalab/seurat-wrappers@community-vig
 # October 11, 2025 — last known date where Seurat v4 was compatible with SeuratObject 5.0.0
 # Seurat 4.4.0 explicitly, with snapshot for consistent deps
 # Match SeuratObject to Seurat v4 line (avoid SeuratObject 5.x here)
-#RUN Rscript -e 'remotes::install_github("satijalab/seurat-wrappers@community-vignette", upgrade="never")' && \
-#    Rscript -e 'remotes::install_version("Seurat", version="4.4.0", upgrade="never")' && \
-#    Rscript -e 'remotes::install_version("SeuratObject", version = "4.1.4", upgrade = "never")'
-
+# Pin SeuratObject first (critical)
+#RUN Rscript -e 'remotes::install_version("SeuratObject", version = "4.1.4", repos = "https://cran.microsoft.com/snapshot/2023-10-01", upgrade = "never")'
+RUN Rscript -e 'install.packages("https://cran.r-project.org/src/contrib/Archive/SeuratObject/SeuratObject_4.1.4.tar.gz", repos = NULL, type = "source")'
 
 # How to find the commit SHA
 # git clone https://github.com/satijalab/seurat.git
 # cd seurat
 # git log --oneline --date=short --pretty=format:"%h %ad %s"
 # Last commit on October 10, 2025: 914c0f18   
-RUN Rscript -e 'remotes::install_github("satijalab/seurat-wrappers@community-vignette", upgrade="never")' && \
-    Rscript -e 'remotes::install_version("Seurat", version = "4.4.0", repos = "https://cran.microsoft.com/snapshot/2025-10-10", upgrade = "never")' #&& \
-    #Rscript -e 'remotes::install_version("SeuratObject", version = "4.1.4", upgrade = "never")'
+RUN Rscript -e 'remotes::install_version("Seurat", version = "4.4.0", repos = "https://packagemanager.posit.co/cran/2023-10-01", upgrade = "never")' 
 
 #RUN Rscript -e 'remotes::install_github("satijalab/seurat", ref = "914c0f18", upgrade = "never", dependencies = TRUE)'
 
+# Install wrappers WITHOUT pulling Seurat 5
+RUN Rscript -e 'remotes::install_github("satijalab/seurat-wrappers@community-vignette", dependencies = FALSE, upgrade = "never")'
 
-# Fail build if versions are not exactly as expected
-#RUN Rscript -e 'stopifnot( \
-#  as.character(packageVersion("Seurat")) == "4.4.0", \
-#  as.character(packageVersion("SeuratObject")) == "4.1.4")'
+# Sanity check
+RUN Rscript -e 'stopifnot(as.character(packageVersion("Seurat")) == "4.4.0")'
+
 
 # -------------------------------------------------------------------
                 
