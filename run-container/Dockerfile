@@ -163,12 +163,6 @@ RUN Rscript -e 'if (!requireNamespace("BSgenome.Mmusculus.UCSC.mm39", quietly = 
 # -------------------------------------------------------------------
 # GitHub packages (pinned where necessary)
 # -------------------------------------------------------------------
-#RUN Rscript -e 'devtools::install_github("stuart-lab/signac", ref="develop", upgrade="never")'
-#RUN Rscript -e 'if (!requireNamespace("Signac", quietly = TRUE)) stop("Signac not installed!")'
-RUN Rscript -e 'devtools::install_github("stuart-lab/signac", ref="1.16.0", upgrade="never")'
-RUN Rscript -e 'if (!requireNamespace("Signac", quietly = TRUE) || packageVersion("Signac") != "1.16.0") {stop("Signac 1.16.0 is not installed!")}'
-
-
 # -------------------------------------------------------------------
 # Install pak from the snapshot, then pin package versions
 # Use single quotes around the -e expression for clean quoting
@@ -177,23 +171,35 @@ RUN Rscript -e 'if (!requireNamespace("Signac", quietly = TRUE) || packageVersio
 # Seurat 4.4.0 explicitly, with snapshot for consistent deps
 # Match SeuratObject to Seurat v4 line (avoid SeuratObject 5.x here)
 # Pin SeuratObject first (critical)
-#RUN Rscript -e 'remotes::install_version("SeuratObject", version = "4.1.4", repos = "https://cran.microsoft.com/snapshot/2023-10-01", upgrade = "never")'
-#RUN Rscript -e 'install.packages("https://cran.r-project.org/src/contrib/Archive/SeuratObject/SeuratObject_4.1.4.tar.gz", repos = NULL, type = "source")'
+
+#
+# 1. SeuratObject
+RUN Rscript -e 'remotes::install_github("satijalab/seurat-object@v5.2.0", upgrade = "never")'
+RUN Rscript -e 'if (!requireNamespace("SeuratObject", quietly = TRUE) || packageVersion("SeuratObject") != "5.2.0") {stop("SeuratObject 5.2.0 is not installed!")}'
+
 
 # How to find the commit SHA
 # git clone https://github.com/satijalab/seurat.git
 # cd seurat
 # git log --oneline --date=short --pretty=format:"%h %ad %s"
 # Last commit on October 10, 2025: 914c0f18   
+
+#
+# 2. Seurat
 RUN Rscript -e 'remotes::install_version("Seurat", version = "4.4.0", repos = "https://packagemanager.posit.co/cran/2023-10-01", upgrade = "never")' 
+RUN Rscript -e 'stopifnot(as.character(packageVersion("Seurat")) == "4.4.0")'
 
-#RUN Rscript -e 'remotes::install_github("satijalab/seurat", ref = "914c0f18", upgrade = "never", dependencies = TRUE)'
+#
+# 3. Signac
+RUN Rscript -e 'devtools::install_github("stuart-lab/signac", ref="1.16.0", upgrade="never")'
+RUN Rscript -e 'if (!requireNamespace("Signac", quietly = TRUE) || packageVersion("Signac") != "1.16.0") {stop("Signac 1.16.0 is not installed!")}'
 
+
+
+# 4. SeuratWrappers
 # Install wrappers WITHOUT pulling Seurat 5
 RUN Rscript -e 'remotes::install_github("satijalab/seurat-wrappers@community-vignette", dependencies = FALSE, upgrade = "never")'
-
-# Sanity check
-RUN Rscript -e 'stopifnot(as.character(packageVersion("Seurat")) == "4.4.0")'
+#
 
 
 # -------------------------------------------------------------------
@@ -240,7 +246,7 @@ RUN Rscript -e 'install.packages(c( \
   "clustree", "cowplot", "data.table", "flexmix", "forcats", "fs", "future", "GGally", \
   "ggh4x", "ggpmisc", "ggrepel", "ggthemes", "harmony", "igraph", "irlba", \
   "knitr", "optparse", "patchwork", "purrr", "RColorBrewer", "remotes", "reshape2", "rlist", "R.utils", \
-  "SeuratObject", "shiny", "SoupX", "stringr", "tidytext", "tidyverse", "tinytex", "yaml", \
+  "shiny", "SoupX", "stringr", "tidytext", "tidyverse", "tinytex", "yaml", \
   "shinyhelper", "DT", "ggdendro", "ragg", "pkgdown"), \
   repos="https://packagemanager.posit.co/cran/__linux__/jammy/latest", upgrade="never")'
 
