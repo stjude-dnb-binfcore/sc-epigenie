@@ -129,6 +129,7 @@ suppressPackageStartupMessages({
   
   ####################################################
   # sc-epigenie
+  library(Signac)
   library(AnnotationHub)
   library(ensembldb)
   library(GenomeInfoDb) #translation between chromosome names
