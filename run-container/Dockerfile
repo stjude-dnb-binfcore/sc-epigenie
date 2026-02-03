@@ -163,8 +163,11 @@ RUN Rscript -e 'if (!requireNamespace("BSgenome.Mmusculus.UCSC.mm39", quietly = 
 # -------------------------------------------------------------------
 # GitHub packages (pinned where necessary)
 # -------------------------------------------------------------------
-RUN Rscript -e 'devtools::install_github("stuart-lab/signac", ref="develop", upgrade="never")'
-RUN Rscript -e 'if (!requireNamespace("Signac", quietly = TRUE)) stop("Signac not installed!")'
+#RUN Rscript -e 'devtools::install_github("stuart-lab/signac", ref="develop", upgrade="never")'
+#RUN Rscript -e 'if (!requireNamespace("Signac", quietly = TRUE)) stop("Signac not installed!")'
+RUN Rscript -e 'devtools::install_github("stuart-lab/signac", ref="1.16.0", upgrade="never")'
+RUN Rscript -e 'if (!requireNamespace("Signac", quietly = TRUE) || packageVersion("Signac") != "1.16.0") {stop("Signac 1.16.0 is not installed!")}'
+
 
 # -------------------------------------------------------------------
 # Install pak from the snapshot, then pin package versions
