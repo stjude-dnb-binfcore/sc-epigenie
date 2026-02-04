@@ -2,6 +2,7 @@
 # Base image
 # -------------------------------------------------------------------
 FROM rocker/rstudio:4.4.0
+
 # Set default locale
 ENV LC_ALL=C
 
@@ -62,9 +63,6 @@ RUN pip install --no-cache-dir --upgrade pip && \
       leidenalg \
       multiqc==1.25 \
       MACS2==2.2.9.1
-    
- 
-
 
 # -------------------------------------------------------------------
 # R setup
@@ -117,14 +115,14 @@ RUN Rscript -e 'BiocManager::install("clusterProfiler", ask=FALSE, update=FALSE,
 RUN Rscript -e 'if (!requireNamespace("enrichplot", quietly = TRUE)) stop("enrichplot not installed!")'
 RUN Rscript -e 'if (!requireNamespace("clusterProfiler", quietly = TRUE)) stop("clusterProfiler not installed!")'
 
-
+#
 # -------------------------------------------------------------------
-
+#
 # install bioconductor packages
 RUN Rscript -e 'install.packages("matrixStats", repos="https://packagemanager.posit.co/cran/__linux__/jammy/latest")'
 RUN Rscript -e 'BiocManager::install("celldex", ask=FALSE, update=FALSE, verbose=TRUE)'
 
-
+#
 # -------------------------------------------------------------------
 RUN Rscript -e 'BiocManager::install(c( \
   "infercnv","scDblFinder","numbat","miQC","scater", \
@@ -133,7 +131,7 @@ RUN Rscript -e 'BiocManager::install(c( \
   "BSgenome.Hsapiens.UCSC.hg19","EnsDb.Hsapiens.v75", \
   "BSgenome.Hsapiens.UCSC.hg38","EnsDb.Hsapiens.v86", \
   "BSgenome.Mmusculus.UCSC.mm10","EnsDb.Mmusculus.v79", \
-  "JASPAR2020"), ask=FALSE, update=FALSE, verbose=TRUE)'
+  "JASPAR2018", "JASPAR2020", "JASPAR2022", "JASPAR2024"), ask=FALSE, update=FALSE, verbose=TRUE)'
 
 RUN Rscript -e 'BiocManager::install("TFBSTools", ask=FALSE, update=FALSE, verbose=TRUE)'
 RUN Rscript -e 'BiocManager::install("motifmatchr", ask=FALSE, update=FALSE, verbose=TRUE)'
@@ -147,13 +145,43 @@ RUN Rscript -e 'if (!requireNamespace("motifmatchr", quietly = TRUE)) stop("moti
 RUN Rscript -e 'if (!requireNamespace("chromVAR", quietly = TRUE)) stop("chromVAR not installed!")'
 RUN Rscript -e 'if (!requireNamespace("BSgenome.Mmusculus.UCSC.mm39", quietly = TRUE)) stop("BSgenome.Mmusculus.UCSC.mm39 not installed!")'
 
-
 # -------------------------------------------------------------------
 # GitHub packages (pinned where necessary)
 # -------------------------------------------------------------------
-RUN Rscript -e 'devtools::install_github("stuart-lab/signac", ref="develop", upgrade="never")'
-RUN Rscript -e 'remotes::install_github("satijalab/seurat-wrappers@community-vignette", upgrade="never")' && \
-    Rscript -e 'remotes::install_version("Seurat", version="4.4.0", upgrade="never")'
+# October 11, 2025 — last known date where Seurat v4 was compatible with SeuratObject 5.0.0
+#
+#
+# 1. SeuratObject
+RUN Rscript -e 'remotes::install_github("satijalab/seurat-object@v5.2.0", upgrade = "never")'
+RUN Rscript -e 'if (!requireNamespace("SeuratObject", quietly = TRUE) || packageVersion("SeuratObject") != "5.2.0") {stop("SeuratObject 5.2.0 is not installed!")}'
+
+
+# How to find the commit SHA
+# git clone https://github.com/satijalab/seurat.git
+# cd seurat
+# git log --oneline --date=short --pretty=format:"%h %ad %s"
+# Last commit on October 10, 2025: 914c0f18   
+
+#
+# 2. Seurat
+RUN Rscript -e 'remotes::install_version("Seurat", version = "4.4.0", repos = "https://packagemanager.posit.co/cran/2023-10-01", upgrade = "never")' 
+RUN Rscript -e 'stopifnot(as.character(packageVersion("Seurat")) == "4.4.0")'
+
+#
+# 3. Signac
+RUN Rscript -e 'devtools::install_github("stuart-lab/signac", ref="1.16.0", upgrade="never")'
+RUN Rscript -e 'if (!requireNamespace("Signac", quietly = TRUE) || packageVersion("Signac") != "1.16.0") {stop("Signac 1.16.0 is not installed!")}'
+
+
+
+# 4. SeuratWrappers
+# Install wrappers WITHOUT pulling Seurat 5
+RUN Rscript -e 'remotes::install_github("satijalab/seurat-wrappers@community-vignette", dependencies = FALSE, upgrade = "never")'
+#
+
+
+# -------------------------------------------------------------------
+                
 RUN Rscript -e 'remotes::install_github("cole-trapnell-lab/monocle3", upgrade="never")' && \
     Rscript -e 'remotes::install_github("cole-trapnell-lab/cicero-release", ref="monocle3", upgrade="never")'
 
@@ -196,9 +224,10 @@ RUN Rscript -e 'install.packages(c( \
   "clustree", "cowplot", "data.table", "flexmix", "forcats", "fs", "future", "GGally", \
   "ggh4x", "ggpmisc", "ggrepel", "ggthemes", "harmony", "igraph", "irlba", \
   "knitr", "optparse", "patchwork", "purrr", "RColorBrewer", "remotes", "reshape2", "rlist", "R.utils", \
-  "SeuratObject", "shiny", "SoupX", "stringr", "tidytext", "tidyverse", "tinytex", "yaml", \
+  "shiny", "SoupX", "stringr", "tidytext", "tidyverse", "tinytex", "yaml", \
   "shinyhelper", "DT", "ggdendro", "ragg", "pkgdown"), \
   repos="https://packagemanager.posit.co/cran/__linux__/jammy/latest", upgrade="never")'
+
 
 RUN Rscript -e 'install.packages("flextable", repos="https://packagemanager.posit.co/cran/__linux__/jammy/latest", upgrade="never")'
 RUN Rscript -e 'if (!requireNamespace("flextable", quietly = TRUE)) stop("flextable not installed!")'
