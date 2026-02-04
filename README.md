@@ -134,6 +134,14 @@ Important Considerations:
     - Refer to the [Introduction to the HPCF cluster](https://wiki.stjude.org/display/HPCF/Introduction+to+the+HPCF+cluster#IntroductiontotheHPCFcluster-queuesQueues:) for detailed guidance.
     - If you require more than 1 TB of memory, use the `large_mem` queue to ensure proper resource allocation.
   
+### Launch the Full Pipeline
+
+The script `launch_sc_epigenie_full_pipeline.sh` runs the entire sc‑epigenie workflow sequentially, with all modules configurable as optional. You can enable or disable any step directly inside the script’s configuration block.
+To launch the full (or customized) pipeline, run the script from the root directory on an interactive node:
+
+```
+bash launch_sc_epigenie_full_pipeline.sh
+```
 
 
 ### Below is the main directory structure listing the analyses and data files used in this repository
@@ -153,6 +161,7 @@ Important Considerations:
 |  └── upstream-analysis
 ├── data
 ├── figures
+├── launch_sc_epigenie_full_pipeline.sh
 ├── LICENSE
 ├── project_parameters.Config.yaml
 ├── README.md
