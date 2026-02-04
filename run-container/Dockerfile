@@ -3,23 +3,8 @@
 # -------------------------------------------------------------------
 FROM rocker/rstudio:4.4.0
 
-
-# -------------------------------------------------------------------
-# CRAN snapshot (Posit Package Manager) — Oct 11, 2025
-# -------------------------------------------------------------------
-# October 11, 2025 is the date of the previous one in which Seurat v4 was compatible with SeuratObject 5.0.0
-# https://hub.docker.com/usage/pulls?from=1759276800000&to=1769472000000
-#ARG SNAPSHOT=2025-10-11
-#ENV CRAN_REPO=https://packagemanager.posit.co/cran/__linux__/jammy/${SNAPSHOT}
-
-
-# ------------------------f-------------------------------------------
-# Locale (avoid malformed ENV)
-# -------------------------------------------------------------------
-ENV LC_ALL=C
-
 # Set default locale
-#ENV LC_ALL=C
+ENV LC_ALL=C
 
 # -------------------------------------------------------------------
 # Environment variables for R and virtualenv
@@ -163,15 +148,8 @@ RUN Rscript -e 'if (!requireNamespace("BSgenome.Mmusculus.UCSC.mm39", quietly = 
 # -------------------------------------------------------------------
 # GitHub packages (pinned where necessary)
 # -------------------------------------------------------------------
-# -------------------------------------------------------------------
-# Install pak from the snapshot, then pin package versions
-# Use single quotes around the -e expression for clean quoting
-# -------------------------------------------------------------------
 # October 11, 2025 — last known date where Seurat v4 was compatible with SeuratObject 5.0.0
-# Seurat 4.4.0 explicitly, with snapshot for consistent deps
-# Match SeuratObject to Seurat v4 line (avoid SeuratObject 5.x here)
-# Pin SeuratObject first (critical)
-
+#
 #
 # 1. SeuratObject
 RUN Rscript -e 'remotes::install_github("satijalab/seurat-object@v5.2.0", upgrade = "never")'
