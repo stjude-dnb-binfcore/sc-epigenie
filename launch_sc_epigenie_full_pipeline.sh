@@ -89,15 +89,15 @@ fi
 # Feature toggles — make EVERY step optional
 # 1 = run step; 0 = skip step
 # ------------------------------------------------------------------------------
-RUN_FASTQC=1                # A: FastQC
-RUN_CELLRANGER=0            # B: CellRanger
+RUN_FASTQC=0                # A: FastQC
+RUN_CELLRANGER=1            # B: CellRanger
 RUN_UPSTREAM=1              # C: Upstream
-RUN_INTEGRATIVE=1           # D: Integrative
-RUN_CLUSTER=1               # E: Cluster cell calling
-RUN_INTEGRATE_SCRNA=1       # F: Integration with scRNA-seq
-RUN_TRAJECTORIES=1          # G: Trajectories (Monocle)
-RUN_MOTIF=1                 # H: Motif footprint analysis
-RUN_RSHINY=1                # I: R/Shiny app
+RUN_INTEGRATIVE=0           # D: Integrative
+RUN_CLUSTER=0               # E: Cluster cell calling
+RUN_INTEGRATE_SCRNA=0       # F: Integration with scRNA-seq
+RUN_TRAJECTORIES=0          # G: Trajectories (Monocle)
+RUN_MOTIF=0                # H: Motif footprint analysis
+RUN_RSHINY=0                # I: R/Shiny app
 
 # Relationship between FastQC and CellRanger (when both are enabled):
 # 1 = CellRanger waits for FastQC, 0 = run in parallel (no dep)
@@ -210,11 +210,14 @@ if (( RUN_CELLRANGER )); then
   if (( RUN_FASTQC && CELLRANGER_WAIT_FOR_FASTQC )); then
     B_DEP="done(${JOB_A})"
   fi
+
+  # submit-multiple-jobs.sh must print the WAITER job ID
   JOB_B=$(submit_job "${B_DIR}" "${B_DIR}/submit-multiple-jobs.sh" "${B_DEP}" "CellRanger")
   echo "  B(CellRanger) = ${JOB_B} ${B_DEP:+(dep: ${B_DEP})}"
 else
   echo "[–/–] CellRanger (B): SKIPPED"
 fi
+
 
 # Maintain a simple linear chain among *enabled* steps after B:
 # The next step depends on the most recent ENABLED job. If B ran, chain from B; else if A ran, chain from A; else no dep.
