@@ -136,7 +136,8 @@ Important Considerations:
   
 ### Launch the Full Pipeline
 
-The script `launch_sc_epigenie_full_pipeline.sh` runs the entire sc‑epigenie workflow sequentially, with all modules configurable as optional. You can enable or disable any step directly inside the script’s configuration block.
+The script `launch_sc_epigenie_full_pipeline.sh` runs the entire sc‑epigenie workflow sequentially, with all modules configurable as optional. You can enable or disable any step directly inside the script’s configuration block named as `Feature toggles` lines 92-100.
+
 To launch the full (or customized) pipeline, run the script from the root directory on an interactive node:
 
 ```
