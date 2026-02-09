@@ -23,6 +23,7 @@
    - [Accessing the Code](#accessing-the-code)
    - [Running the Code](#running-the-code)
 5. [Requesting Resources from the HPCF Cluster](#requesting-resources-from-the-hpcf-cluster)
+6. [Launch the Full Pipeline](#launch-the-full-pipeline)
 
 
 ## Getting Started
