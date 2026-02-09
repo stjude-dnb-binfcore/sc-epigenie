@@ -39,7 +39,7 @@
 #        analyses/<module>/lsf-script.txt
 #        (CellRanger may use submit-multiple-jobs.sh to fan out internal jobs.)
 #   3) Run from anywhere:
-#        bash launch_sc_epigenie.sh
+#        bash launch_sc_epigenie_full_pipeline.sh
 #
 # Notifications:
 #   - Completion emails: enabled by default via `-N -u "$NOTIFY_EMAIL"`.
@@ -61,7 +61,7 @@
 #   - LSF (bsub) available on PATH.
 #   - Module directories exist with their respective LSF scripts.
 #
-# Maintainer:    Antonia Chroni (Sr Bioinformatics Research Scientist)
+# Maintainer:    Antonia Chroni (DNB Bioinformatics, St. Jude Children's Research Hospital)
 # Last updated:  2026-02-03
 ###############################################################################
 
