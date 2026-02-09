@@ -62,7 +62,7 @@
 #   - Module directories exist with their respective LSF scripts.
 #
 # Maintainer:    Antonia Chroni (DNB Bioinformatics, St. Jude Children's Research Hospital)
-# Last updated:  2026-02-03
+# Last updated:  2026-02-09
 ###############################################################################
 
 set -e
@@ -153,6 +153,51 @@ submit_job() {
 }
 
 # ------------------------------------------------------------------------------
+# Helper: bsub wrapper for CellRanger's submit-multiple-jobs.sh, which may print multiple lines of output.
+
+# submit_job WORKDIR LAUNCHER_SCRIPT UPSTREAM_DEP JOBNAME
+# Example:
+#   JOB_B=$(submit_job "${B_DIR}" "${B_DIR}/submit-multiple-jobs.sh" "${B_DEP}" "CellRanger")
+#
+# Contract:
+#   - LAUNCHER_SCRIPT runs LOCALLY (not as an LSF job).
+#   - It is responsible for submitting all internal LSF jobs and their own waiter.
+#   - It must print ONLY the final waiter job ID (numeric) to stdout.
+submit_job_cellranger() {
+  local workdir="$1"           # e.g., ${B_DIR}
+  local launcher="$2"          # e.g., ${B_DIR}/submit-multiple-jobs.sh
+  local upstream_dep="$3"      # e.g., "done(${JOB_A})" or ""
+  local jobname="$4"           # logical prefix, e.g., "CellRanger"
+
+  (
+    set -euo pipefail
+    cd "$workdir"
+
+    # Run launcher LOCALLY. Capture ALL output.
+    local raw
+    raw="$("${launcher}" "${upstream_dep}" "${jobname}" 2>&1)"
+
+    # Extract the LAST numeric token from output (the waiter job ID)
+    local waiter_id
+    waiter_id="$(echo "${raw}" | grep -Eo '[0-9]+' | tail -n 1)"
+
+    # Validate
+    if [[ -z "${waiter_id}" || ! "${waiter_id}" =~ ^[0-9]+$ ]]; then
+      echo "ERROR: ${launcher} did not emit a numeric job ID." >&2
+      echo "       Raw launcher output was:" >&2
+      echo "-----------------------------------------------" >&2
+      echo "${raw}" >&2
+      echo "-----------------------------------------------" >&2
+      exit 1
+    fi
+
+    # Return ONLY the numeric waiter job ID
+    echo "${waiter_id}"
+  )
+}
+
+
+# ------------------------------------------------------------------------------
 # Module directories
 # ------------------------------------------------------------------------------
 A_DIR="${PROJECT_DIR}/analyses/fastqc-analysis"
@@ -211,8 +256,8 @@ if (( RUN_CELLRANGER )); then
     B_DEP="done(${JOB_A})"
   fi
 
-  # submit-multiple-jobs.sh must print the WAITER job ID
-  JOB_B=$(submit_job "${B_DIR}" "${B_DIR}/submit-multiple-jobs.sh" "${B_DEP}" "CellRanger")
+  # submit-multiple-jobs.sh 
+  JOB_B=$(submit_job_cellranger "${B_DIR}" "${B_DIR}/submit-multiple-jobs.sh" "${B_DEP}" "CellRanger")
   echo "  B(CellRanger) = ${JOB_B} ${B_DEP:+(dep: ${B_DEP})}"
 else
   echo "[–/–] CellRanger (B): SKIPPED"
