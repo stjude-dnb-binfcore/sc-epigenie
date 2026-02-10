@@ -31,7 +31,7 @@
 #
 # Usage:
 #   1) Edit the configuration section near the top:
-#        - NOTIFY_EMAIL="antonia.chroni@stjude.org"
+#        - NOTIFY_EMAIL="user.name@stjude.org"
 #        - NOTIFY_ON_START=0|1
 #        - RUN_FASTQC / RUN_CELLRANGER / ... / RUN_RSHINY = 0|1
 #        - CELLRANGER_WAIT_FOR_FASTQC=0|1
@@ -76,7 +76,7 @@ PROJECT_DIR="$(pwd)"
 # ------------------------------------------------------------------------------
 # All jobs will notify on completion (-N) to this email.
 # Set NOTIFY_ON_START=1 to also get a mail when a job starts (-B).
-NOTIFY_EMAIL="antonia.chroni@stjude.org"
+NOTIFY_EMAIL="user.name@stjude.org"
 NOTIFY_ON_START=1   # 1 = include -B (mail on start); 0 = Skip start notifications
 
 # Compose common bsub notification flags
@@ -89,15 +89,15 @@ fi
 # Feature toggles — make EVERY step optional
 # 1 = run step; 0 = skip step
 # ------------------------------------------------------------------------------
-RUN_FASTQC=0                # A: FastQC
+RUN_FASTQC=1                # A: FastQC
 RUN_CELLRANGER=1            # B: CellRanger
 RUN_UPSTREAM=1              # C: Upstream
-RUN_INTEGRATIVE=0           # D: Integrative
-RUN_CLUSTER=0               # E: Cluster cell calling
-RUN_INTEGRATE_SCRNA=0       # F: Integration with scRNA-seq
-RUN_TRAJECTORIES=0          # G: Trajectories (Monocle)
-RUN_MOTIF=0                # H: Motif footprint analysis
-RUN_RSHINY=0                # I: R/Shiny app
+RUN_INTEGRATIVE=1           # D: Integrative
+RUN_CLUSTER=1               # E: Cluster cell calling
+RUN_INTEGRATE_SCRNA=1       # F: Integration with scRNA-seq
+RUN_TRAJECTORIES=1          # G: Trajectories (Monocle)
+RUN_MOTIF=1                # H: Motif footprint analysis
+RUN_RSHINY=1                # I: R/Shiny app
 
 # Relationship between FastQC and CellRanger (when both are enabled):
 # 1 = CellRanger waits for FastQC, 0 = run in parallel (no dep)
