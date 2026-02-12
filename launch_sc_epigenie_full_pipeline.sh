@@ -171,7 +171,7 @@ submit_job_cellranger() {
 
     # Extract the LAST numeric token from output (the waiter job ID)
     local waiter_id
-    waiter_id="$(echo "${raw}" | grep -Eo '[0-9]+' | tail -n 1)"
+    waiter_id="$(echo "${raw} "${BSUB_NOTIFY_FLAGS[@]}" " | grep -Eo '[0-9]+' | tail -n 1)" 
 
     # Validate
     if [[ -z "${waiter_id}" || ! "${waiter_id}" =~ ^[0-9]+$ ]]; then
