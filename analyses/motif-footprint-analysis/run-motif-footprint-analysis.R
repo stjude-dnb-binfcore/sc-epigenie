@@ -40,6 +40,11 @@ if (!dir.exists(module_plots_dir)) {
 # (2) For mouse: BSgenome.Mmusculus.UCSC.mm10 or BSgenome.Mmusculus.UCSC.mm39
 genome = BSgenome.Mmusculus.UCSC.mm39 
 
+# JASPAR database version to use for motif analysis. 
+# It dependens on genome reference and versioning used in the project. 
+# Please check the JASPAR database for more details: https://jaspar.genereg.net/downloads/.
+jaspar_library_version = "2024" # Options: "2018", "2020", "2022" or "2024". 
+
 #################################################################################
 rmarkdown::render('01-motif-analysis.Rmd', clean = TRUE,
                   output_dir = file.path(module_plots_dir),

@@ -14,7 +14,7 @@
 #' @return A `TFBSTools::PFMatrixList` containing JASPAR motif PFMs.
 #' @examples
 #'
-pfm <- getMatrixSet(x = JASPAR2020,
+pfm <- getMatrixSet(x = jaspar_library_version,
                     opts = list(collection = "CORE", tax_group = 'vertebrates', all_versions = FALSE))
 #########################################################################################################
 
