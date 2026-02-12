@@ -72,7 +72,7 @@ PROJECT_DIR="$(pwd)"
 # ------------------------------------------------------------------------------
 # All jobs will notify on completion (-N) to this email.
 # Set NOTIFY_ON_START=1 to also get a mail when a job starts (-B).
-NOTIFY_EMAIL="antonia.chroni@stjude.org"
+NOTIFY_EMAIL="user.name@stjude.org"
 NOTIFY_ON_START=1   # 1 = include -B (mail on start); 0 = Skip start notifications
 
 # Compose common bsub notification flags
@@ -85,7 +85,7 @@ fi
 # Feature toggles — make EVERY step optional
 # 1 = run step; 0 = skip step
 # ------------------------------------------------------------------------------
-RUN_FASTQC=0                # A: FastQC
+RUN_FASTQC=1                # A: FastQC
 RUN_CELLRANGER=1            # B: CellRanger
 RUN_UPSTREAM=1              # C: Upstream
 RUN_INTEGRATIVE=0           # D: Integrative
