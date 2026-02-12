@@ -4,25 +4,27 @@ processing file: 01-run-test-packages.Rmd
 output file: 01-run-test-packages.knit.md
 
 
-Output created: reports/Report-run-test-packages-2025-12-24.html
+Output created: reports/Report-run-test-packages-2026-02-04.html
 
 
 processing file: 01-run-test-packages.Rmd
 output file: 01-run-test-packages.knit.md
 
+Warning: Package microtype Warning: Unable to apply patch `footnote' on input line 86.
 
-Output created: reports/Report-run-test-packages-2025-12-24.pdf
-
-
-processing file: 02-run-lsf-problematic-packages.Rmd
-output file: 02-run-lsf-problematic-packages.knit.md
-
-
-Output created: reports/Report-run-lsf-problematic-packages-2025-12-24.html
+Output created: reports/Report-run-test-packages-2026-02-04.pdf
 
 
 processing file: 02-run-lsf-problematic-packages.Rmd
 output file: 02-run-lsf-problematic-packages.knit.md
 
 
-Output created: reports/Report-run-lsf-problematic-packages-2025-12-24.pdf
+Output created: reports/Report-run-lsf-problematic-packages-2026-02-04.html
+
+
+processing file: 02-run-lsf-problematic-packages.Rmd
+output file: 02-run-lsf-problematic-packages.knit.md
+
+Warning: Package microtype Warning: Unable to apply patch `footnote' on input line 126.
+
+Output created: reports/Report-run-lsf-problematic-packages-2026-02-04.pdf

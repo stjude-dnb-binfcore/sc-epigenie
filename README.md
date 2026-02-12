@@ -23,6 +23,7 @@
    - [Accessing the Code](#accessing-the-code)
    - [Running the Code](#running-the-code)
 5. [Requesting Resources from the HPCF Cluster](#requesting-resources-from-the-hpcf-cluster)
+6. [Launch the Full Pipeline](#launch-the-full-pipeline)
 
 
 ## Getting Started
@@ -134,6 +135,17 @@ Important Considerations:
     - Refer to the [Introduction to the HPCF cluster](https://wiki.stjude.org/display/HPCF/Introduction+to+the+HPCF+cluster#IntroductiontotheHPCFcluster-queuesQueues:) for detailed guidance.
     - If you require more than 1 TB of memory, use the `large_mem` queue to ensure proper resource allocation.
   
+### Launch the Full Pipeline
+
+The script `launch_sc_epigenie_full_pipeline.sh` runs the entire sc‑epigenie workflow sequentially, with all modules configurable as optional. You can enable or disable any step directly inside the script’s configuration block named as `Feature toggles` lines 90-98. Please note that users should update line 77 with their own email address to receive email notifications (i.e., `NOTIFY_EMAIL=\"user.name@stjude.org\"`). Email notifications are sent on job start, completion, and/or failure.
+
+  - Note: The CellRanger step sends an email notification on job start but not on completion. Successful submission of the upstream-analysis step indicates that the CellRanger alignments completed successfully.
+
+To launch the full (or customized) pipeline, run the script from the root directory on an interactive node:
+
+```
+bash launch_sc_epigenie_full_pipeline.sh
+```
 
 
 ### Below is the main directory structure listing the analyses and data files used in this repository
@@ -153,6 +165,7 @@ Important Considerations:
 |  └── upstream-analysis
 ├── data
 ├── figures
+├── launch_sc_epigenie_full_pipeline.sh
 ├── LICENSE
 ├── project_parameters.Config.yaml
 ├── README.md

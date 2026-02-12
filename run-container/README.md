@@ -43,7 +43,6 @@ module load singularity/4.1.1
 singularity pull docker://achronistjude/singlecell-r4.4-seurat4.4-signac1.16:latest
 ```
 
-
 ### 4. Start the Singularity Container
 
 #### a. Running Analysis Modules via LSF
