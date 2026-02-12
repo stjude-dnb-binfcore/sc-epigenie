@@ -24,9 +24,6 @@
 #       I: R/Shiny app packaging
 #   • Optional per-step execution via RUN_* flags.
 #   • Adaptive dependencies: each enabled step depends on the last enabled predecessor.
-#   • Configurable relationship between FastQC and CellRanger:
-#       - CELLRANGER_WAIT_FOR_FASTQC=1 → B waits for A (done(A))
-#       - CELLRANGER_WAIT_FOR_FASTQC=0 → A and B run in parallel
 #   • LSF email notifications with a single NOTIFY_EMAIL value for all jobs.
 #
 # Usage:
@@ -34,7 +31,6 @@
 #        - NOTIFY_EMAIL="user.name@stjude.org"
 #        - NOTIFY_ON_START=0|1
 #        - RUN_FASTQC / RUN_CELLRANGER / ... / RUN_RSHINY = 0|1
-#        - CELLRANGER_WAIT_FOR_FASTQC=0|1
 #   2) Ensure each module directory has its LSF script:
 #        analyses/<module>/lsf-script.txt
 #        (CellRanger may use submit-multiple-jobs.sh to fan out internal jobs.)
@@ -76,7 +72,7 @@ PROJECT_DIR="$(pwd)"
 # ------------------------------------------------------------------------------
 # All jobs will notify on completion (-N) to this email.
 # Set NOTIFY_ON_START=1 to also get a mail when a job starts (-B).
-NOTIFY_EMAIL="user.name@stjude.org"
+NOTIFY_EMAIL="antonia.chroni@stjude.org"
 NOTIFY_ON_START=1   # 1 = include -B (mail on start); 0 = Skip start notifications
 
 # Compose common bsub notification flags
@@ -89,19 +85,15 @@ fi
 # Feature toggles — make EVERY step optional
 # 1 = run step; 0 = skip step
 # ------------------------------------------------------------------------------
-RUN_FASTQC=1                # A: FastQC
+RUN_FASTQC=0                # A: FastQC
 RUN_CELLRANGER=1            # B: CellRanger
 RUN_UPSTREAM=1              # C: Upstream
-RUN_INTEGRATIVE=1           # D: Integrative
-RUN_CLUSTER=1               # E: Cluster cell calling
-RUN_INTEGRATE_SCRNA=1       # F: Integration with scRNA-seq
-RUN_TRAJECTORIES=1          # G: Trajectories (Monocle)
-RUN_MOTIF=1                # H: Motif footprint analysis
-RUN_RSHINY=1                # I: R/Shiny app
-
-# Relationship between FastQC and CellRanger (when both are enabled):
-# 1 = CellRanger waits for FastQC, 0 = run in parallel (no dep)
-CELLRANGER_WAIT_FOR_FASTQC=0
+RUN_INTEGRATIVE=0           # D: Integrative
+RUN_CLUSTER=0               # E: Cluster cell calling
+RUN_INTEGRATE_SCRNA=0       # F: Integration with scRNA-seq
+RUN_TRAJECTORIES=0          # G: Trajectories (Monocle)
+RUN_MOTIF=0               # H: Motif footprint analysis
+RUN_RSHINY=0                # I: R/Shiny app
 
 # ------------------------------------------------------------------------------
 # Heading
@@ -135,7 +127,7 @@ submit_job() {
   local out
   if ! out=$(bsub -cwd "${_cwd}" \
                   ${_dep:+-w "${_dep}"} \
-                  -oo "${_cwd}/job.out" -eo "${_cwd}/job.err" \
+                  #-oo "${_cwd}/job.out" -eo "${_cwd}/job.err" \
                   "${BSUB_NOTIFY_FLAGS[@]}" \
                   < "${_in}" 2>&1); then
     echo "ERROR: bsub failed for ${_label} in ${_cwd}" >&2
@@ -175,7 +167,7 @@ submit_job_cellranger() {
 
     # Run launcher LOCALLY. Capture ALL output.
     local raw
-    raw="$("${launcher}" "${upstream_dep}" "${jobname}" 2>&1)"
+    raw="$("${launcher}" "${upstream_dep}" "${jobname}" "${BSUB_NOTIFY_FLAGS[@]}" 2>&1)"
 
     # Extract the LAST numeric token from output (the waiter job ID)
     local waiter_id
@@ -195,7 +187,6 @@ submit_job_cellranger() {
     echo "${waiter_id}"
   )
 }
-
 
 # ------------------------------------------------------------------------------
 # Module directories
@@ -247,18 +238,17 @@ else
   echo "[–/–] FastQC (A): SKIPPED"
 fi
 
-# B) CellRanger (optional dependency on FastQC)
+
+# B) CellRanger 
 if (( RUN_CELLRANGER )); then
   bump_step
   echo "[${STEP}/${TOTAL_STEPS}] Submitting CellRanger (B)..."
   B_DEP=""
-  if (( RUN_FASTQC && CELLRANGER_WAIT_FOR_FASTQC )); then
-    B_DEP="done(${JOB_A})"
-  fi
 
   # submit-multiple-jobs.sh 
   JOB_B=$(submit_job_cellranger "${B_DIR}" "${B_DIR}/submit-multiple-jobs.sh" "${B_DEP}" "CellRanger")
-  echo "  B(CellRanger) = ${JOB_B} ${B_DEP:+(dep: ${B_DEP})}"
+  # Email me when the CellRanger job (JOB_B) is submitted.
+  echo "  B(CellRanger) = ${JOB_B} ${B_DEP:+(dep: ${B_DEP})}" | mail -s "CellRanger submitted" "${NOTIFY_EMAIL}"
 else
   echo "[–/–] CellRanger (B): SKIPPED"
 fi
