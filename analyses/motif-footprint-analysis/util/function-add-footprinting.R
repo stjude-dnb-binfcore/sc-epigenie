@@ -14,7 +14,7 @@
 #' @examples
 #'
 # extract position frequency matrices for the motifs
-pwm <- getMatrixSet(x = JASPAR2020,
+pwm <- getMatrixSet(x = jaspar_library_version,
                     opts = list(species = species, all_versions = FALSE)) 
 
 

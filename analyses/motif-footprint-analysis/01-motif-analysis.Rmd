@@ -209,7 +209,10 @@ suppressPackageStartupMessages({
   library(DT)
   library(patchwork)
   library(tidyverse)
+  library(JASPAR2018)
   library(JASPAR2020)
+  library(JASPAR2022)
+  library(JASPAR2024)
   library(TFBSTools)
   library(knitr)
   library(GenomeInfoDb) #translation between chromosome names
