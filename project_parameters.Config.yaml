@@ -3,7 +3,7 @@ root_dir: "/sc-epigenie" # Absolute path to the main dir of the project where Gi
 data_dir: "/sc-epigenie/analyses/cellranger-analysis/results/02_cellranger_count/DefaultParameters" # Absolute path to data dir of the project with CellRanger output results. Options: "DefaultParameters", "ForcedCells8000Parameters", or else. 
 metadata_dir: "/data/project_metadata" # Absolute path to metadata dir of the project.
 metadata_file: "project_metadata.tsv" # Options: "project_metadata.tsv" (default) or name as user wants. It needs to be in `tsv` format. It can include one or more samples, as long as it contains at least the following columns in this exact order: `ID`, `SAMPLE`, and `FASTQ`. The `ID` column must contain unique values. Additional metadata columns can be added and arranged as needed by the user (though not required). For samples with multiple technical replicates, list all associated FASTQ file paths in the same row, using commas to separate each path.
-genome_name: "GRCm39" # define genome reference and versioning. Options: (1) human: "GRCh38" and "hg19"; and (2) mouse: "GRCm39", "mm10", and "mm9".
+genome_name: "GRCm39" # define genome reference and versioning. Options: (1) human: "GRCh38"; and (2) mouse: "GRCm39" and "mm10".
 PROJECT_NAME: "Victoria_Knockout - Testing cohort"
 PI_NAME: "Michael A. Dyer, PhD"
 TASK_ID: "NA"
@@ -22,7 +22,7 @@ COMPLETION_DATE: "ONGOING"
 # No need to manually define variables
 
 # `./analyses/cellranger-analysis`
-genome_reference_path: "./reference_genomes/cellranger-sc-atac-seq/2020-A/mus_musculus/mm10/downloads/refdata-cellranger-arc-mm10-2020-A-2.0.0" # Absolute path to genome reference to be used for the `cellranger-analysis` module.
+genome_reference_path: "./reference_genomes/cellranger-sc-atac-seq/2024-A/mus_musculus/GRCm39/downloads/refdata-cellranger-arc-GRCm39-2024-A" # Absolute path to genome reference to be used for the `cellranger-analysis` module.
 cellranger_parameters: "DefaultParameters" # Options: "DefaultParameters", "ForcedCells8000Parameters", or else.
 genome_name_cellranger: "GRCm39" #please define the genome of preference for dual genomes. In case for single genomes, please use the same as used for `genome_name`.
 # Define the sample ID prefix(es) used in this project.
@@ -34,10 +34,10 @@ sample_prefix:
   - XYZ_
 
 # `./analyses/upstream-analysis`
-genome_name_upstream: "GRCm39" # Options: (1) human: "GRCh38" and "hg19"; and (2) mouse: "GRCm39", "mm10", and "mm9".
+genome_name_upstream: "GRCm39" # Options: (1) human: "GRCh38"; and (2) mouse: "GRCm39" and "mm10".
 assay_signac_qc: "peaks" # Options: "peaks" (default ALWAYS)
-# Genome-to-Ensembl Mapping Options: (1) human: "GRCh38" -> "EnsDb.Hsapiens.v108" | "hg19" -> "EnsDb.Hsapiens.v75"
-#                                    (2) mouse: "GRCm39" -> "EnsDb.Mmusculus.v104" (or "EnsDb.Mmusculus.v105"), | "mm10" -> "EnsDb.Mmusculus.v79" and  | "mm9" -> No official `EnsDb` package, use "TxDb.Mmusculus.UCSC.mm9.knownGene" or similar
+# Genome-to-Ensembl Mapping Options: (1) human: "GRCh38" -> "EnsDb.Hsapiens.v108" 
+#                                    (2) mouse: "GRCm39" -> "EnsDb.Mmusculus.v104" (or "EnsDb.Mmusculus.v105"), | "mm10" -> "EnsDb.Mmusculus.v79"
 annotation_Ensembl_upstream: "EnsDb.Mmusculus.v104" 
 species_upstream: "Mus musculus" # Options: "Homo sapiens"; "Mus musculus"
 object_species_upstream: "AH95775" # Reference genome annotation ID. This needs to match the `annotation_Ensembl_upstream` as it is available in the AnnotationHub. 
