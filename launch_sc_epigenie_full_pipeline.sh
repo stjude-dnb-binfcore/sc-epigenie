@@ -8,9 +8,11 @@
 #   - Submits the end-to-end sc-epigenie workflow (A→I) to LSF.
 #   - Every step can be toggled on/off independently.
 #   - Dependencies automatically wire up only between ENABLED steps.
-#   - CellRanger can run in parallel with FastQC or wait for it, based on a flag.
-#   - Email notifications sent on completion (and optionally on start) of each job.
-#
+#   - CellRanger runs in parallel with FastQC.
+#   - Email notifications are sent on job start, completion, and/or failure.
+#   - Note: The CellRanger step sends an email notification on job start but not on completion.
+#           Successful submission of the upstream-analysis step indicates that the
+#           CellRanger alignments completed successfully.
 # Key Features:
 #   • Full workflow coverage with modular, optional steps:
 #       A: FastQC
