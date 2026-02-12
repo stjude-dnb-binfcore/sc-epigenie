@@ -166,7 +166,7 @@ submit_job_cellranger() {
 
     # Run launcher LOCALLY. Capture ALL output.
     local raw
-    raw="$("${launcher}" "${upstream_dep}" "${jobname}" "${BSUB_NOTIFY_FLAGS[@]}" 2>&1)"
+    raw="$("${launcher}" "${upstream_dep}" "${jobname}" 2>&1)"
 
     # Extract the LAST numeric token from output (the waiter job ID)
     local waiter_id
