@@ -85,15 +85,15 @@ fi
 # Feature toggles — make EVERY step optional
 # 1 = run step; 0 = skip step
 # ------------------------------------------------------------------------------
-RUN_FASTQC=1                # A: FastQC
-RUN_CELLRANGER=1            # B: CellRanger
-RUN_UPSTREAM=1              # C: Upstream
-RUN_INTEGRATIVE=0           # D: Integrative
-RUN_CLUSTER=0               # E: Cluster cell calling
-RUN_INTEGRATE_SCRNA=0       # F: Integration with scRNA-seq
-RUN_TRAJECTORIES=0          # G: Trajectories (Monocle)
-RUN_MOTIF=0               # H: Motif footprint analysis
-RUN_RSHINY=0                # I: R/Shiny app
+RUN_FASTQC=1                # A: FastQC: `fastqc-analysis`
+RUN_CELLRANGER=1            # B: CellRanger: `cellranger-analysis`
+RUN_UPSTREAM=1              # C: Upstream: `upstream-analysis`
+RUN_INTEGRATIVE=1           # D: Integrative: `integrative-analysis`
+RUN_CLUSTER=1               # E: Cluster cell calling: `cluster-cell-calling`
+RUN_INTEGRATE_SCRNA=1       # F: Integration with scRNA-seq: `integration-with-scrna-seq-data`
+RUN_TRAJECTORIES=1          # G: Trajectories (Monocle): `building-trajectories-monocle`
+RUN_MOTIF=1                 # H: Motif footprint analysis: `motif-footprint-analysis`
+RUN_RSHINY=1                # I: R/Shiny app: `rshiny-app`
 
 # ------------------------------------------------------------------------------
 # Heading
