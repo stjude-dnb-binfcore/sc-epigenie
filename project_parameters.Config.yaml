@@ -36,13 +36,25 @@ sample_prefix:
 # `./analyses/upstream-analysis`
 genome_name_upstream: "GRCm39" # Options: (1) human: "GRCh38"; and (2) mouse: "GRCm39" and "mm10".
 assay_signac_qc: "peaks" # Options: "peaks" (default ALWAYS)
-# Genome-to-Ensembl Mapping Options: (1) human: "GRCh38" -> "EnsDb.Hsapiens.v108" 
-#                                    (2) mouse: "GRCm39" -> "EnsDb.Mmusculus.v104" (or "EnsDb.Mmusculus.v105"), | "mm10" -> "EnsDb.Mmusculus.v79"
-annotation_Ensembl_upstream: "EnsDb.Mmusculus.v104" 
+annotation_Ensembl_upstream: "EnsDb.Mmusculus.v110" # Genome-to-Ensembl annotation mapping (Ensure the EnsDb version matches the Cell Ranger reference build)
+                                                    # For more info, see: https://www.10xgenomics.com/support/software/cell-ranger-arc/downloads/ref-build-steps
+                                                    # Human:
+                                                    #   - GRCh38  -> EnsDb.Hsapiens.v98  (2020-A)
+                                                    #   - GRCh38  -> EnsDb.Hsapiens.v109 (2024-A)
+                                                    #
+                                                    # Mouse:
+                                                    #   - GRCm39  -> EnsDb.Mmusculus.v110 (2024-A)
+                                                    #   - mm10    -> EnsDb.Mmusculus.v98  (2020-A)
 species_upstream: "Mus musculus" # Options: "Homo sapiens"; "Mus musculus"
-object_species_upstream: "AH95775" # Reference genome annotation ID. This needs to match the `annotation_Ensembl_upstream` as it is available in the AnnotationHub. 
-                                    # Options: (1) human: "GRCh38" -> "AH109336" ("EnsDb.Hsapiens.v108")
-                                    #          (2) mouse: "GRCm39" -> "AH95775" ("EnsDb.Mmusculus.v104")
+object_species_upstream: "AH113713" # Reference genome annotation ID (Ensure the EnsDb version matches the Cell Ranger reference build)
+                                    # This needs to match the `annotation_Ensembl_upstream` as it is available in the AnnotationHub.
+                                    # Human:
+                                    #   - GRCh38  -> "AH75011"  (2020-A and EnsDb.Hsapiens.v98)
+                                    #   - GRCh38  -> "AH109606" (2024-A and EnsDb.Hsapiens.v109)
+                                    #
+                                    # Mouse:
+                                    #   - GRCm39  -> "AH113713" (2024-A and EnsDb.Mmusculus.v110)
+                                    #   - mm10    -> "AH75036" (2020-A and EnsDb.Mmusculus.v98)
 min.cutoff_value_upstream: "q0" # Options: e.g., "q0" to use all peaks; "q75" to use the top 25% all peaks; "q95" to use the top 5% all peaks and so on.
 #nCount_peaks_min_upstream: "100" # Total counts across all peaks	Optional; can correlate with fragments
 #nCount_peaks_max_upstream: "20000" # Total counts across all peaks	Optional; can correlate with fragments
