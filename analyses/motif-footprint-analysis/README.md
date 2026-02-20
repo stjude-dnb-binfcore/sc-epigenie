@@ -10,7 +10,6 @@ Parameters according to the project and analysis strategy will need to be specif
    
    - `genome` to be used for the BSgenome package based on human or mouse experiment and genome build.
    - `species` to be used for the JASPAR database based on human or mouse experiment.
-   - `jaspar_library_version` to be used for the JASPAR database version to use for motif analysis.
 
 
 ### Run module on an interactive session on HPC within the container

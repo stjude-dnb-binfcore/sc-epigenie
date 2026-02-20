@@ -27,6 +27,8 @@ yaml <- read_yaml(configFile)
 # Set up directories and paths to root_dir and analysis_dir
 root_dir <- yaml$root_dir
 assay <- yaml$assay_annotation_module
+jaspar_library_version <- yaml$jaspar_library_version_module
+
 analysis_dir <- file.path(root_dir, "analyses", "motif-footprint-analysis") 
 
 module_plots_dir <- file.path(analysis_dir, "plots") 
@@ -39,11 +41,6 @@ if (!dir.exists(module_plots_dir)) {
 # (1) For human: BSgenome.Hsapiens.UCSC.hg38 
 # (2) For mouse: BSgenome.Mmusculus.UCSC.mm10 or BSgenome.Mmusculus.UCSC.mm39
 genome = BSgenome.Mmusculus.UCSC.mm39 
-
-# JASPAR database version to use for motif analysis. 
-# It dependens on genome reference and versioning used in the project. 
-# Please check the JASPAR database for more details: https://jaspar.genereg.net/downloads/.
-jaspar_library_version = "2024" # Options: "2018", "2020", "2022" or "2024". 
 
 #################################################################################
 rmarkdown::render('01-motif-analysis.Rmd', clean = TRUE,

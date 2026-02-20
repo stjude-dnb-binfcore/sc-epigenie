@@ -151,6 +151,11 @@ top_da_peak_names_motifs_module: "500" # Motif plot: Aim for at least 200 to 500
 top_n_value_footprinting_module: 5 # Number of top motifs to footprint (default).
 motifs_to_fp_module_list_value: NULL # Options: NULL (default) or specify vector of the motif IDs to display on the plots as a list, e.g., [MA1603.1, MA1625.1]. 
                                      # If run by default, the Z-scores from the chromVAR deviation matrix will be used to choose the top motifs.
+# JASPAR database version to use for motif analysis. 
+# It dependens on genome reference and versioning used in the project. 
+# Please check the JASPAR database for more details: https://jaspar.genereg.net/downloads/.
+jaspar_library_version_module: "2024" # Options: "2018", "2020", "2022" or "2024". 
+
 
 # `rshiny-app`
 annotations_dir_rshiny_app: "01_integration_with_scrna_seq_data" # Options: to update based on the folder with the desired annotations to use for the R shiny app from the `integration-with-scrna-seq-data` module
