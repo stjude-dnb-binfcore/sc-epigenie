@@ -1,6 +1,6 @@
 #!/bin/bash
 ###############################################################################
-# Script:        launch_sc_epigenie_full_pipeline.sh
+# Script:        launch_full_pipeline.sh
 # Purpose:       Launch the full sc-epigenie pipeline on LSF as a dependency-
 #                aware job chain, with fully OPTIONAL steps and adaptive waits.
 #
@@ -37,7 +37,7 @@
 #        analyses/<module>/lsf-script.txt
 #        (CellRanger may use submit-multiple-jobs.sh to fan out internal jobs.)
 #   3) Run from anywhere:
-#        bash launch_sc_epigenie_full_pipeline.sh
+#        bash launch_full_pipeline.sh
 #
 # Notifications:
 #   - Completion emails: enabled by default via `-N -u "$NOTIFY_EMAIL"`.

@@ -27,6 +27,8 @@ yaml <- read_yaml(configFile)
 # Set up directories and paths to root_dir and analysis_dir
 root_dir <- yaml$root_dir
 assay <- yaml$assay_annotation_module
+jaspar_library_version <- yaml$jaspar_library_version_module
+
 analysis_dir <- file.path(root_dir, "analyses", "motif-footprint-analysis") 
 
 module_plots_dir <- file.path(analysis_dir, "plots") 

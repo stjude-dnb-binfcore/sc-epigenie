@@ -9,7 +9,7 @@ Parameters according to the project and analysis strategy will need to be specif
 - `run-motif-footprint-analysis.R`: User needs to specify the following:
    
    - `genome` to be used for the BSgenome package based on human or mouse experiment and genome build.
-   - `species` to be used for the JASPAR database based on human or mouse experiment
+   - `species` to be used for the JASPAR database based on human or mouse experiment.
 
 
 ### Run module on an interactive session on HPC within the container
