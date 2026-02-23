@@ -34,7 +34,8 @@ To begin using the **scEpiGenie** workflow, follow the instructions below to set
 
 ### Tutorial and Documentation
 
-Currently under construction. Stay tuned! 🚧🚧🚧 
+For a step-by-step guide on how to access the code, run the analysis, and request memory from the HPCF cluster, refer to the current README file or the [Epigenie wiki page](https://github.com/stjude-dnb-binfcore/sc-epigenie/wiki). Training sessions can also be provided upon request for St Jude users.
+
 
 ### Preparing project metadata
 
