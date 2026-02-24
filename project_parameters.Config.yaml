@@ -22,7 +22,7 @@ COMPLETION_DATE: "ONGOING"
 # No need to manually define variables
 
 # `./analyses/cellranger-analysis`
-genome_reference_path: "./reference_genomes/cellranger-sc-atac-seq/2020-A/mus_musculus/mm10/custom/custom-mm10-with-added-bed-files/refdata-cellranger-arc-mm10-2020-A" # Absolute path to genome reference to be used for the `cellranger-analysis` module.
+genome_reference_path: "./reference_genomes/cellranger-sc-atac-seq/2020-A/mus_musculus/mm10/custom/custom-mm10-with-added-bed-files/refdata-cellranger-arc-mm10-2020-A-2.0.0" # Absolute path to genome reference to be used for the `cellranger-analysis` module.
 cellranger_parameters: "DefaultParameters" # Options: "DefaultParameters", "ForcedCells8000Parameters", or else.
 genome_name_cellranger: "mm10" #please define the genome of preference for dual genomes. In case for single genomes, please use the same as used for `genome_name`.
 # Define the sample ID prefix(es) used in this project.
