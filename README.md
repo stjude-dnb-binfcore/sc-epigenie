@@ -145,7 +145,7 @@ The script `launch_full_pipeline.sh` runs the entire sc‑epigenie workflow sequ
 To launch the full (or customized) pipeline, run the script from the root directory on an interactive node:
 
 ```
-bash launch_sc_epigenie_full_pipeline.sh
+bash launch_full_pipeline.sh
 ```
 
 
