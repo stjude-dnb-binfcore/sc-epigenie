@@ -14,8 +14,30 @@
 #' @return A `TFBSTools::PFMatrixList` containing JASPAR motif PFMs.
 #' @examples
 #'
-pfm <- getMatrixSet(x = JASPAR2020,
-                    opts = list(collection = "CORE", tax_group = 'vertebrates', all_versions = FALSE))
+if (jaspar_library_version == "2018") {
+  pfm <- getMatrixSet(x = JASPAR2018,
+                      opts = list(collection = "CORE", tax_group = 'vertebrates', all_versions = FALSE))
+  
+  } else if (jaspar_library_version == "2020") {
+    pfm <- getMatrixSet(x = JASPAR2020,
+                        opts = list(collection = "CORE", tax_group = 'vertebrates', all_versions = FALSE))
+  
+  } else if (jaspar_library_version == "2022") {
+    pfm <- getMatrixSet(x = JASPAR2022,
+                        opts = list(collection = "CORE", tax_group = 'vertebrates', all_versions = FALSE))
+  
+  } else if (jaspar_library_version == "2024") {
+  # JASPAR2024 package does not seem to be supported by the TFBSTools package, which also causes an error when running getMatrixSet():
+  # Error: unable to find an inherited method for function ‘getMatrixSet’ for signature ‘x = "function"’
+  # The following resources indicate a good alternative solution to get the so desirable sweet peaks
+  # https://github.com/stuart-lab/signac/discussions/1646
+  # https://github.com/ge11232002/TFBSTools/issues/39
+    
+    jaspar <- JASPAR2024::JASPAR2024()
+    pfm <- getMatrixSet(x = jaspar@db,
+                        opts = list(collection = "CORE", tax_group = 'vertebrates', all_versions = FALSE))
+}
+
 #########################################################################################################
 
 

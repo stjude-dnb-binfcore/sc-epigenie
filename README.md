@@ -34,7 +34,8 @@ To begin using the **scEpiGenie** workflow, follow the instructions below to set
 
 ### Tutorial and Documentation
 
-Currently under construction. Stay tuned! 🚧🚧🚧 
+For a step-by-step guide on how to access the code, run the analysis, and request memory from the HPCF cluster, refer to the current README file or the [Epigenie wiki page](https://github.com/stjude-dnb-binfcore/sc-epigenie/wiki). Training sessions can also be provided upon request for St Jude users.
+
 
 ### Preparing project metadata
 
@@ -137,14 +138,14 @@ Important Considerations:
   
 ### Launch the Full Pipeline
 
-The script `launch_sc_epigenie_full_pipeline.sh` runs the entire sc‑epigenie workflow sequentially, with all modules configurable as optional. You can enable or disable any step directly inside the script’s configuration block named as `Feature toggles` lines 90-98. Please note that users should update line 77 with their own email address to receive email notifications (i.e., `NOTIFY_EMAIL=\"user.name@stjude.org\"`). Email notifications are sent on job start, completion, and/or failure.
+The script `launch_full_pipeline.sh` runs the entire sc‑epigenie workflow sequentially, with all modules configurable as optional. You can enable or disable any step directly inside the script’s configuration block named as `Feature toggles` lines 90-98. Please note that users should update line 77 with their own email address to receive email notifications (i.e., `NOTIFY_EMAIL=\"user.name@stjude.org\"`). Email notifications are sent on job start, completion, and/or failure.
 
   - Note: The CellRanger step sends an email notification on job start but not on completion. Successful submission of the upstream-analysis step indicates that the CellRanger alignments completed successfully.
 
 To launch the full (or customized) pipeline, run the script from the root directory on an interactive node:
 
 ```
-bash launch_sc_epigenie_full_pipeline.sh
+bash launch_full_pipeline.sh
 ```
 
 
@@ -165,7 +166,7 @@ bash launch_sc_epigenie_full_pipeline.sh
 |  └── upstream-analysis
 ├── data
 ├── figures
-├── launch_sc_epigenie_full_pipeline.sh
+├── launch_full_pipeline.sh
 ├── LICENSE
 ├── project_parameters.Config.yaml
 ├── README.md
