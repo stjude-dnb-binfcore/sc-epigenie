@@ -1,13 +1,14 @@
 ############################################################################################################
 #' Function to plot fraction of cells per sample and cluster
 #' @param seurat_obj
+#' @param palette description
 #'
 #' @return
 #' @export
 #'
 #' @examples
 #' 
-plot_integrated_clusters = function (seurat_obj) { 
+plot_integrated_clusters = function (seurat_obj, palette) { 
   ## take an integrated Seurat object, plot distributions over orig.ident
   
   count_table <- table(seurat_obj@meta.data$seurat_clusters, seurat_obj@meta.data$orig.ident)
@@ -25,11 +26,12 @@ plot_integrated_clusters = function (seurat_obj) {
   colnames(melt_mtx)[2] <- "dataset"
   
   
-  p1 <- ggplot(cluster_size, aes(y= cluster,x = value)) + geom_bar(position="dodge", stat="identity",fill = "grey60") + 
+  p1 <- ggplot(cluster_size, aes(y= cluster,x = value)) + geom_bar(position="dodge", stat="identity", fill = "grey60") + 
     theme_bw() + scale_x_log10() + xlab("Cells per cluster, log10 scale") + ylab("")
   p2 <- ggplot(melt_mtx,aes(x=cluster,y=value,fill=dataset)) + 
     geom_bar(position="fill", stat="identity") + theme_bw() + coord_flip() + 
-    scale_fill_brewer(palette = "Set2") +
+    #scale_fill_brewer(palette = "Set2") +
+    scale_fill_manual(values = palette) +
     ylab("Fraction of cells in each dataset") + xlab("Cluster number") + theme(legend.position="top")
   
   p2 + p1 + plot_layout(widths = c(3,1))

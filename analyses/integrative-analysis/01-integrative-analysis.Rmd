@@ -254,9 +254,17 @@ ggsave(file = name, width = 6, height = 5, device = "png")
 ```
 
 ```{r plot-fraction-of-cells, fig.width = 10, fig.height = 5, fig.fullwidth = TRUE, echo = TRUE}
+# Build the plot to access scales
+pb <- ggplot_build(p1)
+
+# Extract colors used for the groups
+colors_p1 <- pb$plot$scales$get_scales("colour")$palette.cache
+#colors_p1
+
+
 # Plot
 name <- paste0(plots_dir, "/", glue::glue("plot_fraction_of_cells_{integration_method}.png"))
-plot_integrated_clusters(seurat_obj)
+plot_integrated_clusters(seurat_obj, palette = colors_p1)
 ggsave(file = name, width = 10, height = 6, device = "png")
 ```
 
