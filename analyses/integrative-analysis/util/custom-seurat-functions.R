@@ -2,21 +2,22 @@
 #' Function to plot fraction of cells per sample and cluster
 #' @param seurat_obj
 #' @param palette description
+#' @param variable_value
 #'
 #' @return
 #' @export
 #'
 #' @examples
 #' 
-plot_integrated_clusters = function (seurat_obj, palette) { 
-  ## take an integrated Seurat object, plot distributions over orig.ident
+plot_integrated_clusters = function (seurat_obj, palette, variable_value) { 
+  ## take an integrated Seurat object, plot distributions over the specified variable
   
-  count_table <- table(seurat_obj@meta.data$seurat_clusters, seurat_obj@meta.data$orig.ident)
+  count_table <- table(seurat_obj@meta.data$seurat_clusters, seurat_obj@meta.data[[variable_value]])
   count_mtx   <- as.data.frame.matrix(count_table)
   count_mtx$cluster <- rownames(count_mtx)
   melt_mtx    <- melt(count_mtx)
   melt_mtx$cluster <- as.factor(melt_mtx$cluster)
-
+  
   cluster_size   <- aggregate(value ~ cluster, data = melt_mtx, FUN = sum)
   
   sorted_labels <- paste(sort(as.integer(levels(cluster_size$cluster)),decreasing = T))
