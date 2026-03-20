@@ -264,7 +264,7 @@ colors_p1 <- pb$plot$scales$get_scales("colour")$palette.cache
 
 # Plot
 name <- paste0(plots_dir, "/", glue::glue("plot_fraction_of_cells_{integration_method}.png"))
-plot_integrated_clusters(seurat_obj, palette = colors_p1)
+plot_integrated_clusters(seurat_obj, palette = colors_p1, variable_value = variable_value)
 ggsave(file = name, width = 10, height = 6, device = "png")
 ```
 

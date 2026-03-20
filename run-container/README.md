@@ -10,9 +10,9 @@ Please note that Cell Ranger is not included in this container and must be insta
    - [2. Load the Singularity Module](#2-load-the-singularity-module)
    - [3. Pull the Singularity Container](#3-pull-the-singularity-container)
    - [4. Start the Singularity Container](#4-start-the-singularity-container)
-     - [a. Running from the Terminal](#b-running-from-the-terminal)
-     - [b. Running from RStudio](#c-running-from-rstudio)
-     - [c. Running Analysis Modules via LSF](#a-running-analysis-modules-via-lsf)
+     - [a. Running from the Terminal](#a-running-from-the-terminal)
+     - [b. Running from RStudio](#b-running-from-rstudio)
+     - [c. Running Analysis Modules via LSF](#c-running-analysis-modules-via-lsf)
 
 2. [Running the Container Outside HPC (Docker)](#running-the-container-outside-hpc-docker)
 
