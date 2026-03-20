@@ -12,8 +12,13 @@ metadata_dir=$(grep 'metadata_dir:' ../../project_parameters.Config.yaml | awk '
 metadata_dir=${metadata_dir//\"/}  # Removes all double quotes
 echo "Metadata directory: $metadata_dir"  # Output the directory path
 
+metadata_file=$(grep 'metadata_file:' ../../project_parameters.Config.yaml | awk '{print $2}')
+metadata_file=${metadata_file//\"/}  # Removes all double quotes
+echo "Metadata file: $metadata_file"  # Output the file name
+
 # Define the path to the metadata file (adjust to your actual file)
-metadata_file="$metadata_dir/project_metadata.tsv"
+#metadata_file="$metadata_dir/project_metadata.tsv"
+metadata_file="$metadata_dir/$metadata_file"
 
 # Check if metadata file exists
 if [ ! -f "$metadata_file" ]; then
@@ -41,7 +46,9 @@ declare -a fastqc_dir
 # Use awk to extract the FASTQ column values (skip the header)
 # Adjust delimiter (tab or comma) based on your file format
 while IFS= read -r fastq_value; do
-  fastqc_dir+=("$fastq_value")
+  if [[ ! "${fastqc_dir[@]}" =~ "$fastq_value" ]]; then
+    fastqc_dir+=("$fastq_value")
+  fi
 done < <(awk -F'\t' -v col="$column_number" 'NR > 1 {print $col}' "$metadata_file")
 
 # Check if the array has values
