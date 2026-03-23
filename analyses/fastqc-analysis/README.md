@@ -13,6 +13,7 @@ If the module needs to be run more than one time, user will need to remove the `
 rm -r 02-multiqc-reports
 ```
 
+- `run-fastqc-analysis.sh` (Line 84). Users should comment or uncomment the FastQC command for the **R2 FASTQ** files depending on how Read 2 data are stored in their dataset. Some datasets store Read 2 sequences in the **R2 FASTQ** files, while others use **R3**. If your data use R2 to store Read 2 information, FastQC should be enabled for R2; otherwise, it should remain disabled to avoid redundant or incorrect QC (default set up). Per the Cell Ranger ATAC‑seq documentation, storing Read 2 data in the R2 FASTQ files is a valid alternate input format. See the [official 10x Genomics documentation](https://www.10xgenomics.com/support/software/cell-ranger-atac/2.1/analysis/inputs/specifying-input-fastq-files) for details.
 
 ### Run module on an interactive session on HPC within the container
 

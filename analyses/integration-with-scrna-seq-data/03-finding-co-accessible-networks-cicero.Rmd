@@ -325,9 +325,14 @@ write.table(links_df, file = paste(results_dir, "/", "links.tsv", sep = ""), sep
 
 In Cicero/Signac, the score column for links typically represents the co-accessibility score.  Higher scores usually indicate more confident (stronger) links. The best (most confident) links are those with the highest score values.
 
+Because the `links` table can be very large, only a subset of the most confident links is displayed in the HTML report to avoid slow loading or browser crashes. Links are ranked by co‑accessibility score (higher scores indicate stronger, more confident links), and only the top **~500 links** are shown for inspection. The full links table is preserved separately for downstream analysis.
+
 ```{r links-interactive-table, echo=TRUE}
+table1 <- links_df %>% dplyr::arrange(desc(score)) %>%   # co-accessibility score
+  dplyr::slice_head(n = 500)
+
 # Interactive Table
-datatable(links_df, 
+datatable(table1, 
           options = list(pageLength = 5, 
                          autoWidth = TRUE, 
                          server = TRUE), 

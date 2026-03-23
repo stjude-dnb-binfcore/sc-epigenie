@@ -55,19 +55,24 @@ object_species_upstream: "AH109606" # Reference genome annotation ID (Ensure the
                                     # Mouse:
                                     #   - GRCm39  -> "AH113713" (2024-A and EnsDb.Mmusculus.v110)
                                     #   - mm10    -> "AH75036" (2020-A and EnsDb.Mmusculus.v98)
+# Minimum number of features (peaks) to retain. 
+# Options: 1 (Very permissive (not recommended), Keeps nearly everything; high memory cost)
+#          50 (default; Removes empty/noisy barcodes early with minimal biological risk) or 
+#   higher (e.g., 100, 200, etc.) to be more stringent and filter out low-quality cells with very few features.
+min.features_value_module: 50
 min.cutoff_value_upstream: "q0" # Options: e.g., "q0" to use all peaks; "q75" to use the top 25% all peaks; "q95" to use the top 5% all peaks and so on.
-#nCount_peaks_min_upstream: "100" # Total counts across all peaks	Optional; can correlate with fragments
-#nCount_peaks_max_upstream: "20000" # Total counts across all peaks	Optional; can correlate with fragments
-#nFeature_peaks_min_upstream: "500" # Number of peaks with non-zero counts	Optional
-#nFeature_peaks_max_upstream: "6000" # Number of peaks with non-zero counts	Optional
-#peak_region_fragments_min_upstream: "100" # Total fragments in called peak regions	> 3000
-#peak_region_fragments_max_upstream: "20000" #"20000"
-pct_reads_in_peaks_value_upstream: "20" # % of reads in peaks (signal-to-noise)	> 15 or > 20
-blacklist_ratio_value_upstream: "0.05" # Fraction of reads in ENCODE blacklist regions (noise metric)	< 0.05
-#duplicate_value_upstream: "8000" # Duplication rate	Use only if computed
-#mitochondrial_value_upstream: "5" # % of mitochondrial reads	< 5
-TSS.enrichment_value_upstream: "4" # Transcription start site enrichment score	> 2
-nucleosome_signal_value_upstream: "3" # Nucleosome periodicity signal	< 4
+#nCount_peaks_min_upstream: 100 # Total counts across all peaks	Optional; can correlate with fragments
+#nCount_peaks_max_upstream: 20000 # Total counts across all peaks	Optional; can correlate with fragments
+#nFeature_peaks_min_upstream: 500 # Number of peaks with non-zero counts	Optional
+#nFeature_peaks_max_upstream: 6000 # Number of peaks with non-zero counts	Optional
+#peak_region_fragments_min_upstream: 100 # Total fragments in called peak regions	> 3000
+#peak_region_fragments_max_upstream: 20000 # 20000
+pct_reads_in_peaks_value_upstream: 20 # % of reads in peaks (signal-to-noise)	> 15 or > 20
+blacklist_ratio_value_upstream: 0.05 # Fraction of reads in ENCODE blacklist regions (noise metric)	< 0.05
+#duplicate_value_upstream: 8000 # Duplication rate	Use only if computed
+#mitochondrial_value_upstream: 5 # % of mitochondrial reads	< 5
+TSS.enrichment_value_upstream: 4 # Transcription start site enrichment score	> 2
+nucleosome_signal_value_upstream: 3 # Nucleosome periodicity signal	< 4
 use_threshold_filtering_upstream: "YES" # Options: "YES" (default)  or "NO" (if user prefers to use percentile filtering)
 condition_value1: "condition" # Use discrete values. Min #conditions per project: 1 and Max #conditions per project: 3. To use for visualization purposes and split UMAPs. Value to be extracted from column name in `project_metadata.tsv` file. 
 condition_value2: NULL # Use discrete values. Min #conditions per project: 1 and Max #conditions per project: 3. To use for visualization purposes and split UMAPs. Value to be extracted from column name in `project_metadata.tsv` file. 
@@ -158,15 +163,16 @@ data_dir_motif_module: "./sc-epigenie/analyses/building-trajectories-monocle/res
 data_file_motif_module: "seurat_obj_pseudotime.rds" # Seurat object name located at the data dir of the last module run.
 min.cutoff_value_motif_module: "q10" # Default.
 max.cutoff_value_motif_module: "q90" # Default.
-top_n_value_motifs_module: "5" # Number of top motifs per cluster to plot. Start with a low value to quickly generate results and check if the plots look good. If you want deeper analysis and have time/resources, increase to 3 or more. Often 3 is a good balance between thoroughness and efficiency - top_n_value = 3 (or higher) means you plot more peaks per cluster.
-top_da_peak_names_motifs_module: "500" # Motif plot: Aim for at least 200 to 500 peaks for motif enrichment. Avoid going too high (>5000), as it dilutes signal and increases computation.
+top_n_value_motifs_module: 5 # Number of top motifs per cluster to plot. Start with a low value to quickly generate results and check if the plots look good. If you want deeper analysis and have time/resources, increase to 3 or more. Often 3 is a good balance between thoroughness and efficiency - top_n_value = 3 (or higher) means you plot more peaks per cluster.
+top_da_peak_names_motifs_module: 500 # Motif plot: Aim for at least 200 to 500 peaks for motif enrichment. Avoid going too high (>5000), as it dilutes signal and increases computation.
 top_n_value_footprinting_module: 5 # Number of top motifs to footprint (default).
 motifs_to_fp_module_list_value: NULL # Options: NULL (default) or specify vector of the motif IDs to display on the plots as a list, e.g., [MA1603.1, MA1625.1]. 
                                      # If run by default, the Z-scores from the chromVAR deviation matrix will be used to choose the top motifs.
 # JASPAR database version to use for motif analysis. 
 # It dependens on genome reference and versioning used in the project. 
 # Please check the JASPAR database for more details: https://jaspar.genereg.net/downloads/.
-jaspar_library_version_module: "2024" # Options: "2018", "2020", "2022" or "2024". 
+# https://www.10xgenomics.com/support/software/cell-ranger-arc/downloads/ref-build-steps
+jaspar_library_version_module: "2024" # Options: "2018" (GRCh38 2020-A, mm10 2020-A), "2020", "2022" or "2024" (GRCh38 2024-A; GRCm39 2024-A). 
 
 
 # `rshiny-app`

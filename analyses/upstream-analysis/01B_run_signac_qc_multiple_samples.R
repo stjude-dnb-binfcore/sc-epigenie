@@ -101,6 +101,7 @@ for (i in seq_along(sample_name)){
                                   use_condition_split = yaml$use_condition_split_seurat_multiple_samples,
                                   print_pdf = yaml$print_pdf_seurat_multiple_samples,
                                   grouping = yaml$grouping,
+                                  min.features_value = yaml$min.features_value_module,
 
                                   # the following parameters are the same across the module #
                                   PROJECT_NAME = yaml$PROJECT_NAME,
