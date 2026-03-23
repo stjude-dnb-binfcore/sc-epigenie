@@ -55,7 +55,7 @@ object_species_upstream: "AH75036" # Reference genome annotation ID (Ensure the 
                                     # Mouse:
                                     #   - GRCm39  -> "AH113713" (2024-A and EnsDb.Mmusculus.v110)
                                     #   - mm10    -> "AH75036" (2020-A and EnsDb.Mmusculus.v98)
-# Minimum number of features (e.g., peaks) to retain. 
+# Minimum number of features (peaks) to retain. 
 # Options: "1" (Very permissive (not recommended), Keeps nearly everything; high memory cost)
 #          "50" (default; Removes empty/noisy barcodes early with minimal biological risk) or 
 #   higher (e.g., "100", "200", etc.) to be more stringent and filter out low-quality cells with very few features.
