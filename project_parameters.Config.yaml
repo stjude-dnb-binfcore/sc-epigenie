@@ -166,7 +166,8 @@ motifs_to_fp_module_list_value: NULL # Options: NULL (default) or specify vector
 # JASPAR database version to use for motif analysis. 
 # It dependens on genome reference and versioning used in the project. 
 # Please check the JASPAR database for more details: https://jaspar.genereg.net/downloads/.
-jaspar_library_version_module: "2024" # Options: "2018", "2020", "2022" or "2024". 
+# https://www.10xgenomics.com/support/software/cell-ranger-arc/downloads/ref-build-steps
+jaspar_library_version_module: "2024" # Options: "2018" (GRCh38 2020-A, mm10 2020-A), "2020", "2022" or "2024" (GRCh38 2024-A; GRCm39 2024-A). 
 
 
 # `rshiny-app`
