@@ -61,6 +61,7 @@ params:
   use_condition_split: "."
   print_pdf: "."
   grouping: "."
+  min.features_value: "."
   root_dir: "."
   metadata_dir: "."
   metadata_file: "."
@@ -269,7 +270,7 @@ counts <- Read10X_h5(filename = counts_file)
 meta <- read.csv(file = meta_file, header = TRUE, row.names = 1)
 
 # Create chromatin and seurat objects
-chrom_assay <- CreateChromatinAssay(counts = counts, sep = c(":", "-"), genome = genome_name, fragments = fragments_file, min.cells = 10, min.features = 200)
+chrom_assay <- CreateChromatinAssay(counts = counts, sep = c(":", "-"), genome = genome_name, fragments = fragments_file, min.cells = 10, min.features = min.features_value) 
 seurat_obj <- CreateSeuratObject(counts = chrom_assay, assay = assay, meta.data = meta)
 
 # Assign a sample ID to all cells from a specific sample

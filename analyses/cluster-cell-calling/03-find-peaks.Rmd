@@ -343,9 +343,14 @@ fc_df_combined <- compute_fold_change_peaks(seurat_obj = seurat_obj, da_peaks = 
 
 ## Explore Fold Change Results: Interactive Table
 
+Because `fc_df_combined` can be very large, printing the full table in the HTML report may significantly slow loading or cause the page to crash. To ensure report stability, only a subset of the most informative rows (i.e., **500 top peaks by absolute avg_log2FC fold change**) is displayed in the report. The complete, unfiltered table is always saved to disk for downstream analysis. 
+
 ```{r fold-change-interactive-table, echo=TRUE}
+table1 <- fc_df_combined %>% dplyr::arrange(desc(abs(avg_log2FC))) %>%
+  dplyr::slice_head(n = 500)
+
 # Interactive Table
-datatable(fc_df_combined, 
+datatable(table1, 
           options = list(pageLength = 5, 
                          autoWidth = TRUE, 
                          server = TRUE), 
