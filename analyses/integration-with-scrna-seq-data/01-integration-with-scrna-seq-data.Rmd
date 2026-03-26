@@ -231,8 +231,8 @@ rna_reference <- readRDS(reference_file)
 # Rename column containing cell types in the reference
 rna_reference@meta.data$celltype <- rna_reference@meta.data[[celltype_reference]]
 print(table(rna_reference@meta.data$celltype))
-print(table(rna_reference@meta.data$DYE))
-print(table(atac_query@meta.data$DYE))
+print(table(rna_reference@meta.data$ID))
+print(table(atac_query@meta.data$ID))
 
 # Plot
 name <- paste0(plots_dir, "/", glue::glue("plot-scATAC-vs-scRNA-seq-cells.png"))
