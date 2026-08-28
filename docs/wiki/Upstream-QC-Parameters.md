@@ -98,6 +98,10 @@ Benchmark results were strongly influenced by one low-quality sample (`ATAC_7f2a
 
 ---
 
+Note: Benchmarking is currently ongoing. The recommendations and validated default parameters presented here are based on results from a single cohort and should be considered preliminary. Additional datasets and cohorts will be evaluated to further validate and refine these recommendations.
+
+---
+
 ## References
 
 - [Validation benchmark (repo doc)](https://github.com/stjude-dnb-binfcore/sc-epigenie/blob/main/docs/validation/upstream-qc-parameter-benchmark.md)

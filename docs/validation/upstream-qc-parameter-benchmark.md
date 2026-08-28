@@ -57,25 +57,6 @@ Full tables: internal benchmark folder `benchmarking-sc-atac-seq/comparison/resu
 
 5. **Parameters with negligible effect:** `% reads in peaks` 15 vs 20; `min.cutoff` q5/q75/q95 on cell counts.
 
----
-
-## Visual comparisons
-
-Post-filter upstream UMAPs from the benchmark cohort.
-
-### Threshold vs percentile filtering
-
-![Threshold vs percentile](figures/threshold_vs_percentile_umap.png)
-
-### min.features 50 vs 200
-
-![min.features 50 vs 200](figures/min_features_50_vs_200_umap.png)
-
-### Default vs relaxed TSS (condition split)
-
-![Relaxed TSS QC](figures/relaxed_tss_qc_brain_region_umap.png)
-
-Additional side-by-side plots (internal): `benchmarking-sc-atac-seq/comparison/plots/umap_comparisons/`.
 
 ---
 
