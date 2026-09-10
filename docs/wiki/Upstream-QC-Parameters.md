@@ -76,6 +76,18 @@ Review Cell Ranger + upstream summary report
 
 ---
 
+## Visual comparisons
+
+Post-filter upstream UMAPs from the benchmark cohort ([full report with figures](https://github.com/stjude-dnb-binfcore/sc-epigenie/blob/add-benchmarking-results/docs/validation/upstream-qc-parameter-benchmark.md#visual-comparisons)):
+
+**Threshold vs percentile filtering** — percentile mode retains ~11k more cells but lower median QC.
+
+**min.features 50 vs 200** — large effect only when a low-quality sample is present.
+
+**Default vs relaxed TSS** — relaxing TSS/`% reads in peaks` mostly rescues low-quality cells; brain-region structure is preserved.
+
+---
+
 ## Important distinctions
 
 **Cell filtering vs feature selection**
@@ -85,9 +97,7 @@ Review Cell Ranger + upstream summary report
 
 **Outlier samples**
 
-Benchmark results were strongly influenced by one low-quality sample (`ATAC_7f2a`). For cohorts without outlier samples, `min.features = 50` vs `200` makes almost no difference. Always review per-sample Cell Ranger metrics before changing defaults.
-
-> **St Jude internal:** Anonymous labels map to original sample IDs in `benchmarking-sc-atac-seq/comparison/SAMPLE_ID_MAPPING.md` on HPCF (do not publish).
+Benchmark results were strongly influenced by one low-quality sample (`CBC813`). For cohorts without outlier samples, `min.features = 50` vs `200` makes almost no difference. Always review per-sample Cell Ranger metrics before changing defaults.
 
 ---
 

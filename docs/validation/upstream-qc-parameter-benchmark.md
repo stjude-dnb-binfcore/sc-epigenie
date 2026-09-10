@@ -2,9 +2,7 @@
 
 **Date:** 2026-08-28  
 **Pipeline:** sc-epigenie `./analyses/upstream-analysis`  
-**Cohort:** Internal mm10 scATAC-seq validation (8 samples; unpublished)
-
-> **Sample ID mapping (internal only):** Public docs use anonymous labels (e.g. `ATAC_7f2a`). Original IDs are recorded in `benchmarking-sc-atac-seq/comparison/SAMPLE_ID_MAPPING.md` on HPCF. Do not commit that file to public GitHub.
+**Cohort:** Internal mm10 scATAC-seq validation (8 samples; CBC809, CBC813, CTX809, CTX813, HIP809, HIP813, THA809, THA813)
 
 **Analysts:** Sharon Freshour, PhD; Antonia Chroni
 
@@ -53,16 +51,41 @@ Full tables: internal benchmark folder `benchmarking-sc-atac-seq/comparison/resu
 
 3. **`min.cutoff_value_upstream` (q5, q75, q95)** does not change cell counts when percentile cell filtering is used. It affects FindTopFeatures peak selection and therefore DR/clustering. Sharon's evaluation suggests **q75** may produce cleaner integration UMAPs; **q95** is too stringent.
 
-4. **Outlier samples dominate benchmarks.** One sample (`ATAC_7f2a`) drove most sensitivity to `min.features`, TSS relaxation, and percentile filtering. See [Impact of excluding outlier samples](#impact-of-excluding-outlier-samples).
+4. **Outlier samples dominate benchmarks.** One sample (`CBC813`) drove most sensitivity to `min.features`, TSS relaxation, and percentile filtering. See [Impact of excluding outlier samples](#impact-of-excluding-outlier-samples).
 
 5. **Parameters with negligible effect:** `% reads in peaks` 15 vs 20; `min.cutoff` q5/q75/q95 on cell counts.
 
+---
+
+## Visual comparisons
+
+Post-filter upstream UMAPs from the benchmark cohort.
+
+### Threshold vs percentile filtering
+
+Left: default (threshold filtering). Right: percentile filtering with `min.features = 50`.
+
+![Threshold vs percentile](figures/threshold_vs_percentile_umap.png)
+
+### min.features 50 vs 200
+
+Left: default (`min.features = 50`). Right: `min.features = 200` (threshold filtering).
+
+![min.features 50 vs 200](figures/min_features_50_vs_200_umap.png)
+
+### Default vs relaxed TSS (brain region)
+
+Left: default (`TSS.enrichment = 4`). Right: relaxed TSS (`TSS.enrichment = 2`, `% reads in peaks = 15`), colored by brain region.
+
+![Relaxed TSS QC](figures/relaxed_tss_qc_brain_region_umap.png)
+
+Additional side-by-side plots (internal): `benchmarking-sc-atac-seq/comparison/plots/umap_comparisons/`.
 
 ---
 
 ## Impact of excluding outlier samples
 
-When the lowest-quality sample (`ATAC_7f2a`) was excluded from analysis:
+When the lowest-quality sample (`CBC813`) was excluded from analysis:
 
 | Comparison | Delta (8 samples) | Delta (7 samples) |
 |------------|------------------:|------------------:|
@@ -92,7 +115,6 @@ St Jude internal path:
 ```
 benchmarking-sc-atac-seq/comparison/
     README.md
-    SAMPLE_ID_MAPPING.md                 # internal only — do not publish
     reports/
       01_benchmark_summary.md
       02_sharon_evaluation.md
