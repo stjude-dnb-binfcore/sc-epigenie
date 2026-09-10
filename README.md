@@ -34,7 +34,12 @@ To begin using the **scEpiGenie** workflow, follow the instructions below to set
 
 ### Tutorial and Documentation
 
-For a step-by-step guide on how to access the code, run the analysis, and request memory from the HPCF cluster, refer to the current README file or the [Epigenie wiki page](https://github.com/stjude-dnb-binfcore/sc-epigenie/wiki). Training sessions can also be provided upon request for St Jude users.
+For a step-by-step guide on how to access the code, run the analysis, and request memory from the HPCF cluster, refer to the current README file or the [scEpiGenie wiki](https://github.com/stjude-dnb-binfcore/sc-epigenie/wiki). Training sessions can also be provided upon request for St Jude users.
+
+**Upstream QC parameters (validated defaults and decision guide):**
+
+- Wiki: [Upstream QC Parameters](https://github.com/stjude-dnb-binfcore/sc-epigenie/wiki/Upstream-QC-Parameters) — copy from [`docs/wiki/Upstream-QC-Parameters.md`](docs/wiki/Upstream-QC-Parameters.md) when publishing
+- Repo doc: [`docs/validation/upstream-qc-parameter-benchmark.md`](docs/validation/upstream-qc-parameter-benchmark.md) — full benchmark report, figures, and pipeline notes
 
 
 ### Preparing project metadata
