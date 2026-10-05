@@ -6,7 +6,7 @@
 
 **Analysts:** Sharon Freshour, PhD; Antonia Chroni, PhD
 
-**Wiki summary (user-facing):** [Upstream QC Parameters](../wiki/Upstream-QC-Parameters.md) — paste into [GitHub wiki](https://github.com/stjude-dnb-binfcore/sc-epigenie/wiki/6.-Upstream-QC-Parameters) when publishing.
+**GitHub Wiki summary:** [Upstream QC Parameters](https://github.com/stjude-dnb-binfcore/sc-epigenie/wiki/6.-Upstream-QC-Parameters) page with links to the maintained documentation and validation reports.
 
 ---
 
