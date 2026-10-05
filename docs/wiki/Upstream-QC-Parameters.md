@@ -78,13 +78,13 @@ Review Cell Ranger + upstream summary report
 
 ## Visual comparisons
 
-Post-filter upstream UMAPs from the benchmark cohort ([full report with figures](https://github.com/stjude-dnb-binfcore/sc-epigenie/blob/add-benchmarking-results/docs/validation/upstream-qc-parameter-benchmark.md#visual-comparisons)):
+Post-filter upstream UMAPs from the benchmark cohort ([full report with figures](https://github.com/stjude-dnb-binfcore/sc-epigenie/blob/main/docs/validation/upstream-qc-parameter-benchmark.md#visual-comparisons)):
 
-**Threshold vs percentile filtering** — percentile mode retains ~11k more cells but lower median QC.
+- **Threshold vs percentile filtering** — percentile mode retains ~11k more cells but lower median QC.
 
-**min.features 50 vs 200** — large effect only when a low-quality sample is present.
+- **min.features 50 vs 200** — large effect only when a low-quality sample is present.
 
-**Default vs relaxed TSS** — relaxing TSS/`% reads in peaks` mostly rescues low-quality cells; brain-region structure is preserved.
+- **Default vs relaxed TSS** — relaxing TSS/`% reads in peaks` mostly rescues low-quality cells; brain-region structure is preserved.
 
 ---
 
@@ -103,7 +103,7 @@ Benchmark results were strongly influenced by one low-quality sample (`CBC813`).
 
 ## Pipeline notes
 
-- **FindClusters (>46k cells):** If using percentile filtering on large cohorts, ensure `method = "igraph"` is set in `integrative-analysis/util/function-samples-integrate.R`.
+- **FindClusters (>46k cells):** If using percentile filtering on large cohorts, ensure `method = "igraph"` is set in `integrative-analysis/util/function-samples-integrate.R`. There is a known issue as reported here: https://github.com/stjude-dnb-binfcore/sc-epigenie/issues/138.
 - **Rerun scope:** After changing upstream parameters, rerun `upstream-analysis` and `integrative-analysis` at minimum.
 
 ---
