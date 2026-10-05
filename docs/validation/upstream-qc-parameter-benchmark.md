@@ -4,9 +4,9 @@
 **Pipeline:** sc-epigenie `./analyses/upstream-analysis`  
 **Cohort:** Internal mm10 scATAC-seq validation (8 samples; CBC809, CBC813, CTX809, CTX813, HIP809, HIP813, THA809, THA813)
 
-**Analysts:** Sharon Freshour, PhD; Antonia Chroni
+**Analysts:** Sharon Freshour, PhD; Antonia Chroni, PhD
 
-**Wiki summary (user-facing):** [Upstream QC Parameters](../wiki/Upstream-QC-Parameters.md) — paste into [GitHub wiki](https://github.com/stjude-dnb-binfcore/sc-epigenie/wiki/Upstream-QC-Parameters) when publishing.
+**Wiki summary (user-facing):** [Upstream QC Parameters](../wiki/Upstream-QC-Parameters.md) — paste into [GitHub wiki](https://github.com/stjude-dnb-binfcore/sc-epigenie/wiki/6.-Upstream-QC-Parameters) when publishing.
 
 ---
 
@@ -97,17 +97,6 @@ When the lowest-quality sample (`CBC813`) was excluded from analysis:
 
 ---
 
-## Pipeline issues identified during validation
-
-Document these when maintaining the pipeline:
-
-| Issue | Location | Action |
-|-------|----------|--------|
-| FindClusters fails >46k cells | `integrative-analysis/util/function-samples-integrate.R` | Add `method = "igraph"` to `FindClusters()` |
-| `min.cutoff_value_upstream` dual use | upstream + `cluster-cell-calling/util/export-cluster-peaks.R` | Consider separate YAML variables for cell vs plot cutoffs |
-
----
-
 ## Internal benchmark artifacts
 
 St Jude internal path:
@@ -137,7 +126,7 @@ benchmarking-sc-atac-seq/comparison/
 
 ## References
 
-- [Upstream QC Parameters wiki draft](../wiki/Upstream-QC-Parameters.md)
+- [Upstream QC Parameters wiki](../wiki/Upstream-QC-Parameters.md)
 - [Signac FindTopFeatures](https://stuartlab.org/signac/reference/findtopfeatures)
 - [Seurat FindClusters igraph issue](https://github.com/satijalab/seurat/issues/7340)
 
