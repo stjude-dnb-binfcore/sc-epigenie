@@ -38,8 +38,9 @@ For a step-by-step guide on how to access the code, run the analysis, and reques
 
 **Upstream QC parameters (validated defaults and decision guide):**
 
-- Wiki: [Upstream QC Parameters](https://github.com/stjude-dnb-binfcore/sc-epigenie/wiki/Upstream-QC-Parameters) — copy from [`docs/wiki/Upstream-QC-Parameters.md`](docs/wiki/Upstream-QC-Parameters.md) when publishing
-- Repo doc: [`docs/validation/upstream-qc-parameter-benchmark.md`](docs/validation/upstream-qc-parameter-benchmark.md) — full benchmark report, figures, and pipeline notes
+- GitHub Wiki: [Upstream QC Parameters](https://github.com/stjude-dnb-binfcore/sc-epigenie/wiki/6.-Upstream-QC-Parameters) page with links to the maintained documentation and validation reports.
+- Parameter documentation: [`docs/wiki/Upstream-QC-Parameters.md`](docs/wiki/Upstream-QC-Parameters) parameters, and recommended settings (source of truth).
+- Validation documentation: [`docs/validation/`](docs/validation/) — full benchmark report, figures, and pipeline notes.
 
 
 ### Preparing project metadata
