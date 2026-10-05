@@ -29,8 +29,8 @@ QC is defined in `analyses/upstream-analysis/util/function-run-QC.R` and applied
 1. **`create_qc_metrics()`** — computes nucleosome signal, TSS enrichment, `blacklist_ratio`, `pct_reads_in_peaks`, etc.
 2. **`run_QC()`** — filters cells using either:
    - **Threshold mode** (`use_threshold_filtering_upstream: "YES"`) — fixed YAML cutoffs on 4 metrics: `pct_reads_in_peaks`, `blacklist_ratio`, `nucleosome_signal`, `TSS.enrichment`
-   - **Percentile mode** (`"NO"`) — per-sample 2nd / 98th quantile cutoffs on those 4 metrics **plus** `peak_region_fragments`
-
+   - **Percentile mode** (`use_threshold_filtering_upstream: "NO"`) — per-sample 2nd (minimum) / 98th (maximum) percentile cutoffs on those 4 metrics **plus** `peak_region_fragments`
+   
 **Not in `run_QC`:** `min.features_value_module` (object creation) and `min.cutoff_value_upstream` (FindTopFeatures for DR — affects clustering/UMAP, not cell counts).
 
 Percentile thresholds adapt to each sample's distribution, so poor-quality samples can pass with lower absolute QC than fixed defaults allow. Prefer threshold mode when samples should meet the same standards.
