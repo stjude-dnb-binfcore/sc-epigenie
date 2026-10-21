@@ -7,13 +7,13 @@
 Parameters according to the project and analysis strategy will need to be specified in the following scripts:
 - `project_parameters.Config.yaml`: define `metadata_dir`. FASTQ paths to the fastqc files with format: `path1/*R1-R3*.fastq.gz` are extracted from the `FASTQ` column from the `metadata_dir`. The `project_metadata.tsv` file can include one or multiple samples, as long as it contains at least the following columns in this exact order: `ID`, `SAMPLE`, and `FASTQ`.
 
-If the module needs to be run more than one time, user will need to remove the `02-multiqc-reports` folder before rerunning the module or the code will give an error at that step. Files and folder related to the MultiQC step will be generated every time a new run is performed. Folder can be deleted manually or from the node as:
+On reruns, the module removes previous MultiQC outputs (`02-multiqc-reports` and `multiqc_report.html`) automatically before generating new reports.
 
-```
-rm -r 02-multiqc-reports
-```
+Parallel FastQC uses `MAX_PARALLEL` jobs with `FASTQC_THREADS` threads each (defaults: 6 jobs, 1 thread each). These defaults match `#BSUB -n 6` in `lsf-script.txt`.
 
-- `run-fastqc-analysis.sh` (Line 84). Users should comment or uncomment the FastQC command for the **R2 FASTQ** files depending on how Read 2 data are stored in their dataset. Some datasets store Read 2 sequences in the **R2 FASTQ** files, while others use **R3**. If your data use R2 to store Read 2 information, FastQC should be enabled for R2; otherwise, it should remain disabled to avoid redundant or incorrect QC (default set up). Per the Cell Ranger ATAC‑seq documentation, storing Read 2 data in the R2 FASTQ files is a valid alternate input format. See the [official 10x Genomics documentation](https://www.10xgenomics.com/support/software/cell-ranger-atac/2.1/analysis/inputs/specifying-input-fastq-files) for details.
+By default, FastQC runs on **R1** and **R3** FASTQ files. Some datasets store Read 2 sequences in **R2** instead of **R3**. To also QC R2, set `RUN_R2_FASTQC=1` when running the script (for example: `RUN_R2_FASTQC=1 bash run-fastqc-analysis.sh`). Per the Cell Ranger ATAC‑seq documentation, storing Read 2 data in the R2 FASTQ files is a valid alternate input format. See the [official 10x Genomics documentation](https://www.10xgenomics.com/support/software/cell-ranger-atac/2.1/analysis/inputs/specifying-input-fastq-files) for details.
+
+If a sample has multiple technical replicates, list all associated FASTQ directory paths in the same row of the metadata file, separated by commas (same convention as sc-rna-seq-snap).
 
 ### Run module on an interactive session on HPC within the container
 
